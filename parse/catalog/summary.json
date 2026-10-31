@@ -1,0 +1,42 @@
+{
+  "src-srd52-zh": 1399,
+  "src-srd52-zh-by-type": {
+    "background": 4,
+    "class": 12,
+    "condition": 15,
+    "equipment": 359,
+    "feat": 18,
+    "glossary": 139,
+    "monster": 328,
+    "rule": 112,
+    "species": 9,
+    "spell": 391,
+    "subclass": 12
+  },
+  "src-srd52-zh-unresolved": [
+    "怪物图鉴2025/附录A/巨乌贼.htm#Giant_Squid#no-english:Giant Squid",
+    "怪物图鉴2025/构装/魔像/铁魔像2.htm#Iron_Golem#duplicate:srd52:monster:iron-golem",
+    "玩家手册2024/装备/魔法物品.htm#Magic_Items#duplicate:srd52:rule:magic-items"
+  ],
+  "src-srd52-zh-deferred": [],
+  "src-srd51-zh": 944,
+  "src-srd51-zh-by-type": {
+    "background": 1,
+    "class": 12,
+    "condition": 15,
+    "equipment": 248,
+    "feat": 1,
+    "monster": 316,
+    "rule": 20,
+    "spell": 319,
+    "subclass": 12
+  },
+  "src-srd51-zh-unresolved": [],
+  "src-srd51-zh-deferred": [
+    "docs/Changelog.md",
+    "docs/index.md",
+    "docs/Legal.md",
+    "docs/NOTICE.md",
+    "docs/TERMS.md"
+  ]
+}

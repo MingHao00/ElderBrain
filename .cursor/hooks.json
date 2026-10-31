@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "node .cursor/hooks/session-record.js",
+        "timeout": 180
+      }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/session-record.js",
+        "timeout": 15
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "node .cursor/hooks/session-record.js",
+        "timeout": 180
+      }
+    ],
+    "workspaceOpen": [
+      {
+        "command": "node .cursor/hooks/session-record.js",
+        "timeout": 180
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "node .cursor/hooks/session-record.js",
+        "timeout": 120
+      }
+    ]
+  }
+}
