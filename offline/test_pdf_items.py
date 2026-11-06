@@ -58,6 +58,29 @@ class ItemEntryTests(unittest.TestCase):
         self.assertIn("Call dragons", orb.text)
         self.assertNotIn("stat block", orb.text)
 
+    def test_rarity_on_the_heading_line_starts_a_new_item(self) -> None:
+        entries = item_entries(_SAME_LINE, **_FIELDS)
+        self.assertEqual([item.entry_id for item in entries], [
+            "srd51:equipment:dragon-slayer",
+            "srd51:equipment:dust-of-disappearance",
+            "srd51:equipment:dust-of-dryness",
+        ])
+        slayer = entries[0]
+        self.assertIn("3d6", slayer.text)
+        self.assertNotIn("powder", slayer.text)
+        self.assertIn("powder", entries[1].text)
+        self.assertNotIn("pinch", entries[1].text)
+
+
+_SAME_LINE = """
+## Dragon Slayer
+Weapon (any sword), rare
+Extra 3d6 damage.
+## Dust of Disappearance Wondrous item, uncommon
+The powder vanishes.
+## Dust of Dryness Wondrous item, uncommon
+A pinch of dust.
+"""
 
 _AFTER_ITEMS = """
 ## Wings of Flying

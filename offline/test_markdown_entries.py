@@ -53,6 +53,18 @@ class MarkdownEntryTests(unittest.TestCase):
         self.assertEqual(notes.title_en, "Customizing NPCs")
         self.assertEqual(notes.align_status, "stripped_category")
 
+    def test_abilities_file_uses_the_english_chapter_heading(self) -> None:
+        entry = entry_from_markdown_file(
+            "# 属性\n\n六项属性。\n",
+            relative_path="docs/Gameplay/Abilities.md",
+            entry_type="rule",
+            english_name="Abilities",
+        )
+        self.assertIsNotNone(entry)
+        assert entry is not None
+        self.assertEqual(entry.entry_id, "srd51:rule:using-ability-scores")
+        self.assertEqual(entry.align_status, "named_from_review")
+
 
 def _monster(english_name: str, text: str):
     entry = entry_from_markdown_file(

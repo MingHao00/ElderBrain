@@ -30,6 +30,16 @@ class PdfTextTests(unittest.TestCase):
         self.assertIn("150 feet", text)
         self.assertIn("20-foot-radius", text)
 
+    def test_ability_row_keeps_six_scores_when_a_pipe_is_missing(self) -> None:
+        raw = "\n".join((
+            "| STR | DEX | CON | INT | WIS | CHA |",
+            "| --- | --- | --- | --- | --- | --- |",
+            "| 19 (+4) | 9 (-1) 18 (+4) | 6(-2) | 10 (+0) | 5 (-3) | |",
+        ))
+        text = normalize_pdf_text(raw)
+        self.assertIn("| 19 (+4) | 9 (-1) | 18 (+4) | 6 (-2) | 10 (+0) | 5 (-3) |", text)
+        self.assertNotIn("9 (-1) 18", text)
+
 
 if __name__ == "__main__":
     unittest.main()

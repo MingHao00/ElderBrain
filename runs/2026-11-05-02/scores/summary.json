@@ -1,0 +1,10 @@
+{
+  "eval_version": "eval-v0.2",
+  "question_count": 15,
+  "daily_count": 12,
+  "daily_recall_at_5": 1.0,
+  "daily_recall_at_8": 1.0,
+  "all_recall_at_5": 1.0,
+  "all_recall_at_8": 1.0,
+  "misses_at_5": []
+}

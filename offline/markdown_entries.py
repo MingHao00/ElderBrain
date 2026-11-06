@@ -6,6 +6,7 @@ from pathlib import Path
 from html_entries import CatalogEntry
 from ids import RULE_VERSION_51, VERSION_TOKEN_51, concept_key, entry_id
 from monster_names import NAMED_FROM_FILENAME, monster_file_identity
+from reviewed_terms import canonical_reviewed_heading
 
 SOURCE_ID_51_ZH = "src-srd51-zh"
 SOURCE_PIN_51_ZH = "9b711c46d93dbf1d70a9bdf72703e0ecafd50ca8"
@@ -55,6 +56,9 @@ def entry_from_markdown_file(
     if not english_name or not body:
         return None
     entry_type, english_name, align_status = _identity(entry_type, english_name)
+    english_name, align_status = canonical_reviewed_heading(
+        entry_type, english_name, align_status,
+    )
     anchor = title_zh or english_name
     return CatalogEntry(
         entry_id=entry_id(VERSION_TOKEN_51, entry_type, english_name),

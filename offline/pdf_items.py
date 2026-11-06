@@ -10,9 +10,17 @@ from html_entries import CatalogEntry
 from pdf_entries import english_entry
 
 _HEADING = re.compile(r"^## (?P<name>.+)$")
+_KIND = (
+    r"(?:Ammunition|Armor|Potion|Ring|Rod|Scroll|Staff|Wand|Weapon|Wondrous [Ii]tem)"
+)
+_RARITY = r"(?:uncommon|common|legendary|artifact|varies|rarity|rare)"
 _ITEM_TYPE = re.compile(
-    r"^(?:## )?(?:Ammunition|Armor|Potion|Ring|Rod|Scroll|Staff|Wand|Weapon|"
-    r"Wondrous [Ii]tem)\b.*,.*\b(?:common|uncommon|rare|legendary|artifact|varies)\b",
+    rf"^(?:## )?{_KIND}\b.*,.*\b{_RARITY}\b",
+    re.IGNORECASE,
+)
+# 文字层有时把「Wondrous item, uncommon」写进标题同一行，下一行就不再是类别。
+_COMBINED = re.compile(
+    rf"^(?P<name>.+?) (?P<kind>{_KIND}\b.*,.*\b{_RARITY}\b.*)$",
     re.IGNORECASE,
 )
 _LOOKAHEAD = 3
@@ -40,7 +48,7 @@ def item_entries(
     for position, start in enumerate(starts):
         next_item = starts[position + 1] if position + 1 < len(starts) else len(lines)
         end = _item_end(lines, start, next_item)
-        name = _heading_name(lines[start])
+        name = _entry_name(lines[start])
         body = "\n".join(lines[start:end]).strip()
         if not name or not body:
             continue
@@ -78,8 +86,17 @@ def _is_item_start(lines: list[str], index: int) -> bool:
     name = _heading_name(lines[index])
     if not name or _ITEM_TYPE.match(name):
         return False
-    following = _next_nonempty(lines, index)
-    return _ITEM_TYPE.match(following) is not None
+    if _COMBINED.match(name):
+        return True
+    return _ITEM_TYPE.match(_next_nonempty(lines, index)) is not None
+
+
+def _entry_name(line: str) -> str:
+    heading = _heading_name(line)
+    combined = _COMBINED.match(heading)
+    if combined:
+        return combined.group("name").strip()
+    return heading
 
 
 def _heading_name(line: str) -> str:

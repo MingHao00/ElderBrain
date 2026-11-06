@@ -6,6 +6,7 @@ from pathlib import Path
 
 from html_entries import CatalogEntry
 from ids import RULE_VERSION_51, RULE_VERSION_52, VERSION_TOKEN_51, VERSION_TOKEN_52
+from pdf_chapters import chapter_entries
 from pdf_conditions import condition_entries
 from pdf_items import item_entries
 from pdf_monsters import monster_entries
@@ -52,6 +53,7 @@ def catalog_from_parse(
         + monster_entries_51(text, **fields)
         + rule_entries_51(text, **fields)
         + condition_entries(text, **fields)
+        + chapter_entries(text, **fields)
     )
     structured_path = PARSE_DIR / f"{stem}.structured.json"
     if structured_path.exists():

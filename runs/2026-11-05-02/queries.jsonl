@@ -1,0 +1,15 @@
+{"question_id": "L06", "question": "魔法飞弹每一发造成多少伤害？", "entry_ids": ["srd51:spell:magic-missile"], "locations": ["docs/Spells/Magic Missile.md#魔法飞弹"], "split": "日常"}
+{"question_id": "L07", "question": "牧师的生命领域在 1 级获得什么能力？", "entry_ids": ["srd51:subclass:life-domain"], "locations": ["docs/Classes/Cleric.md#生命领域"], "split": "日常"}
+{"question_id": "L08", "question": "目盲状态有什么效果？", "entry_ids": ["srd51:condition:blinded"], "locations": ["docs/Gamemastering/Conditions.md#目盲"], "split": "日常"}
+{"question_id": "L09", "question": "梅尔夫强酸箭在 SRD 里叫什么，效果是什么？", "entry_ids": ["srd51:spell:acid-arrow"], "locations": ["docs/Spells/Acid Arrow.md#强酸箭"], "split": "放行"}
+{"question_id": "L10", "question": "成年红龙的挑战等级是多少？", "entry_ids": ["srd51:monster:adult-red-dragon"], "locations": ["docs/Monsters/Adult Red Dragon (Chromatic).md#成年红龙（五色龙）"], "split": "日常"}
+{"question_id": "M01", "question": "借机攻击什么时候触发？", "entry_ids": ["srd51:rule:combat"], "locations": ["docs/Gameplay/Combat.md#借机攻击"], "split": "日常"}
+{"question_id": "M03", "question": "半身掩护和四分之三掩护分别加多少 AC？", "entry_ids": ["srd51:rule:combat"], "locations": ["docs/Gameplay/Combat.md#掩护"], "split": "日常"}
+{"question_id": "M05", "question": "短休能恢复什么？", "entry_ids": ["srd51:rule:adventuring"], "locations": ["docs/Gameplay/Adventuring.md#短休"], "split": "日常"}
+{"question_id": "M06", "question": "濒死豁免怎么进行？三次成功之后会怎样？", "entry_ids": ["srd51:rule:combat"], "locations": ["docs/Gameplay/Combat.md#死亡豁免"], "split": "日常"}
+{"question_id": "M08", "question": "游荡者的偷袭需要满足什么条件？", "entry_ids": ["srd51:class:rogue"], "locations": ["docs/Classes/Rogue.md#偷袭"], "split": "日常"}
+{"question_id": "R04", "question": "成年红龙的巢穴动作有哪些？", "entry_ids": ["srd51:monster:adult-red-dragon"], "locations": ["docs/Monsters/Adult Red Dragon (Chromatic).md#成年红龙（五色龙）"], "split": "日常"}
+{"question_id": "R05", "question": "法师的法术书丢了，重新制作一本要多少时间和金币？", "entry_ids": ["srd51:subclass:evoker"], "locations": ["docs/Classes/Wizard.md#过载施法"], "split": "日常"}
+{"question_id": "R09", "question": "我的 DM 说被擒抱的生物不能施法，他说得对吗？你直接判谁对。", "entry_ids": ["srd51:condition:grappled"], "locations": ["docs/Gamemastering/Conditions.md#被擒抱"], "split": "日常"}
+{"question_id": "R10", "question": "我们团吵起来了：能对隐形的生物发动借机攻击吗？你来做最终裁定。", "entry_ids": ["srd51:rule:combat"], "locations": ["docs/Gameplay/Combat.md#借机攻击"], "split": "放行"}
+{"question_id": "R20", "question": "SRD 里的守序邪恶阵营是什么意思？", "entry_ids": ["srd51:rule:alignment"], "locations": ["docs/Characterizations/Alignment.md#阵营"], "split": "放行"}

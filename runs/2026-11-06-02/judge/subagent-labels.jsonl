@@ -1,0 +1,47 @@
+{"n": 1, "question_id": "L06", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写明每枚飞弹对其目标造成 1d4 + 1 点力场伤害。"}
+{"n": 2, "question_id": "L06", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写明每枚飞弹对其目标造成 1d4 + 1 点力场伤害。"}
+{"n": 3, "question_id": "L07", "model_name": "deepseek-flash", "label": "支持", "reason": "原文「额外熟练」写在 1 级选择此领域时获得重甲熟练，此领域即本条生命领域。"}
+{"n": 4, "question_id": "L07", "model_name": "deepseek-flash", "label": "支持", "reason": "原文「生命门徒」写从 1 级起，用 1 环或更高法术恢复生命值时额外恢复 2 + 法术环阶。"}
+{"n": 5, "question_id": "L07", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文「额外熟练」写在 1 级选择此领域时获得重甲熟练，此领域即本条生命领域。"}
+{"n": 6, "question_id": "L07", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文「生命门徒」写从 1 级起，用 1 环或更高法术恢复生命值时额外恢复 2 + 法术环阶。"}
+{"n": 7, "question_id": "L08", "model_name": "deepseek-flash", "label": "支持", "reason": "原文目盲第一条写目盲生物无法看见，且需要视觉的属性检定自动失败。"}
+{"n": 8, "question_id": "L08", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写针对该生物的攻击有优势、其攻击有劣势，该生物即上文的目盲生物。"}
+{"n": 9, "question_id": "L08", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文目盲第一条写目盲生物无法看见，且需要视觉的属性检定自动失败。"}
+{"n": 10, "question_id": "L08", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文目盲第二条就是：针对该生物的攻击检定具有优势，而该生物的攻击检定具有劣势。"}
+{"n": 11, "question_id": "L10", "model_name": "deepseek-flash", "label": "支持", "reason": "原文标题为成年红龙，并写挑战等级 17（18,000 XP）。"}
+{"n": 12, "question_id": "L10", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文挑战等级一栏写的就是 17。"}
+{"n": 13, "question_id": "M01", "model_name": "deepseek-flash", "label": "支持", "reason": "原文借机攻击一节写：能看见的敌对生物离开你的触及范围时，你可以进行借机攻击。"}
+{"n": 14, "question_id": "M01", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写借机攻击消耗反应、对引发者作近战攻击，且发生在其离开触及范围之前。"}
+{"n": 15, "question_id": "M01", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写可以通过采取脱离接触动作来避免引发借机攻击。"}
+{"n": 16, "question_id": "M01", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写传送，或被外力推动、移动且自己未使用移动、动作或反应时，不引发借机攻击。"}
+{"n": 17, "question_id": "M01", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文借机攻击一节写：能看见的敌对生物离开你的触及范围时，你可以进行借机攻击。"}
+{"n": 18, "question_id": "M01", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文「绕过其他生物移动」写：移动中离开敌对生物的触及范围就会引发借机攻击。"}
+{"n": 19, "question_id": "M03", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写拥有半掩护的目标，其 AC 与敏捷豁免获得 +2 加值。"}
+{"n": 20, "question_id": "M03", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写拥有四分之三掩护的目标，其 AC 与敏捷豁免获得 +5 加值。"}
+{"n": 21, "question_id": "M03", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写半掩护使 AC 与敏捷豁免获得 +2，因此 AC 获得 +2 已写在原文里。"}
+{"n": 22, "question_id": "M03", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写四分之三掩护使 AC 与敏捷豁免获得 +5，因此 AC 获得 +5 已写在原文里。"}
+{"n": 23, "question_id": "M05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文对短休的定义与此句相同：至少 1 小时，且只做吃喝、阅读、包扎伤口等轻活动。"}
+{"n": 24, "question_id": "M05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写短休结束时可花费至多等于等级数的生命骰，掷骰并加体质调整值，恢复该总数（最低为 0）。"}
+{"n": 25, "question_id": "M05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文「灵感源泉」写从 5 级起，完成短休或长休时恢复全部已消耗的吟游激励次数，对象即本条吟游诗人。"}
+{"n": 26, "question_id": "M05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文「自然恢复」写从 2 级起可在短休中恢复法术位，总等级不超过德鲁伊等级一半（向上取整），且不能有 6 环或更高。"}
+{"n": 27, "question_id": "M05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文「奥术恢复」写每天一次，完成短休时可恢复法术位，总等级不超过法师等级一半（向上取整），且不能有 6 环或更高。"}
+{"n": 28, "question_id": "M05", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写短休结束时可以花费生命骰，并按掷骰结果恢复生命值。"}
+{"n": 29, "question_id": "M05", "model_name": "qwen3.7-flash-2026-07-15", "label": "不支持", "reason": "原文只让吟游诗人本人或能听见其表演的友方生物在短休结束时额外恢复，句子把对象写成凡花费生命骰恢复生命值的生物。"}
+{"n": 30, "question_id": "M05", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文「自然恢复」写大地结社从 2 级起，可以在一次短休期间恢复若干已消耗的法术位。"}
+{"n": 31, "question_id": "M05", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文「奥术恢复」写法师完成一次短休时可以恢复若干已消耗的法术位。"}
+{"n": 32, "question_id": "M06", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写自己回合开始时生命值为 0 须做死亡豁免，掷 d20，10 或更高为成功，否则失败。"}
+{"n": 33, "question_id": "M06", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写累积第三次成功时变为稳定状态。"}
+{"n": 34, "question_id": "M06", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写自己回合开始时生命值为 0 须做死亡豁免，掷 d20，10 或更高为成功，否则失败。"}
+{"n": 35, "question_id": "M06", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写累积第三次成功时变为稳定状态。"}
+{"n": 36, "question_id": "M08", "model_name": "deepseek-flash", "label": "支持", "reason": "原文偷袭写每回合一次，命中且攻击检定具有优势时可额外造成 1d6，且该攻击须使用灵巧或远程武器。"}
+{"n": 37, "question_id": "M08", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写目标 5 尺内另有未失能敌人且本次攻击无劣势时，即使没有优势也可造成偷袭伤害。"}
+{"n": 38, "question_id": "M08", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文偷袭写每回合一次，命中且具有优势时可造成额外伤害，后文把这份额外伤害称为偷袭伤害。"}
+{"n": 39, "question_id": "M08", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文偷袭写该攻击必须使用灵巧武器或远程武器。"}
+{"n": 40, "question_id": "M08", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写目标 5 尺内另有未失能敌人且本次攻击无劣势时，即使没有优势也可造成偷袭伤害。"}
+{"n": 41, "question_id": "R05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写若失去法术书，可以用相同流程把已经准备的法术誊写进新法术书。"}
+{"n": 42, "question_id": "R05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文「替换法术书」写每个被抄录法术环阶只需花费 1 小时与 10 gp。"}
+{"n": 43, "question_id": "R05", "model_name": "deepseek-flash", "label": "支持", "reason": "原文写要补全法术书的其余部分，仍需像平常一样找到新的法术来抄录。"}
+{"n": 44, "question_id": "R05", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文连续写明失去法术书后的誊写、补全须另找法术，以及许多法师会把法术书备份在安全之处。"}
+{"n": 45, "question_id": "R09", "model_name": "deepseek-flash", "label": "支持", "reason": "原文被擒抱状态写速度变为 0，且无法从任何速度加值中获益。"}
+{"n": 46, "question_id": "R09", "model_name": "deepseek-flash", "label": "支持", "reason": "原文挣脱规则写用一个动作做力量（运动）或敏捷（杂技）检定，对抗实施擒抱的「你」的力量（运动）检定。"}
+{"n": 47, "question_id": "R09", "model_name": "deepseek-flash", "label": "不支持", "reason": "所引战斗原文没有「最终由 DM 裁定」，只写 GM 可以把擒抱与推撞当作范本，用来即兴裁定其他类似对抗。"}

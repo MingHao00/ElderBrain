@@ -84,8 +84,24 @@ def parse_one(pdf_path: Path, stem: str) -> None:
     _save(_wait(_submit(pdf_path)), stem)
 
 
+def repair_saved(pdf_path: Path, stem: str) -> None:
+    """用已经下载的文字层补属性表和粘连表格，不重新提交解析。"""
+    from pdf_table_repair import load_pdf_plain, repair_glued_tables
+
+    raw = (OUTPUT_DIR / f"{stem}.md").read_text(encoding="utf-8")
+    cleaned = normalize_pdf_text(raw)
+    repaired = repair_glued_tables(cleaned, load_pdf_plain(pdf_path))
+    destination = OUTPUT_DIR / f"{stem}.clean.md"
+    destination.write_text(repaired + "\n", encoding="utf-8")
+    print(f"wrote {destination}", flush=True)
+
+
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    if len(sys.argv) == 3 and sys.argv[1] == "repair":
+        pdf_name = "SRD_CC_v5.1.pdf" if sys.argv[2] == "src-srd51-en" else "SRD_CC_v5.2.1.pdf"
+        repair_saved(REPO_ROOT / pdf_name, sys.argv[2])
+        return
     if len(sys.argv) == 3:
         _save(_wait(sys.argv[1]), sys.argv[2])
         return

@@ -412,7 +412,7 @@ When you reach 4th level, and again at 8th, 12th, 16th, and 19th level, you can 
 ## Destroy Undead
 Starting at 5th level, when an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table.
 ## Destroy Undead
-| ClericLevel | DestroysUndeadofCR... |
+| ClericLevel | Destroys Undead of CR... |
 | --- | --- |
 | 5th | 1/2orlower |
 | 8th | 1orlower |
@@ -494,8 +494,8 @@ Your druid level determines the beasts you can transform into, as shown in the B
 | | Max. | | |
 | --- | --- | --- | --- |
 | Level | CR | Limitations | Example |
-| 2nd | 1/4 | Noflyingorswimming speed | Wolf |
-| 4th | 1/2 | Noflyingspeed | Crocodile |
+| 2nd | 1/4 | No flying or swimming speed | Wolf |
+| 4th | 1/2 | No flying speed | Crocodile |
 | 8th | 1 | - | Giant eagle |
 You can stay in a beast shape for a number of hours equal to half your druid level (rounded down). You then revert to your normal form unless you expend another use of this feature. You can revert to your normal form earlier by using a bonus action on your turn. You automatically revert if you fall unconscious, drop to 0 hit points, or die.
 While you are transformed, the following rules apply:
@@ -705,7 +705,7 @@ You start with the following equipment, in addition to the equipment granted by 
 | 6th | +3 | 1d6 | 6 | +15ft. | Ki--EmpoweredStrikes,MonasticTraditionfeature |
 | 7th | +3 | 1d6 | 7 | +15ft. | Evasion,StillnessofMind |
 | 8th | +3 | 1d6 | 8 | +15ft. | AbilityScoreImprovement |
-| 9th | +4 | 1d6 | 9 | +15ft. | UnarmoredMovementimprovement |
+| 9th | +4 | 1d6 | 9 | +15ft. | Unarmored Movement improvement |
 | 10th | +4 | 1d6 | 10 | +20ft. | PurityofBody |
 | 11th | +4 | 1d8 | 11 | +20ft. | MonasticTraditionfeature |
 | 12th | +4 | 1d8 | 12 | +20ft. | AbilityScoreImprovement |
@@ -1589,7 +1589,7 @@ As you advance in levels, you might primarily remain a member of your original c
 ## Prerequisites
 To qualify for a new class, you must meet the ability score prerequisites for both your current class and your new one, as shown in the Multiclassing Prerequisites table. For example, a barbarian who decides to multiclass into the druid class must have both Strength and Wisdom scores of 13 or higher. Without the full training that a beginning character receives, you must be a quick study in your new class, having a natural aptitude that is reflected by higher- than-average ability scores.
 ## Multiclassing Prerequisites
-| Class | AbilityScoreMinimum |
+| Class | Ability Score Minimum |
 | --- | --- |
 | Barbarian | Strength13 |
 | Bard | Charisma13 |
@@ -1709,7 +1709,7 @@ Exotic Languages
 | Infernal | Devils | Infernal |
 | Primordial | Elementals | Dwarvish |
 | Sylvan | Feycreatures | Elvish |
-| Undercommon | Underworldtraders | Elvish |
+| Undercommon | Underworld traders | Elvish |
 ## Inspiration
 Inspiration is a rule the game master can use to reward you for playing your character in a way that's true to his or her personality traits, ideal, bond, and flaw. By using inspiration, you can draw on your personality trait of compassion for the downtrodden to give you an edge in negotiating with the Beggar Prince. Or inspiration can let you call on your bond to the defense of your home village to push past the effect of a spell that has been laid on you.
 ## Gaining Inspiration
@@ -1762,21 +1762,21 @@ Acolytes are shaped by their experience in temples or other religious communitie
 5 Faith. I trust that my deity will guide my actions. I have faith that if I work hard, things will go well. (Lawful)
 6 Aspiration. I seek to prove myself worthy of my god's favor by matching my actions against his or her teachings. (Any)
 ## d6 Bond
-| 1 | Iwoulddietorecoveranancientrelicofmyfaith |
+| 1 | I would die to recover an ancient relic of my faith |
 | --- | --- |
-| 2 | thatwaslostlongago. Iwillsomedaygetrevengeonthecorrupttemple hierarchywhobrandedmeaheretic. |
-| 3 | Iowemylifetothepriestwhotookmeinwhenmy parentsdied. |
-| 4 | EverythingIdoisforthecommonpeople. |
-| 5 | IwilldoanythingtoprotectthetemplewhereI served. |
-| 6 | Iseektopreserveasacredtextthatmyenemies considerhereticalandseektodestroy. |
+| 2 | that was lost long ago. I will someday get revenge on the corrupt temple hierarchy who branded me a heretic. |
+| 3 | I owe my life to the priest who took me in when my parentsdied. |
+| 4 | Everything I do is for the common people. |
+| 5 | I will do anything to protect the temple where I served. |
+| 6 | I seek to preserve a sacred text that my enemies consider heretical and seek to destroy. |
 ## d6 Flaw
-| 1 | Ijudgeothersharshly,andmyselfevenmore |
+| 1 | I judge others harshly,and myself even more |
 | --- | --- |
-| 2 | severely. Iputtoomuchtrustinthosewhowieldpower withinmytemple'shierarchy. |
-| 3 | Mypietysometimesleadsmetoblindlytrustthose thatprofessfaithinmygod. |
-| 4 | Iaminflexibleinmythinking. |
-| 5 | Iamsuspiciousofstrangersandexpecttheworstof them. |
-| 6 | OnceIpickagoal,Ibecomeobsessedwithittothe detrimentofeverythingelseinmylife. |
+| 2 | severely. I put too much trust in those who wield power within my temple'shierarchy. |
+| 3 | My piety sometimes leads me to blindly trust those that profess faith in my god. |
+| 4 | I am inflexible in my thinking. |
+| 5 | I am suspicious of strangers and expect the worst of them. |
+| 6 | Once I pick a goal,I become obsessed with it to the detriment of everything else in my life. |
 ## Equipment
 Common coins come in several different denominations based on the relative worth of the metal from which they are made. The three most common coins are the gold piece (gp), the silver piece (sp), and the copper piece (cp).
 With one gold piece, a character can buy a bedroll, 50 feet of good rope, or a goat. A skilled (but not exceptional) artisan can earn one gold piece a day. The gold piece is the standard unit of measure for wealth, even if the coin itself is not commonly used. When merchants discuss deals that involve goods or services worth hundreds or thousands of gold pieces, the transactions don't usually involve the exchange of individual coins. Rather, the gold piece is a standard measure of value, and the actual exchange is in gold bars, letters of credit, or valuable goods.
@@ -2074,7 +2074,7 @@ A cleric or paladin may create holy water by performing a special ritual. The ri
 | Scale,merchant's | 5gp | 3lb. |
 | Sealingwax | 5sp | - |
 | Shovel | 2gp | 5lb. |
-| Signalwhistle | 5cp | - |
+| Signal whistle | 5cp | - |
 | Signetring | 5gp | - |
 | Soap | 2cp | - |
 | Spellbook | 50gp | 3lb. |
@@ -2133,7 +2133,7 @@ A tool helps you to do something you couldn't otherwise do, such as craft or rep
 | Forgerykit | 15gp | 5lb. |
 | Gamingset | | |
 | Diceset | 1sp | - |
-| Playingcardset | 5sp | - |
+| Playing card set | 5sp | - |
 | Herbalismkit | 5gp | 3lb. |
 | Musicalinstrument | | |
 | Bagpipes | 30gp | 6lb. |
@@ -2174,7 +2174,7 @@ Mounts other than those listed here are available in fantasy gaming worlds, but 
 | --- | --- | --- | --- |
 | Item | Cost | Speed | Capacity |
 | Camel | 50gp | 50ft. | 480lb. |
-| Donkeyormule | 8gp | 40ft. | 420lb. |
+| Donkey or mule | 8gp | 40ft. | 420lb. |
 | Elephant | 200gp | 40ft. | 1,320lb. |
 | Horse, draft | 50 gp 40 ft. | 540 lb. |
 | --- | --- | --- |
@@ -2216,16 +2216,16 @@ Guilds, nobles, and royalty regulate trade. Chartered companies are granted righ
 | Cost | Goods |
 | --- | --- |
 | 1cp | 1lb.ofwheat |
-| 2cp | 1lb.offlouroronechicken |
+| 2cp | 1lb.of flour or one chicken |
 | 5cp | 1lb.ofsalt |
 | 1sp | 1lb.ofironor1sq.yd.ofcanvas |
-| 5sp | 1lb.ofcopperor1sq.yd.ofcottoncloth |
-| 1gp | 1lb.ofgingeroronegoat |
-| 2gp | 1lb.ofcinnamonorpepper,oronesheep |
-| 3gp | 1lb.ofclovesoronepig |
+| 5sp | 1lb.ofcopperor1sq.yd.of cotton cloth |
+| 1gp | 1lb.of ginger or one goat |
+| 2gp | 1lb.of cinnamon or pepper,oronesheep |
+| 3gp | 1lb.of cloves or one pig |
 | 5gp | 1lb.ofsilveror1sq.yd.oflinen |
-| 10gp | 1sq.yd.ofsilkoronecow |
-| 15gp | 1lb.ofsaffronoroneox |
+| 10gp | 1sq.yd.of silk or one cow |
+| 15gp | 1lb.of saffron or one ox |
 | 50gp | 1lb.ofgold |
 | 500gp | 1lb.ofplatinum |
 ## Expenses
@@ -2292,13 +2292,13 @@ Other hirelings provide more expert or dangerous services. Mercenary soldiers pa
 | Service | Pay |
 | --- | --- |
 | Coachcab | |
-| Betweentowns | 3cppermile |
+| Between towns | 3cppermile |
 | Withinacity | 1cp |
 | Hireling | |
 | Skilled | 2gpperday |
 | Untrained | 2spperday |
 | Messenger | 2cppermile |
-| Roadorgatetoll | 1cp |
+| Road or gate toll | 1cp |
 | Ship'spassage | 1sppermile |
 Skilled hirelings include anyone hired to perform a service that involves a proficiency (including weapon, tool, or skill): a mercenary, artisan, scribe, and so on. The pay shown is a minimum; some expert hirelings require more pay. Untrained hirelings are hired for menial work that requires no particular skill and can include laborers, porters, maids, and similar workers.
 ## Spellcasting Services
@@ -2365,14 +2365,14 @@ In general, you don't multiply your proficiency bonus for attack rolls or saving
 An ability check tests a character's or monster's innate talent and training in an effort to overcome a challenge. The GM calls for an ability check when a character or monster attempts an action (other than an attack) that has a chance of failure. When the outcome is uncertain, the dice determine the results.
 For every ability check, the GM decides which of the six abilities is relevant to the task at hand and the difficulty of the task, represented by a Difficulty Class. The more difficult a task, the higher its DC. The Typical Difficulty Classes table shows the most common DCs.
 ## Typical Difficulty Classes
-| TaskDifficulty | DC |
+| Task Difficulty | DC |
 | --- | --- |
 | Veryeasy | 5 |
 | Easy | 10 |
 | Medium | 15 |
 | Hard | 20 |
 | Veryhard | 25 |
-| Nearlyimpossible | 30 |
+| Nearly impossible | 30 |
 To make an ability check, roll a d20 and add the relevant ability modifier. As with other d20 rolls, apply bonuses and penalties, and compare the total to the DC. If the total equals or exceeds the DC, the ability check is a success—the creature overcomes the challenge at hand. Otherwise, it's a failure, which means the character or monster makes no progress toward the objective or makes progress combined with a setback determined by the GM.
 ## Contests
 Sometimes one character's or monster's efforts are directly opposed to another's. This can occur when both of them are trying to do the same thing and only one can succeed, such as attempting to snatch up a magic ring that has fallen on the floor. This situation also applies when one of them is trying to prevent the other one from accomplishing a goal— for example, when a monster tries to force open a door that an adventurer is holding closed. In situations like these, the outcome is determined by a special form of ability check, called a contest.
@@ -2562,9 +2562,9 @@ Certain special mounts, such as a pegasus or griffon, or special vehicles, such 
 ## Travel Pace
 | Pace | Distance | Traveled | per... | |
 | --- | --- | --- | --- | --- |
-| Fast | Minute400feet | Hour4miles | Day30miles | Effect-5penaltytopassiveWisdom(Perception) scores |
+| Fast | Minute400feet | Hour4miles | Day30miles | Effect-5penalty to passive Wisdom(Perception) scores |
 | Normal | 300feet | 3miles | 24miles | - |
-| Slow | 200feet | 2miles | 18miles | Abletousestealth |
+| Slow | 200feet | 2miles | 18miles | Able to use stealth |
 ## Difficult Terrain
 The travel speeds given in the Travel Pace table assume relatively simple terrain: roads, open plains, or clear dungeon corridors. But adventurers often face dense forests, deep swamps, rubble-filled ruins, steep mountains, and ice-covered ground—all considered difficult terrain.
 You move at half speed in difficult terrain— moving 1 foot in difficult terrain costs 2 feet of speed—so you can cover only half the normal distance in a minute, an hour, or a day.
@@ -3673,7 +3673,7 @@ When you change the weather conditions, find a current condition on the followin
 ## Temperature
 | Stage | Condition |
 | --- | --- |
-| 1 | Unbearableheat |
+| 1 | Unbearable heat |
 | 2 | Hot |
 | 3 | Warm |
 | 4 | Cool |
@@ -3728,10 +3728,10 @@ The duration depends on the object's material. If the object is composed of mult
 | Material | Duration |
 | --- | --- |
 | Vegetablematter | 1day |
-| Stoneorcrystal | 12hours |
+| Stone or crystal | 12hours |
 | Preciousmetals | 1hour |
 | Gems | 10minutes |
-| Adamantineormithral | 1minute |
+| Adamantine or mithral | 1minute |
 Using any material created by this spell as another spell's material component causes that spell to fail.
 **At Higher Levels.** When you cast this spell using a spell slot of 6th level or higher, the cube increases by 5 feet for each slot level above 5th.
 **Cure Wounds** 1st-level evocation
@@ -4969,12 +4969,12 @@ Make a ranged spell attack for each ray. On a hit, the target takes 2d6 fire dam
 You can see and hear a particular creature you choose that is on the same plane of existence as you. The target must make a Wisdom saving throw, which is modified by how well you know the target and the sort of physical connection you have to it. If a target knows you're casting this spell, it can fail the saving throw voluntarily if it wants to be observed.
 | Knowledge | SaveModifier |
 | --- | --- |
-| Secondhand(youhaveheardofthetarget) | +5 |
-| Firsthand(youhavemetthetarget) | +0 |
-| Familiar(youknowthetargetwell) | -5 |
+| Secondhand(you have heard of the target) | +5 |
+| Firsthand(you have met the target) | +0 |
+| Familiar(you know the target well) | -5 |
 | Connection | SaveModifier |
-| Likenessorpicture | -2 |
-| Possessionorgarment | -4 |
+| Likeness or picture | -2 |
+| Possession or garment | -4 |
 | Bodypart,lockofhair,bitofnail,orthelike | -10 |
 On a successful save, the target isn't affected, and you can't use this spell against it again for 24 hours.
 On a failed save, the spell creates an invisible sensor within 10 feet of the target. You can see and hear through the sensor as if you were there. The sensor moves with the target, remaining within 10 feet of it for the duration. A creature that can see invisible objects sees the sensor as a luminous orb about the size of your fist.
@@ -5560,32 +5560,32 @@ A character afflicted with **indefinite madness** gains a new character flaw fro
 ## Short--Term Madness
 | d100 | Effect(lasts1d10minutes) |
 | --- | --- |
-| 01-20 | Thecharacterretreatsintohisorhermindand becomesparalyzed.Theeffectendsifthe charactertakesanydamage. |
-| 21-30 | Thecharacterbecomesincapacitatedand spendsthedurationscreaming,laughing,or weeping. |
-| 31-40 | Thecharacterbecomesfrightenedandmust usehisorheractionandmovementeach roundtofleefromthesourceofthefear. |
-| 41-50 | Thecharacterbeginsbabblingandisincapable ofnormalspeechorspellcasting. |
-| 51-60 | Thecharactermustusehisorheractioneach |
+| 01-20 | The character retreats into his or her mind and becomes paralyzed.Theeffectendsifthe character takes any damage. |
+| 21-30 | The character becomes incapacitated and spends the duration screaming,laughing,or weeping. |
+| 31-40 | The character becomes frightened and must use his or her action and movement each round to flee from the source of the fear. |
+| 41-50 | The character begins babbling and is incapable of normal speech or spellcasting. |
+| 51-60 | The character must use his or her action each |
 | --- | --- |
-| 61-70 | roundtoattackthenearestcreature. Thecharacterexperiencesvividhallucinations andhasdisadvantageonabilitychecks. |
-| 71-75 | Thecharacterdoeswhateveranyonetellshim orhertodothatisn'tobviouslyself-- destructive. |
-| 76-80 | Thecharacterexperiencesanoverpowering urgetoeatsomethingstrangesuchasdirt, slime,oroffal. |
-| 81-90 | Thecharacterisstunned. |
+| 61-70 | round to attack the nearest creature. Thecharacterexperiencesvividhallucinations andhasdisadvantageonabilitychecks. |
+| 71-75 | The character does whatever anyone tells him or her to do that isn’t obviously self-­‐ destructive. |
+| 76-80 | The character experiences an overpowering urge to eat something strange such as dirt, slime, or offal. |
+| 81-90 | The character is stunned. |
 | 91-100 | Thecharacterfallsunconscious. |
 ## Long--Term Madness
 | d100 | Effect(lasts1d10×10hours) |
 | --- | --- |
-| 01-10 | Thecharacterfeelscompelledtorepeata specificactivityoverandover,suchaswashing hands,touchingthings,praying,orcounting coins. |
+| 01-10 | The character feels compelled to repeat a specific activity over and over,such as washing hands,touching things,praying,orcounting coins. |
 | 11-20 | Thecharacterexperiencesvividhallucinations andhasdisadvantageonabilitychecks. |
-| 21-30 | Thecharactersuffersextremeparanoia.The characterhasdisadvantageonWisdomand Charismachecks. |
-| 31-40 | Thecharacterregardssomething(usuallythe sourceofmadness)withintenserevulsion,asif affectedbytheantipathyeffectofthe antipathy/sympathyspell. |
-| 41-45 | Thecharacterexperiencesapowerfuldelusion. Chooseapotion.Thecharacterimaginesthat heorsheisunderitseffects. |
-| 46-55 | Thecharacterbecomesattachedtoa"lucky charm,"suchasapersonoranobject,andhas disadvantageonattackrolls,abilitychecks,andsavingthrowswhilemorethan30feetfromit. |
-| 56-65 | Thecharacterisblinded(25%)ordeafened(75%). |
-| 66-75 | Thecharacterexperiencesuncontrollable tremorsortics,whichimposedisadvantageon attackrolls,abilitychecks,andsavingthrows thatinvolveStrengthorDexterity. |
-| 76-85 | Thecharactersuffersfrompartialamnesia.The characterknowswhoheorsheisandretains racialtraitsandclassfeatures,butdoesn't recognizeotherpeopleorrememberanything thathappenedbeforethemadnesstookeffect. |
-| 86-90 | Wheneverthecharactertakesdamage,heorshemustsucceedonaDC15Wisdomsavingthroworbeaffectedasthoughheorshefailed asavingthrowagainsttheconfusionspell.The |
-| 91-95 | confusioneffectlastsfor1minute.Thecharacterlosestheabilitytospeak. |
-| 96-100 | Thecharacterfallsunconscious.Noamountof jostlingordamagecanwakethecharacter. |
+| 21-30 | The character suffers extreme paranoia.The character has disadvantage on Wisdom and Charismachecks. |
+| 31-40 | The character regards something(usuallythe source of madness)with intense revulsion,asif affected by the antipathy effect of the antipathy/sympathyspell. |
+| 41-45 | The character experiences a powerful delusion. Choose a potion. The character imagines that he or she is under its effects. |
+| 46-55 | The character becomes attached to a “lucky charm,” such as a person or an object, and has disadvantage on attack rolls, ability checks, and saving throws while more than 30 feet from it. |
+| 56-65 | The character is blinded (25%) or deafened (75%). |
+| 66-75 | The character experiences uncontrollable tremors or tics, which impose disadvantage on attack rolls, ability checks, and saving throws that involve Strength or Dexterity. |
+| 76-85 | The character suffers from partial amnesia. The character knows who he or she is and retains racial traits and class features, but doesn’t recognize other people or remember anything that happened before the madness took effect. |
+| 86-90 | Whenever the character takes damage, he or she must succeed on a DC 15 Wisdom saving throw or be affected as though he or she failed a saving throw against the confusion spell. The confusion effect lasts for 1 minute. |
+| 91-95 | confusion effect lasts for1minute.The character loses the ability to speak. |
+| 96-100 | Thecharacterfallsunconscious.Noamountof jostling or damage can wake the character. |
 ## Indefinite Madness
 | d100 | Flaw (lasts until cured) |
 | --- | --- |
@@ -5776,7 +5776,8 @@ If you remove a bean from the bag, plant it in dirt or sand, and then water it, 
 | 11-20 | feet into the air for 1d12 rounds. A treant sprouts. There's a 50 percent chance that the treant is chaotic evil and attacks. |
 | 21-30 | An animate, immobile stone statue in your likeness rises. It makes verbal threats against you. If you leave it and others come near, it describes you as the most heinous of villains and directs the newcomers to find and attack you. If you are on the same plane of existence as the statue, it knows where you are. The statue becomes inanimate after 24 hours. |
 | 31-40 | A campfire with blue flames springs forth and burns for 24 hours (or until it is extinguished). |
-| 41-50 51-60 | 1d6 + 6 shriekers sprout 1d4 + 8 bright pink toads crawl forth. Whenever |
+| 41-50 | 1d6 + 6 shriekers sprout |
+| 51-60 | 1d4 + 8 bright pink toads crawl forth. Whenever a toad is touched, it transforms into a Large or smaller monster of the GM’s choice. The monster remains for 1 minute, then disappears in a puff of bright pink smoke. |
 | | a toad is touched, it transforms into a Large or smaller monster of the GM's choice. The monster remains for 1 minute, then disappears in a puff of bright pink smoke. |
 | 61-70 71-80 | A hungry bulette burrows up and attacks. A fruit tree grows. It has 1d10 + 20 fruit, 1d8 of which act as randomly determined magic potions, while one acts as an ingested poison of the GM's choice. The tree vanishes after 1 hour. Picked fruit remains, retaining any magic for 30 |
 81–90 A nest of 1d4 + 3 eggs springs up. Any creature
@@ -6029,36 +6030,36 @@ The illusion lasts until its card is moved or the illusion is dispelled. When th
 | PlayingCard | Illusion |
 | --- | --- |
 | Aceofhearts | Reddragon |
-| Kingofhearts | Knightandfourguards |
-| Queenofhearts | Succubusorincubus |
+| Kingofhearts | Knight and four guards |
+| Queenofhearts | Succubus or incubus |
 | Jackofhearts | Druid |
 | Tenofhearts | Cloudgiant |
-| Nineofhearts | Ettin |
-| Eightofhearts | Bugbear |
+| Nine of hearts | Ettin |
+| Eight of hearts | Bugbear |
 | Twoofhearts | Goblin |
 | Aceofdiamonds | Beholder |
-| Kingofdiamonds | Archmageandmageapprentice |
+| Kingofdiamonds | Archmage and mage apprentice |
 | Queenofdiamonds | Nighthag |
 | Jackofdiamonds | Assassin |
-| Tenofdiamonds | Firegiant |
-| Nineofdiamonds | Ogremage |
-| Eightofdiamonds | Gnoll |
+| Ten of diamonds | Firegiant |
+| Nine of diamonds | Ogremage |
+| Eight of diamonds | Gnoll |
 | Twoofdiamonds | Kobold |
 | Aceofspades | Lich |
-| Kingofspades | Priestandtwoacolytes |
+| Kingofspades | Priest and two acolytes |
 | Queenofspades | Medusa |
 | Jackofspades | Veteran |
 | Tenofspades | Frostgiant |
-| Nineofspades | Troll |
-| Eightofspades | Hobgoblin |
+| Nine of spades | Troll |
+| Eight of spades | Hobgoblin |
 | Twoofspades | Goblin |
 | Aceofclubs | Irongolem |
-| Kingofclubs | Banditcaptainandthreebandits |
+| Kingofclubs | Bandit captain and three bandits |
 | Queenofclubs | Erinyes |
 | Jackofclubs | Berserker |
 | Tenofclubs | Hillgiant |
 | Nineofclubs | Ogre |
-| Eightofclubs | Orc |
+| Eight of clubs | Orc |
 | Twoofclubs | Kobold |
 | Jokers(2) | You(thedeck'sowner) |
 ## Deck of Many Things Wondrous item, legendary
@@ -6187,10 +6188,10 @@ bottle is opened a fourth time, the efreeti escapes and disappears, and the bott
 ## Elemental Gem
 ## Wondrous item, uncommon
 This gem contains a mote of elemental energy. When you use an action to break the gem, an elemental is summoned as if you had cast the conjure elemental spell, and the gem's magic is lost. The type of gem determines the elemental summoned by the spell.
-| Gem | SummonedElemental |
+| Gem | Summoned Elemental |
 | --- | --- |
-| Bluesapphire | Airelemental |
-| Yellowdiamond | Earthelemental |
+| Blue sapphire | Airelemental |
+| Yellow diamond | Earthelemental |
 | Redcorundum | Fireelemental |
 | Emerald | Waterelemental |
 ## Elven Chain
@@ -6394,7 +6395,7 @@ An identify spell reveals that a creature is inside the flask, but the only way 
 | 1-50 | Empty |
 | 51-54 | Demon(type1) |
 | 55-58 | Demon(type2) |
-| 59-62 | Demon(type3) |
+| 59-62 | Grass grows on the ground in a 60-­‐foot radius centered on the target. If grass is already there, it grows to ten times its normal size and remains overgrown for 1 minute. |
 | 63-64 | Demon(type4) |
 | 65 | Demon(type5) |
 | 66 | Demon(type6) |
@@ -6488,7 +6489,7 @@ Six types of magic beads exist. The GM decides the type of each bead on the neck
 | d20 | Beadof… | Spell |
 | --- | --- | --- |
 | 1-6 | Blessing | Bless |
-| 7-12 | Curing | Curewounds(2ndlevel)orlesserrestoration |
+| 7-12 | Curing | Curewounds(2ndlevel)or lesser restoration |
 | 13-16 | Favor | Greaterrestoration |
 | 17-18 | Smiting | Brandingsmite |
 | 19 | Summons | Planarally |
@@ -6580,8 +6581,8 @@ Whatever its potency, the potion's red liquid glimmers when agitated.
 | Potionof… | Rarity | HPRegained |
 | --- | --- | --- |
 | Healing | Common | 2d4+2 |
-| Greaterhealing | Uncommon | 4d4+4 |
-| Superiorhealing | Rare | 8d4+8 |
+| Greater healing | Uncommon | 4d4+4 |
+| Superior healing | Rare | 8d4+8 |
 | Supremehealing | Veryrare | 10d4+20 |
 ## Potion of Heroism
 Potion, rare
@@ -6773,18 +6774,18 @@ The robe has two of each of the following patches:
 In addition, the robe has 4d4 other patches. The GM chooses the patches or determines them randomly.
 | d100 | Patch |
 | --- | --- |
-| 01-08 | Bagof100gp |
-| 09-15 | Silvercoffer(1footlong,6incheswideanddeep)worth500gp |
-| 16-22 | Irondoor(upto10feetwideand10feethigh,barredononesideofyourchoice),whichyou canplaceinanopeningyoucanreach;it conformstofittheopening,attachingand hingingitself |
-| 23-30 | 10gemsworth100gpeach |
-| 31-44 | Woodenladder(24feetlong) |
-| 45-51 | Aridinghorsewithsaddlebags |
-| 52-59 | Pit(acube10feetonaside),whichyoucanplaceonthegroundwithin10feetofyou |
-| 60-68 | 4potionsofhealing |
-| 69-75 | Rowboat(12feetlong) |
-| 76-83 | Spellscrollcontainingonespellof1stto3rdlevel |
-| 84-90 | 2mastiffs |
-| 91-96 | Window(2feetby4feet,upto2feetdeep),whichyoucanplaceonaverticalsurfaceyou |
+| 01-08 | Bag of 100 gp |
+| 09-15 | Silver coffer (1 foot long, 6 inches wide and deep) worth 500 gp |
+| 16-22 | Iron door (up to 10 feet wide and 10 feet high, barred on one side of your choice), which you can place in an opening you can reach; it conforms to fit the opening, attaching and hinging itself |
+| 23-30 | 10 gems worth 100 gp each |
+| 31-44 | Wooden ladder (24 feet long) |
+| 45-51 | A riding horse with saddle bags |
+| 52-59 | Pit (a cube 10 feet on a side), which you can place on the ground within 10 feet of you |
+| 60-68 | 4 potions of healing |
+| 69-75 | Rowboat (12 feet long) |
+| 76-83 | Spell scroll containing one spell of 1st to 3rd level |
+| 84-90 | 2 mastiffs |
+| 91-96 | Window (2 feet by 4 feet, up to 2 feet deep), which you can place on a vertical surface you can reach |
 | 97-00 | canreach Portableram |
 ## Rod of Absorption
 ## Rod, very rare (requires attunement)
@@ -6879,7 +6880,7 @@ If the sphere comes into contact with a planar portal, such as that created by t
 | d100 | Resuit |
 | --- | --- |
 | 01-50 | The sphere is destroyed. |
-| 51-85 | The sphere moves through the portal or into the extradimensional space |
+| 51-85 | The sphere moves through the portal or into the extradimensional space. |
 | 86-00 | A spatial rift sends each creature and object within 180 feet of the sphere, including the sphere, to a random plane of existence. |
 ## Staff of Charming
 Staff, rare (requires attunement by a bard, cleric, druid, sorcerer, warlock, or wizard)
@@ -7064,18 +7065,26 @@ multiple possible subjects, the GM randomly determines which ones are affected.
 The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20. On a 1, the wand crumbles into dust and is destroyed.
 | d100 | Effect |
 | --- | --- |
-| 01-0506-1011-15 | Youcastslow. Youcastfaeriefire. Youarestunneduntilthestartofyournextturn, believingsomethingawesomejusthappened. |
-| 16-2021-25 | Youcastgustofwind. Youcastdetectthoughtsonthetargetyou chose.Ifyoudidn'ttargetacreature,youinsteadtake1d6psychicdamage. |
-| 26-3031-33 | Youcaststinkingcloud.Heavyrainfallsina60--footradiuscenteredonthetarget.Theareabecomeslightlyobscured. Therainfallsuntilthestartofyournextturn. |
-| 34-36 | Ananimalappearsintheunoccupiedspace nearestthetarget.Theanimalisn'tunderyourcontrolandactsasitnormallywould.Rollad100todeterminewhichanimalappears.Ona01-25,arhinocerosappears;ona26-50,anelephantappears;andona51-100,aratappears. |
-| 37-4647-49 | Youcastlightningbolt.Acloudof600oversizedbutterfliesfillsa30--footradiuscenteredonthetarget.Theareabecomesheavilyobscured.Thebutterfliesremainfor10minutes. |
-| 50-53 | Youenlargethetargetasifyouhadcast enlarge/reduce.Ifthetargetcan'tbeaffectedbythatspell,orifyoudidn'ttargetacreature,you becomethetarget. |
-| 54-5859-62 | Youcastdarkness.Grassgrowsonthegroundina60--footradiuscenteredonthetarget.Ifgrassisalreadythere, itgrowstotentimesitsnormalsizeandremainsovergrownfor1minute. |
-| 63-65 | AnobjectoftheGM'schoicedisappearsintothe EtherealPlane.Theobjectmustbeneitherwornnorcarried,within120feetofthetarget,andnolargerthan10feetinanydimension. |
-| 66-6970-79 | Youshrinkyourselfasifyouhadcast enlarge/reduceonyourself.Youcastfireball. |
-| 80-8485-87 | Youcastinvisibilityonyourself. Leavesgrowfromthetarget.Ifyouchoseapoint inspaceasthetarget,leavessproutfromthe creaturenearesttothatpoint.Unlesstheyare pickedoff,theleavesturnbrownandfalloffafter24hours. |
-| 88-90 | Astreamof1d4×10gems,eachworth1gp,shootsfromthewand'stipinaline30feetlongand5feetwide.Eachgemdeals1bludgeoningdamage,andthetotaldamageofthegemsis |
-divided equally among all creatures in the line. 91–95 A burst of colorful shimmering light extends from you in a 30--foot radius. You and each creature in the area that can see must succeed on a DC 15 Constitution saving throw or become blinded for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
+| 01-05 | You cast slow. |
+| 06-10 | You cast faerie fire. |
+| 11-15 | You are stunned until the start of your next turn, believing something awesome just happened. |
+| 16-20 | You cast gust of wind. |
+| 21-25 | You cast detect thoughts on the target you chose. If you didn’t target a creature, you instead take 1d6 psychic damage. |
+| 26-30 | You cast stinking cloud. |
+| 31-33 | Heavy rain falls in a 60-­‐foot radius centered on the target. The area becomes lightly obscured. The rain falls until the start of your next turn. |
+| 34-36 | An animal appears in the unoccupied space nearest the target. The animal isn’t under your control and acts as it normally would. Roll a d100 to determine which animal appears. On a 01–25, a rhinoceros appears; on a 26–50, an elephant appears; and on a 51–100, a rat appears. |
+| 37-46 | You cast lightning bolt. |
+| 47-49 | A cloud of 600 oversized butterflies fills a 30-­‐foot radius centered on the target. The area becomes heavily obscured. The butterflies remain for 10 minutes. |
+| 50-53 | You enlarge the target as if you had cast enlarge/reduce. If the target can’t be affected by that spell, or if you didn’t target a creature, you become the target. |
+| 54-58 | You cast darkness. |
+| 59-62 | Grass grows on the ground in a 60-­‐foot radius centered on the target. If grass is already there, it grows to ten times its normal size and remains overgrown for 1 minute. |
+| 63-65 | An object of the GM’s choice disappears into the Ethereal Plane. The object must be neither worn nor carried, within 120 feet of the target, and no larger than 10 feet in any dimension. |
+| 66-69 | You shrink yourself as if you had cast enlarge/reduce on yourself. |
+| 70-79 | You cast fireball. |
+| 80-84 | You cast invisibility on yourself. |
+| 85-87 | Leaves grow from the target. If you chose a point in space as the target, leaves sprout from the creature nearest to that point. Unless they are picked off, the leaves turn brown and fall off after 24 hours. |
+| 88-90 | A stream of 1d4 × 10 gems, each worth 1 gp, shoots from the wand’s tip in a line 30 feet long and 5 feet wide. Each gem deals 1 bludgeoning damage, and the total damage of the gems is divided equally among all creatures in the line. |
+91–95 A burst of colorful shimmering light extends from you in a 30--foot radius. You and each creature in the area that can see must succeed on a DC 15 Constitution saving throw or become blinded for 1 minute. A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.
 96–97 The target's skin turns bright blue for 1d10 days. If you chose a point in space, the creature nearest to that point is affected.
 98–00 If you targeted a creature, it must make a DC 15 Constitution saving throw. If you didn't target a creature, you become the target and must make the saving throw. If the saving throw fails by 5 or more, the target is instantly petrified. On any other failed save, the target is restrained and begins to turn to stone. While restrained in this way, the target must repeat the saving throw at the end of its next turn, becoming petrified on a failure or ending the effect on a success. The petrification lasts until the target is freed by the greater restoration spell or similar magic.
 ## Weapon, +1, +2, or +3
@@ -7108,9 +7117,9 @@ A sentient magic item has Intelligence, Wisdom, and Charisma scores. You can cho
 A sentient item has some ability to communicate, either by sharing its emotions, broadcasting its thoughts telepathically, or speaking aloud. You can choose how it communicates or roll on the following table.
 | d100 | Communication |
 | --- | --- |
-| 01-60 | Theitemcommunicatesbytransmittingemotion tothecreaturecarryingorwieldingit. |
-| 61-90 | Theitemcanspeak,read,andunderstandone ormorelanguages. |
-| 91-00 | Theitemcanspeak,read,andunderstandone ormorelanguages.Inaddition,theitemcan communicatetelepathicallywithanycharacter thatcarriesorwieldsit. |
+| 01-60 | The item communicates by transmitting emotion to the creature carrying or wielding it. |
+| 61-90 | The item can speak, read, and understand one or more languages. |
+| 91-00 | Theitemcanspeak,read,andunderstandone ormorelanguages.Inaddition,theitemcan communicate telepathically with any character that carries or wields it. |
 ## Senses
 With sentience comes awareness. A sentient item can perceive its surroundings out to a limited range. You can choose its senses or roll on the following table.
 ## d4 Senses
@@ -7379,9 +7388,9 @@ Medium celestial, lawful good
 **Armor Class** 17 (natural armor)
 **Hit Points** 136 (16d8 + 64)
 **Speed** 30 ft., fly 90 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 18 (+4) | 18 (+4) | 18 (+4) 17 (+3) | 20 (+5) | 20 (+5) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 18 (+4) | 18 (+4) | 18 (+4) | 17 (+3) | 20 (+5) | 20 (+5) |
 **Saving Throws** Wis +9, Cha +9
 **Skills** Insight +9, Perception +9
 **Damage Resistances** radiant; bludgeoning, piercing, and slashing from nonmagical attacks
@@ -7404,9 +7413,9 @@ Large celestial, lawful good
 **Armor Class** 19 (natural armor)
 **Hit Points** 200 (16d10 + 112)
 **Speed** 40 ft., fly 120 ft.
-| STR | DEX | CON | INT WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 24 (+7) | 20 (+5) | 24 (+7) 19 (+4) | 22 (+6) | 25 (+7) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 24 (+7) | 20 (+5) | 24 (+7) | 19 (+4) | 22 (+6) | 25 (+7) |
 **Saving Throws** Con +12, Wis +11, Cha +12
 **Skills** Perception +11
 **Damage Resistances** radiant; bludgeoning, piercing, and slashing from nonmagical attacks
@@ -7430,7 +7439,7 @@ Large celestial, lawful good
 **Speed** 50 ft., fly 150 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 26 (+8) | 22 (+6) | 26 (+8) | 25 (+7) | 25 (+7) 30 (+10) | |
+| 26 (+8) | 22 (+6) | 26 (+8) | 25 (+7) | 25 (+7) | 30 (+10) |
 **Saving Throws** Int +14, Wis +14, Cha +17
 **Skills** Perception +14
 **Damage Resistances** radiant; bludgeoning, piercing, and slashing from nonmagical attacks
@@ -7533,7 +7542,7 @@ Medium elemental, lawful neutral
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 17 (+3) | 15 (+2) 12 (+1) | 12 (+1) | 13 (+1) | 10 (+0) | |
+| 17 (+3) | 15 (+2) | 12 (+1) | 12 (+1) | 13 (+1) | 10 (+0) |
 **Saving Throws** Con +4 **Damage Immunities** fire, poison **Condition Immunities** poisoned **Senses** passive Perception 11 **Languages** Ignan **Challenge** 2 (450 XP)
 **Heated Body.** A creature that touches the azer or hits it with a melee attack while within 5 feet of it takes 5 (1d10) fire damage.
 **Heated Weapons.** When the azer hits with a metal melee weapon, it deals an extra 3 (1d6) fire damage (included in the attack).
@@ -7542,9 +7551,9 @@ Medium elemental, lawful neutral
 **Warhammer.** Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) bludgeoning damage, or 8 (1d10 + 3) bludgeoning damage if used with two hands to make a melee attack, plus 3 (1d6) fire damage.
 ## Monsters (B)
 **Basilisk** Medium monstrosity, unaligned **Armor Class** 15 (natural armor) **Hit Points** 52 (8d8 + 16) **Speed** 20 ft.
-| STR | DEX | CON | WIS INT | | CHA |
+| STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 16 (+3) | 15 (+2) 8 (-1) | 2 (-4) | 8 (-1) | 7 (-2) | |
+| 16 (+3) | 15 (+2) | 8 (-1) | 2 (-4) | 8 (-1) | 7 (-2) |
 Senses darkvision 60 ft., passive Perception 9
 **Languages** —
 **Challenge** 3 (700 XP)
@@ -7601,9 +7610,9 @@ Large monstrosity, neutral good
 **Armor Class** 12
 **Hit Points** 45 (6d10 + 12)
 **Speed** 50 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 18 (+4) | 14 (+2) 14 (+2) | 9 (-1) | 13 (+1) | 11 (+0) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 18 (+4) | 14 (+2) | 14 (+2) | 9 (-1) | 13 (+1) | 11 (+0) |
 **Skills** Athletics +6, Perception +3, Survival +3
 **Senses** passive Perception 13
 **Languages** Elvish, Sylvan
@@ -7655,7 +7664,7 @@ Large aberration, chaotic neutral
 **Speed** 10 ft., fly 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 17 (+3) | 15 (+2) | 12 (+1) 13 (+1) | | 12 (+1) | 14 (+2) |
+| 17 (+3) | 15 (+2) | 12 (+1) | 13 (+1) | 12 (+1) | 14 (+2) |
 **Skills** Stealth +5
 **Senses** darkvision 60 ft., passive Perception 11 **Languages** Deep Speech, Undercommon **Challenge** 8 (3,900 XP)
 **Damage Transfer.** While attached to a creature, the cloaker takes only half the damage dealt to it (rounded down), and that creature takes the other half.
@@ -7761,9 +7770,9 @@ Large fiend (demon), chaotic evil
 **Armor Class** 17 (natural armor)
 **Hit Points** 157 (15d10 + 75)
 **Speed** 40 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 20 (+5) | 15 (+2) | 21 (+5) 19 (+4) | 17 (+3) | 16 (+3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 20 (+5) | 15 (+2) | 21 (+5) | 19 (+4) | 17 (+3) | 16 (+3) |
 S i Th St 9 C 9 Wi 7 Ch 7 av ng rows r + , on + , s + , a +
 **Damage Resistances** cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks **Damage Immunities** poison **Condition Immunities** poisoned **Senses** truesight 120 ft., passive Perception 13 **Languages** Abyssal, telepathy 120 ft. **Challenge** 9 (5,000 XP)
 **Innate Spellcasting.** The glabrezu's spellcasting ability is Intelligence (spell save DC 16). The glabrezu can innately cast the following spells, requiring no material components:
@@ -7843,7 +7852,7 @@ Tiny fiend (demon, shapechanger), chaotic evil
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 5 (-3) | 17 (+3) | 10 (+0) | 7(-2) | 10 (+0) | 10 (+0) |
+| 5 (-3) | 17 (+3) | 10 (+0) | 7 (-2) | 10 (+0) | 10 (+0) |
 Skills Stealth +5
 **Damage Resistances** cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks
 **Damage Immunities** poison
@@ -7863,9 +7872,9 @@ Large fiend (demon), chaotic evil
 **Armor Class** 15 (natural armor)
 **Hit Points** 104 (11d10 + 44)
 **Speed** 40 ft., fly 60 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 17 (+3) 15 (+2) | 18 (+4) | 8 (-1) | 13 (+1) | 8 (-1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 17 (+3) | 15 (+2) | 18 (+4) | 8 (-1) | 13 (+1) | 8 (-1) |
 Saving Throws Dex +5, Wis +4, Cha +2
 **Damage Resistances** cold, fire, lightning; bludgeoning, piercing, and slashing from nonmagical attacks
 **Damage Immunities** poison
@@ -8044,7 +8053,7 @@ Tiny fiend (devil, shapechanger), lawful evil
 **Speed** 20 ft., fly 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 6(-2) | 17 (+3) 13 (+1) | 11 (+0) | 12 (+1) | 14 (+2) | |
+| 6 (-2) | 17 (+3) | 13 (+1) | 11 (+0) | 12 (+1) | 14 (+2) |
 **Skills** Deception +4, Insight +3, Persuasion +4, Stealth +5
 **Damage Resistances** cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered
 **Damage Immunities** fire, poison
@@ -8076,9 +8085,9 @@ Large fiend (devil), lawful evil
 **Armor Class** 19 (natural armor)
 **Hit Points** 300 (24d10 + 168)
 **Speed** 30 ft., fly 60 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 26 (+8) | 14 (+2) 24 (+7) | 22 (+6) | 18 (+4) | 24 (+7) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 26 (+8) | 14 (+2) | 24 (+7) | 22 (+6) | 18 (+4) | 24 (+7) |
 Saving Throws Dex +8, Con +13, Wis +10
 **Damage Resistances** cold; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered **Damage Immunities** fire, poison **Condition Immunities** poisoned **Senses** truesight 120 ft., passive Perception 14 **Languages** Infernal, telepathy 120 ft. **Challenge** 20 (25,000 XP)
 **Fear Aura.** Any creature hostile to the pit fiend that starts its turn within 20 feet of the pit fiend must make a DC 21 Wisdom saving throw, unless the pit fiend is incapacitated. On a failed save, the creature is frightened until the start of its next turn. If a creature's saving throw is successful, the creature is immune to the pit fiend's Fear Aura for the next 24 hours.
@@ -8214,7 +8223,7 @@ Large dragon, chaotic evil
 **Speed** 40 ft., fly 80 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 19 (+4) | 14 (+2) | 17 (+3) | 12 (+1) | 15 (+2) 11 (+0) | |
+| 19 (+4) | 14 (+2) | 17 (+3) | 12 (+1) | 15 (+2) | 11 (+0) |
 **Saving Throws** Dex +5, Con +6, Wis +3, Cha +5
 **Skills** Perception +6, Stealth +5
 **Damage Immunities** acid
@@ -8322,7 +8331,7 @@ Medium dragon, lawful evil
 **Speed** 30 ft., burrow 15 ft., fly 60 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 17 (+3) | 10 (+0) | 15 (+2) 12 (+1) | | 11 (+0) | 15 (+2) |
+| 17 (+3) | 10 (+0) | 15 (+2) | 12 (+1) | 11 (+0) | 15 (+2) |
 **Saving Throws** Dex +2, Con +4, Wis +2, Cha +4
 **Skills** Perception +4, Stealth +2
 **Damage Immunities** lightning
@@ -8334,9 +8343,9 @@ Medium dragon, lawful evil
 **Lightning Breath (Recharge 5–6).** The dragon exhales lightning in a 30--foot line that is 5 feet wide. Each creature in that line must make a DC 12 Dexterity saving throw, taking 22 (4d10) lightning damage on a failed save, or half as much damage on a successful one.
 **Green Dragon**
 **Ancient Green Dragon** Gargantuan dragon, lawful evil **Armor Class** 21 (natural armor) **Hit Points** 385 (22d20 + 154) **Speed** 40 ft., fly 80 ft., swim 40 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 27 (+8) | 12 (+1) | 25 (+7) 20 (+5) | 17 (+3) | 19 (+4) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 27 (+8) | 12 (+1) | 25 (+7) | 20 (+5) | 17 (+3) | 19 (+4) |
 Saving Throws Dex +8, Con +14, Wis +10, Cha +11
 **Skills** Deception +11, Insight +10, Perception +17, Persuasion +11, Stealth +8
 **Damage Immunities** poison
@@ -8362,9 +8371,9 @@ Huge dragon, lawful evil
 **Armor Class** 19 (natural armor)
 **Hit Points** 207 (18d12 + 90)
 **Speed** 40 ft., fly 80 ft., swim 40 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 23 (+6) | 12 (+1) 21 (+5) | 18 (+4) | 15 (+2) | 17 (+3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 23 (+6) | 12 (+1) | 21 (+5) | 18 (+4) | 15 (+2) | 17 (+3) |
 **Saving Throws** Dex +6, Con +10, Wis +7, Cha +8 **Skills** Deception +8, Insight +7, Perception +12, Persuasion +8, Stealth +6 **Damage Immunities** poison **Condition Immunities** poisoned **Senses** blindsight 60 ft., darkvision 120 ft., passive Perception 22 **Languages** Common, Draconic **Challenge** 15 (13,000 XP)
 **Amphibious.** The dragon can breathe air and water. **Legendary Resistance (3/Day).** If the dragon fails a saving throw, it can choose to succeed instead.
 ## Actions
@@ -8384,9 +8393,9 @@ Large dragon, lawful evil
 **Armor Class** 18 (natural armor)
 **Hit Points** 136 (16d10 + 48)
 **Speed** 40 ft., fly 80 ft., swim 40 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 19 (+4) | 12 (+1) | 17 (+3) 16 (+3) | 13 (+1) | 15 (+2) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 19 (+4) | 12 (+1) | 17 (+3) | 16 (+3) | 13 (+1) | 15 (+2) |
 **Saving Throws** Dex +4, Con +6, Wis +4, Cha +5 **Skills** Deception +5, Perception +7, Stealth +4 **Damage Immunities** poison **Condition Immunities** poisoned **Senses** blindsight 30 ft., darkvision 120 ft., passive Perception 17 **Languages** Common, Draconic **Challenge** 8 (3,900 XP)
 **Amphibious.** The dragon can breathe air and water.
 ## Actions
@@ -8411,7 +8420,7 @@ Medium dragon, lawful evil
 **Ancient Red Dragon** Gargantuan dragon, chaotic evil **Armor Class** 22 (natural armor) **Hit Points** 546 (28d20 + 252) **Speed** 40 ft., climb 40 ft., fly 80 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 30 (+10) 10 (+0) | | 29 (+9) | 18 (+4) | 15 (+2) | 23 (+6) |
+| 30 (+10) | 10 (+0) | 29 (+9) | 18 (+4) | 15 (+2) | 23 (+6) |
 Saving Throws Dex +7, Con +16, Wis +9, Cha +13
 Skills Perception +16, Stealth +7
 **Damage Immunities** fire
@@ -8472,9 +8481,9 @@ Medium dragon, chaotic evil
 **Armor Class** 17 (natural armor)
 **Hit Points** 75 (10d8 + 30)
 **Speed** 30 ft., climb 30 ft., fly 60 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 19 (+4) 10 (+0) | 17 (+3) | 12 (+1) 11 (+0) | 15 (+2) | |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 19 (+4) | 10 (+0) | 17 (+3) | 12 (+1) | 11 (+0) | 15 (+2) |
 **Saving Throws** Dex +2, Con +5, Wis +2, Cha +4
 **Skills** Perception +4, Stealth +2
 **Damage Immunities** fire
@@ -8546,7 +8555,7 @@ Large dragon, chaotic evil
 **Speed** 40 ft., burrow 20 ft., fly 80 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 10 (+0) | 18 (+4) | 6(-2) | 11 (+0) | 12 (+1) |
+| 18 (+4) | 10 (+0) | 18 (+4) | 6 (-2) | 11 (+0) | 12 (+1) |
 Saving Throws Dex +3, Con +7, Wis +3, Cha +4
 **Skills** Perception +6, Stealth +3
 **Damage Immunities** cold
@@ -8745,9 +8754,9 @@ Large dragon, lawful good
 **Armor Class** 18 (natural armor)
 **Hit Points** 142 (15d10 + 60)
 **Speed** 40 ft., fly 80 ft., swim 40 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 21 (+5) | 10 (+0) | 19 (+4) 14 (+2) | 13 (+1) | 17 (+3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 21 (+5) | 10 (+0) | 19 (+4) | 14 (+2) | 13 (+1) | 17 (+3) |
 **Saving Throws** Dex +3, Con +7, Wis +4, Cha +6 **Skills** Insight +4, Perception +7, Stealth +3 **Damage Immunities** lightning **Senses** blindsight 30 ft., darkvision 120 ft., passive Perception 17 **Languages** Common, Draconic **Challenge** 8 (3,900 XP)
 **Amphibious.** The dragon can breathe air and water.
 ## Actions
@@ -8934,7 +8943,7 @@ Large dragon, lawful good
 **Speed** 40 ft., fly 80 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 23 (+6) | 14 (+2) 21 (+5) | | 16 (+3) | 20 (+5) 13 (+1) | |
+| 23 (+6) | 14 (+2) | 21 (+5) | 16 (+3) | 20 (+5) | 13 (+1) |
 **Saving Throws** Dex +6, Con +9, Wis +5, Cha +9 **Skills** Insight +5, Perception +9, Persuasion +9, Stealth +6 **Damage Immunities** fire **Senses** blindsight 30 ft., darkvision 120 ft., passive Perception 19 **Languages** Common, Draconic **Challenge** 10 (5,900 XP)
 **Amphibious.** The dragon can breathe air and water.
 ## Actions
@@ -8967,9 +8976,9 @@ Gargantuan dragon, lawful good
 **Armor Class** 22 (natural armor)
 **Hit Points** 487 (25d20 + 225)
 **Speed** 40 ft., fly 80 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 30 (+10) 10 (+0) | | 29 (+9) 18 (+4) | 15 (+2) | 23 (+6) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 30 (+10) | 10 (+0) | 29 (+9) | 18 (+4) | 15 (+2) | 23 (+6) |
 **Saving Throws** Dex +7, Con +16, Wis +9, Cha +13 **Skills** Arcana +11, History +11, Perception +16, Stealth +7
 **Damage Immunities** cold
 **Senses** blindsight 60 ft., darkvision 120 ft., passive Perception 26
@@ -9068,9 +9077,9 @@ Large monstrosity, chaotic evil
 **Armor Class** 19 (natural armor)
 **Hit Points** 123 (13d10 + 52)
 **Speed** 30 ft., climb 30 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 16 (+3) | 16 (+3) | 18 (+4) 13 (+1) | 14 (+2) | 12 (+1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 16 (+3) | 16 (+3) | 18 (+4) | 13 (+1) | 14 (+2) | 12 (+1) |
 **Skills** Perception +5, Stealth +9 **Senses** darkvision 120 ft., passive Perception 15 **Languages** Elvish, Undercommon **Challenge** 6 (2,300 XP)
 **Fey Ancestry.** The drider has advantage on saving throws against being charmed, and magic can't put the drider to sleep.
 **Innate Spellcasting.** The drider's innate spellcasting ability is Wisdom (spell save DC 13). The drider can innately cast the following spells, requiring no material components:
@@ -9134,7 +9143,7 @@ Large elemental, neutral
 **Speed** 0 ft., fly 90 ft. (hover)
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 14 (+2) | 20 (+5) | 14 (+2) | 6(-2) | 10 (+0) | 6 (-2) |
+| 14 (+2) | 20 (+5) | 14 (+2) | 6 (-2) | 10 (+0) | 6 (-2) |
 **Damage Resistances** lightning, thunder; bludgeoning, piercing, and slashing from nonmagical attacks
 **Damage Immunities** poison
 **Condition Immunities** exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious
@@ -9172,7 +9181,7 @@ Large elemental, neutral
 **Speed** 50 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 10 (+0) | 17 (+3) | 16 (+3) | 6 (-2) | 7 (-2) 10 (+0) | |
+| 10 (+0) | 17 (+3) | 16 (+3) | 6 (-2) | 7 (-2) | 10 (+0) |
 **Damage Resistances** bludgeoning, piercing, and slashing from nonmagical attacks
 **Damage Immunities** fire, poison
 **Condition Immunities** exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious
@@ -9241,9 +9250,9 @@ Large giant, chaotic evil
 **Armor Class** 12 (natural armor)
 **Hit Points** 85 (10d10 + 30)
 **Speed** 40 ft.
-| STR | DEX | CON | INT WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 21 (+5) | 8 (-1) 17 (+3) | 6 (-2) | 10 (+0) | 8 (-1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 21 (+5) | 8 (-1) | 17 (+3) | 6 (-2) | 10 (+0) | 8 (-1) |
 Skills Perception +4
 **Senses** darkvision 60 ft., passive Perception 14
 **Languages** Giant, Orc
@@ -9317,9 +9326,9 @@ A creature can use its action to free a creature restrained by the whirlwind, in
 ## Efreeti
 Large elemental, lawful evil
 **Armor Class** 17 (natural armor) **Hit Points** 200 (16d10 + 112) **Speed** 40 ft., fly 60 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 22 (+6) | 12 (+1) | 24 (+7) 16 (+3) | 15 (+2) | 16 (+3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 22 (+6) | 12 (+1) | 24 (+7) | 16 (+3) | 15 (+2) | 16 (+3) |
 **Saving Throws** Int +7, Wis +6, Cha +7 **Damage Immunities** fire **Senses** darkvision 120 ft., passive Perception 12 **Languages** Ignan **Challenge** 11 (7,200 XP)
 **Elemental Demise.** If the efreeti dies, its body disintegrates in a flash of fire and puff of smoke, leaving behind only equipment the efreeti was wearing or carrying.
 **Innate Spellcasting.** The efreeti's innate spellcasting ability is Charisma (spell save DC 15, +7 to hit with spell attacks). It can innately cast the following spells, requiring no material components:
@@ -9355,9 +9364,9 @@ Medium undead, chaotic evil
 **Armor Class** 13
 **Hit Points** 36 (8d8)
 **Speed** 30 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 16 (+3) | 17 (+3) 10 (+0) | 11 (+0) | 10 (+0) | 8 (-1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 16 (+3) | 17 (+3) | 10 (+0) | 11 (+0) | 10 (+0) | 8 (-1) |
 **Damage Resistances** necrotic
 **Damage Immunities** poison
 **Condition Immunities** charmed, exhaustion, poisoned **Senses** darkvision 60 ft., passive Perception 10 **Languages** Common **Challenge** 2 (450 XP)
@@ -9424,7 +9433,7 @@ Huge giant, chaotic evil
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 21 (+5) | 8 (-1) | 19 (+4) | 5 (-3) | 9 (-1) | 6(-2) |
+| 21 (+5) | 8 (-1) | 19 (+4) | 5 (-3) | 9 (-1) | 6 (-2) |
 **Skills** Perception +2
 **Senses** passive Perception 12
 **Languages** Giant
@@ -9437,9 +9446,9 @@ Huge giant, neutral
 **Armor Class** 17 (natural armor)
 **Hit Points** 126 (11d12 + 55)
 **Speed** 40 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 23 (+6) | 15 (+2) 20 (+5) | 10 (+0) | 12 (+1) | 9 (-1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 23 (+6) | 15 (+2) | 20 (+5) | 10 (+0) | 12 (+1) | 9 (-1) |
 Saving Throws Dex +5, Con +8, Wis +4
 Skills Athletics +12, Perception +4
 **Senses** darkvision 60 ft., passive Perception 14
@@ -9531,7 +9540,7 @@ Large construct, unaligned
 **Speed** 20 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 20 (+5) | 9 (-1) 18 (+4) | 3 (-4) | 8 (-1) | | 1 (-5) |
+| 20 (+5) | 9 (-1) | 18 (+4) | 3 (-4) | 8 (-1) | 1 (-5) |
 **Damage Immunities** acid, poison, psychic; bludgeoning, piercing, and slashing from nonmagical attacks that aren't adamantine
 **Condition Immunities** charmed, exhaustion, frightened, paralyzed, petrified, poisoned
 **Senses** darkvision 60 ft., passive Perception 9
@@ -9553,7 +9562,7 @@ Medium construct, neutral
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 19 (+4) | 9 (-1) 18 (+4) | 6(-2) | 10 (+0) | 5 (-3) | |
+| 19 (+4) | 9 (-1) | 18 (+4) | 6 (-2) | 10 (+0) | 5 (-3) |
 **Damage Immunities** lightning, poison; bludgeoning, piercing, and slashing from nonmagical attacks that aren't adamantine
 **Condition Immunities** charmed, exhaustion, frightened, paralyzed, petrified, poisoned
 **Senses** darkvision 60 ft., passive Perception 10
@@ -9573,9 +9582,9 @@ Large construct, unaligned
 **Armor Class** 20 (natural armor)
 **Hit Points** 210 (20d10 + 100)
 **Speed** 30 ft.
-| STR | DEX CON | INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 9 (-1) 24 (+7) | 20 (+5) | 3 (-4) | 11 (+0) | 1 (-5) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 9 (-1) | 24 (+7) | 20 (+5) | 3 (-4) | 11 (+0) | 1 (-5) |
 **Damage Immunities** fire, poison, psychic; bludgeoning, piercing, and slashing from nonmagical attacks that aren't adamantine
 **Condition Immunities** charmed, exhaustion, frightened, paralyzed, petrified, poisoned
 **Senses** darkvision 120 ft., passive Perception 10
@@ -9700,9 +9709,9 @@ Medium fiend, neutral evil
 **Armor Class** 17 (natural armor)
 **Hit Points** 112 (15d8 + 45)
 **Speed** 30 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 18 (+4) 15 (+2) | 16 (+3) 16 (+3) | 14 (+2) | | 16 (+3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 18 (+4) | 15 (+2) | 16 (+3) | 16 (+3) | 14 (+2) | 16 (+3) |
 Skills Deception +7, Insight +6, Perception +6, Stealth +6
 **Damage Resistances** cold, fire; bludgeoning, piercing, and slashing from nonmagical attacks not made with silvered weapons
 **Condition Immunities** charmed
@@ -9722,7 +9731,7 @@ Medium fey, chaotic evil
 **Speed** 30 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 16 (+3) 13 (+1) | 16 (+3) | 12 (+1) | 12 (+1) | 13 (+1) | |
+| 16 (+3) | 13 (+1) | 16 (+3) | 12 (+1) | 12 (+1) | 13 (+1) |
 **Senses** darkvision 60 ft., passive Perception 11 **Languages** Aquan, Common, Giant **Challenge** 2 (450 XP)
 **Amphibious.** The hag can breathe air and water. **Horrific Appearance.** Any humanoid that starts its turn within 30 feet of the hag and can see the hag's true
 form must make a DC 11 Wisdom saving throw. On a failed save, the creature is frightened for 1 minute. A creature can repeat the saving throw at the end of each of its turns, with disadvantage if the hag is within line of sight, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the hag's Horrific Appearance for the next 24 hours.
@@ -9752,9 +9761,9 @@ Medium humanoid (human), any alignment
 **Armor Class** 18 (plate)
 **Hit Points** 65 (10d8 + 20)
 **Speed** 30 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 16 (+3) | 13 (+1) 14 (+2) | 10 (+0) | 11 (+0) | 10 (+0) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 16 (+3) | 13 (+1) | 14 (+2) | 10 (+0) | 11 (+0) | 10 (+0) |
 Skills Athletics +5, Perception +2
 **Damage Resistances** fire
 **Senses** blindsight 10 ft., darkvision 60 ft., passive Perception 12
@@ -9805,7 +9814,7 @@ Large monstrosity, unaligned
 **Speed** 40 ft., fly 60 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 17 (+3) | 13 (+1) | 13 (+1) | 2 (-4) | 8 (-1) 12 (+1) | |
+| 17 (+3) | 13 (+1) | 13 (+1) | 2 (-4) | 8 (-1) | 12 (+1) |
 **Skills** Perception +5
 **Senses** passive Perception 15
 **Languages** —
@@ -9820,9 +9829,9 @@ Medium humanoid (goblinoid), lawful evil
 **Armor Class** 18 (chain mail, shield)
 **Hit Points** 11 (2d8 + 2)
 **Speed** 30 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 13 (+1) 12 (+1) | 12 (+1) | 10 (+0) 10 (+0) | | 9 (-1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 13 (+1) | 12 (+1) | 12 (+1) | 10 (+0) | 10 (+0) | 9 (-1) |
 **Senses** darkvision 60 ft., passive Perception 10 **Languages** Common, Goblin **Challenge** 1/2 (100 XP)
 **Martial Advantage.** Once per turn, the hobgoblin can deal an extra 7 (2d6) damage to a creature it hits with a weapon attack if that creature is within 5 feet of an ally of the hobgoblin that isn't incapacitated.
 ## Actions
@@ -9833,9 +9842,9 @@ Tiny construct, neutral
 **Armor Class** 13 (natural armor)
 **Hit Points** 5 (2d4)
 **Speed** 20 ft., fly 40 ft.
-| STR | DEX | CON | INT | WIS CHA |
-| --- | --- | --- | --- | --- |
-| 4 (-3) | 15 (+2) 11 (+0) | 10 (+0) 10 (+0) | | 7 (-2) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 4 (-3) | 15 (+2) | 11 (+0) | 10 (+0) | 10 (+0) | 7 (-2) |
 Damage Immunities poison
 **Condition Immunities** charmed, poisoned **Senses** darkvision 60 ft., passive Perception 10
 **Languages** understands the languages of its creator but can't speak
@@ -9904,9 +9913,9 @@ Gargantuan monstrosity (titan), chaotic evil
 **Armor Class** 18 (natural armor)
 **Hit Points** 472 (27d20 + 189)
 **Speed** 20 ft., swim 60 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 30 (+10) 11 (+0) | 25 (+7) | 22 (+6) | 18 (+4) | 20 (+5) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 30 (+10) | 11 (+0) | 25 (+7) | 22 (+6) | 18 (+4) | 20 (+5) |
 **Saving Throws** Str +17, Dex +7, Con +14, Int +13, Wis +11
 **Damage Immunities** lightning; bludgeoning, piercing, and slashing from nonmagical attacks **Condition Immunities** frightened, paralyzed **Senses** truesight 120 ft., passive Perception 14
 **Languages** understands Abyssal, Celestial, Infernal, and Primordial but can't speak, telepathy 120 ft.
@@ -9935,7 +9944,7 @@ Large monstrosity, chaotic evil
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 16 (+3) | 15 (+2) 13 (+1) | 14 (+2) | 15 (+2) | 16 (+3) | |
+| 16 (+3) | 15 (+2) | 13 (+1) | 14 (+2) | 15 (+2) | 16 (+3) |
 **Skills** Deception +7, Insight +4, Stealth +3 **Senses** darkvision 60 ft., passive Perception 12 **Languages** Abyssal, Common **Challenge** 4 (1,100 XP)
 **Innate Spellcasting.** The lamia's innate spellcasting ability is Charisma (spell save DC 13). It can innately cast the following spells, requiring no material components.
 At will: disguise self (any humanoid form), major image 3/day each: charm person, mirror image, scrying, suggestion
@@ -10023,7 +10032,7 @@ Medium humanoid (human, shapechanger), neutral evil
 **Speed** 30 ft. (40 ft. in boar form)
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 17 (+3) | 10 (+0) 15 (+2) | 10 (+0) | 11 (+0) | | 8 (-1) |
+| 17 (+3) | 10 (+0) | 15 (+2) | 10 (+0) | 11 (+0) | 8 (-1) |
 ## Skills Perception +2
 **Damage Immunities** bludgeoning, piercing, and slashing from nonmagical attacks not made with silvered weapons **Senses** passive Perception 12
 **Languages** Common (can't speak in boar form) **Challenge** 4 (1,100 XP)
@@ -10041,7 +10050,7 @@ Medium humanoid (human, shapechanger), lawful evil
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 10 (+0) 15 (+2) | 12 (+1) | 11 (+0) | | 8 (-1) 10 (+0) | |
+| 10 (+0) | 15 (+2) | 12 (+1) | 11 (+0) | 8 (-1) | 10 (+0) |
 Skills Perception +2, Stealth +4
 **Damage Immunities** bludgeoning, piercing, and slashing from nonmagical attacks not made with silvered weapons
 **Senses** darkvision 60 ft. (rat form only), passive Perception 12
@@ -10172,7 +10181,7 @@ Small elemental, neutral evil
 **Speed** 30 ft., fly 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 7 (-2) | 13 (+1) 10 (+0) | 9 (-1) | | 11 (+0) | 12 (+1) |
+| 7 (-2) | 13 (+1) | 10 (+0) | 9 (-1) | 11 (+0) | 12 (+1) |
 Skills Perception +2, Stealth +3
 **Damage Vulnerabilities** bludgeoning, fire **Damage Immunities** cold, poison **Condition Immunities** poisoned **Senses** darkvision 60 ft., passive Perception 12 **Languages** Aquan, Auran **Challenge** 1/2 (100 XP)
 **Death Burst.** When the mephit dies, it explodes in a burst of jagged ice. Each creature within 5 feet of it must make a DC 10 Dexterity saving throw, taking 4 (1d8) slashing damage on a failed save, or half as much damage on a successful one.
@@ -10233,7 +10242,7 @@ Large monstrosity, chaotic evil
 **Speed** 10 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 10 (+0) | 15 (+2) | 8 (-1) | 9 (-1) 10 (+0) | |
+| 18 (+4) | 10 (+0) | 15 (+2) | 8 (-1) | 9 (-1) | 10 (+0) |
 **Languages** Abyssal, Aquan
 **Challenge** 2 (450 XP)
 **Amphibious.** The merrow can breathe air and water.
@@ -10270,7 +10279,7 @@ Large monstrosity, chaotic evil
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 11 (+0) | 16 (+3) | 6(-2) | 16 (+3) | 9 (-1) |
+| 18 (+4) | 11 (+0) | 16 (+3) | 6 (-2) | 16 (+3) | 9 (-1) |
 **Skills** Perception +7
 **Senses** darkvision 60 ft., passive Perception 17
 **Languages** Abyssal
@@ -10287,9 +10296,9 @@ Medium undead, lawful evil
 **Armor Class** 11 (natural armor)
 **Hit Points** 58 (9d8 + 18)
 **Speed** 20 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 16 (+3) | 8 (-1) 15 (+2) | 6 (-2) | 10 (+0) | 12 (+1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 16 (+3) | 8 (-1) | 15 (+2) | 6 (-2) | 10 (+0) | 12 (+1) |
 **Saving Throws** Wis +2
 **Damage Vulnerabilities** fire
 **Damage Resistances** bludgeoning, piercing, and slashing from nonmagical attacks
@@ -10342,9 +10351,9 @@ The mummy lord can take 3 legendary actions, choosing from the options below. On
 # Monsters (N)
 ## Nagas
 **Guardian Naga** Large monstrosity, lawful good **Armor Class** 18 (natural armor) **Hit Points** 127 (15d10 + 45) **Speed** 40 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 19 (+4) | 18 (+4) | 16 (+3) 16 (+3) | 19 (+4) | 18 (+4) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 19 (+4) | 18 (+4) | 16 (+3) | 16 (+3) | 19 (+4) | 18 (+4) |
 **Saving Throws** Dex +8, Con +7, Int +7, Wis +8, Cha +8 **Damage Immunities** poison **Condition Immunities** charmed, poisoned **Senses** darkvision 60 ft., passive Perception 14 **Languages** Celestial, Common **Challenge** 10 (5,900 XP)
 **Rejuvenation.** If it dies, the naga returns to life in 1d6 days and regains all its hit points. Only a wish spell can prevent this trait from functioning.
 **Spellcasting.** The naga is an 11th--level spellcaster. Its spellcasting ability is Wisdom (spell save DC 16, +8 to hit with spell attacks), and it needs only verbal
@@ -10394,9 +10403,9 @@ Large fiend, neutral evil
 **Ethereal Stride.** The nightmare and up to three willing creatures within 5 feet of it magically enter the Ethereal Plane from the Material Plane, or vice versa.
 ## Monsters (O)
 **Ogre** Large giant, chaotic evil **Armor Class** 11 (hide armor) **Hit Points** 59 (7d10 + 21) **Speed** 40 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 19 (+4) | 8 (-1) 16 (+3) | 5 (-3) | 7 (-2) | 7 (-2) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 19 (+4) | 8 (-1) | 16 (+3) | 5 (-3) | 7 (-2) | 7 (-2) |
 **Senses** darkvision 60 ft., passive Perception 8 **Languages** Common, Giant **Challenge** 2 (450 XP)
 ## Actions
 **Greatclub.** Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage. **Javelin.** Melee or Ranged Weapon Attack: +6 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 11 (2d6 + 4) piercing damage.
@@ -10405,9 +10414,9 @@ Large giant, lawful evil
 **Armor Class** 16 (chain mail)
 **Hit Points** 110 (13d10 + 39)
 **Speed** 30 ft., fly 30 ft.
-| STR | DEX | CON | WIS INT | CHA |
-| --- | --- | --- | --- | --- |
-| 19 (+4) | 11 (+0) | 16 (+3) 14 (+2) | 12 (+1) | 15 (+2) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 19 (+4) | 11 (+0) | 16 (+3) | 14 (+2) | 12 (+1) | 15 (+2) |
 **Saving Throws** Dex +3, Con +6, Wis +4, Cha +5 **Skills** Arcana +5, Deception +8, Perception +4 **Senses** darkvision 60 ft., passive Perception 14 **Languages** Common, Giant **Challenge** 7 (2,900 XP)
 **Innate Spellcasting.** The oni's innate spellcasting ability is Charisma (spell save DC 13). The oni can innately cast the following spells, requiring no material components: At will: darkness, invisibility
 1/day each: charm person, cone of cold, gaseous form, sleep
@@ -10470,7 +10479,7 @@ Medium ooze, unaligned
 **Speed** 10 ft., climb 10 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 12 (+1) | 6(-2) | 16 (+3) | 1 (-5) | 6(-2) | 2 (-4) |
+| 12 (+1) | 6 (-2) | 16 (+3) | 1 (-5) | 6 (-2) | 2 (-4) |
 **Skills** Stealth +2
 **Damage Resistances** acid, cold, fire
 **Condition Immunities** blinded, charmed, deafened, exhaustion, frightened, prone
@@ -10577,7 +10586,7 @@ Tiny dragon, neutral good
 **Speed** 15 ft., fly 60 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 6(-2) | 15 (+2) | 13 (+1) | 10 (+0) | 12 (+1) | 10 (+0) |
+| 6 (-2) | 15 (+2) | 13 (+1) | 10 (+0) | 12 (+1) | 10 (+0) |
 Skills Perception +3, Stealth +4
 **Senses** blindsight 10 ft., darkvision 60 ft., passive Perception 13
 **Languages** understands Common and Draconic but can't speak
@@ -10612,9 +10621,9 @@ Medium fiend, lawful evil
 **Armor Class** 16 (natural armor)
 **Hit Points** 110 (13d8 + 52)
 **Speed** 40 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 14 (+2) 17 (+3) | 18 (+4) | 13 (+1) | 16 (+3) | 20 (+5) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 14 (+2) | 17 (+3) | 18 (+4) | 13 (+1) | 16 (+3) | 20 (+5) |
 **Skills** Deception +10, Insight +8
 **Damage Vulnerabilities** piercing from magic weapons wielded by good creatures
 **Damage Immunities** bludgeoning, piercing, and slashing from nonmagical attacks
@@ -10670,7 +10679,7 @@ Large monstrosity, neutral evil
 **Speed** 10 ft., climb 10 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 8 (-1) | 17 (+3) 7 (-2) | 16 (+3) | 6 (-2) | |
+| 18 (+4) | 8 (-1) | 17 (+3) | 7 (-2) | 16 (+3) | 6 (-2) |
 Skills Perception +6, Stealth +5
 **Senses** darkvision 60 ft., passive Perception 16
 **Languages** —
@@ -10707,7 +10716,7 @@ Medium humanoid (sahuagin), lawful evil
 **Speed** 30 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 13 (+1) | 11 (+0) | 12 (+1) 12 (+1) | 13 (+1) | | 9 (-1) |
+| 13 (+1) | 11 (+0) | 12 (+1) | 12 (+1) | 13 (+1) | 9 (-1) |
 Skills Perception +5
 **Senses** darkvision 120 ft., passive Perception 15 **Languages** Sahuagin **Challenge** 1/2 (100 XP)
 **Blood Frenzy.** The sahuagin has advantage on melee attack rolls against any creature that doesn't have all its hit points.
@@ -10799,7 +10808,7 @@ Large construct, unaligned
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 8 (-1) | 18 (+4) | 7 (-2) | 10 (+0) 3 (-4) | |
+| 18 (+4) | 8 (-1) | 18 (+4) | 7 (-2) | 10 (+0) | 3 (-4) |
 Senses blindsight 10 ft., darkvision 60 ft., passive Perception 10
 Damage Immunities poison
 **Condition Immunities** charmed, exhaustion, frightened, paralyzed, poisoned
@@ -10864,7 +10873,7 @@ Medium undead, chaotic evil
 **Speed** 0 ft., fly 50 ft. (hover)
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 1 (-5) | 14 (+2) 11 (+0) | | 10 (+0) | 10 (+0) | 11 (+0) |
+| 1 (-5) | 14 (+2) | 11 (+0) | 10 (+0) | 10 (+0) | 11 (+0) |
 **Damage Resistances** acid, cold, fire, lightning, thunder; bludgeoning, piercing, and slashing from nonmagical attacks
 **Damage Immunities** necrotic, poison
 **Condition Immunities** charmed, exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained, unconscious
@@ -10881,9 +10890,9 @@ Large monstrosity, lawful neutral
 **Armor Class** 17 (natural armor)
 **Hit Points** 199 (19d10 + 95)
 **Speed** 40 ft., fly 60 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 22 (+6) | 10 (+0) | 20 (+5) 16 (+3) | 18 (+4) | 23 (+6) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 22 (+6) | 10 (+0) | 20 (+5) | 16 (+3) | 18 (+4) | 23 (+6) |
 **Saving Throws** Dex +6, Con +11, Int +9, Wis +10 **Skills** Arcana +9, Perception +10, Religion +15 **Damage Immunities** psychic; bludgeoning, piercing, and slashing from nonmagical attacks **Condition Immunities** charmed, frightened **Senses** truesight 120 ft., passive Perception 20
 **Languages** Common, Sphinx
 **Challenge** 17 (18,000 XP)
@@ -10977,7 +10986,7 @@ Medium fiend (shapechanger), neutral evil
 **Speed** 30 ft., fly 60 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 8 (-1) | 17 (+3) 13 (+1) | 15 (+2) | 12 (+1) | 20 (+5) | |
+| 8 (-1) | 17 (+3) | 13 (+1) | 15 (+2) | 12 (+1) | 20 (+5) |
 Skills Deception +9, Insight +5, Perception +5, Persuasion +9, Stealth +7
 **Damage Resistances** cold, fire, lightning, poison; bludgeoning, piercing, and slashing from nonmagical attacks
 **Senses** darkvision 60 ft., passive Perception 15 **Languages** Abyssal, Common, Infernal, telepathy 60 ft. **Challenge** 4 (1,100 XP)
@@ -10998,7 +11007,7 @@ Gargantuan monstrosity (titan), unaligned
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| | 30 (+10) 11 (+0) 30 (+10) | | 3 (-4) | 11 (+0) | 11 (+0) |
+| 30 (+10) | 11 (+0) | 30 (+10) | 3 (-4) | 11 (+0) | 11 (+0) |
 **Saving Throws** Int +5, Wis +9, Cha +9
 **Damage Immunities** fire, poison; bludgeoning, piercing, and slashing from nonmagical attacks
 **Condition Immunities** charmed, frightened, paralyzed, poisoned
@@ -11049,7 +11058,7 @@ Large giant, chaotic evil
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 13 (+1) | 20 (+5) | 7 (-2) | 9 (-1) | 7(-2) |
+| 18 (+4) | 13 (+1) | 20 (+5) | 7 (-2) | 9 (-1) | 7 (-2) |
 Skills Perception +2
 **Senses** darkvision 60 ft., passive Perception 12 **Languages** Giant
 **Challenge** 5 (1,800 XP)
@@ -11198,7 +11207,7 @@ Medium undead, neutral evil
 **Speed** 0 ft., fly 60 ft. (hover)
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 6 (-2) | 16 (+3) 16 (+3) | 12 (+1) | 14 (+2) | | 15 (+2) |
+| 6 (-2) | 16 (+3) | 16 (+3) | 12 (+1) | 14 (+2) | 15 (+2) |
 **Damage Resistances** acid, cold, fire, lightning, thunder; bludgeoning, piercing, and slashing from nonmagical attacks that aren't silvered
 **Damage Immunities** necrotic, poison
 **Condition Immunities** charmed, exhaustion, grappled, paralyzed, petrified, poisoned, prone, restrained
@@ -11484,7 +11493,7 @@ Medium beast, unaligned
 **Speed** 30 ft., climb 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 16 (+3) | 14 (+2) | 14 (+2) | 6(-2) | 12 (+1) | 7 (-2) |
+| 16 (+3) | 14 (+2) | 14 (+2) | 6 (-2) | 12 (+1) | 7 (-2) |
 **Skills** Athletics +5, Perception +3
 **Senses** passive Perception 13
 **Languages** —
@@ -11515,9 +11524,9 @@ Huge plant, unaligned
 **Armor Class** 13 (natural armor)
 **Hit Points** 59 (7d12 + 14)
 **Speed** 20 ft.
-| STR | DEX | CON | INT WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 19 (+4) | 6(-2) 15 (+2) | 10 (+0) | 10 (+0) | 7 (-2) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 19 (+4) | 6 (-2) | 15 (+2) | 10 (+0) | 10 (+0) | 7 (-2) |
 **Damage Vulnerabilities** fire
 **Damage Resistances** bludgeoning, piercing **Senses** passive Perception 10
 **Languages** one language known by its creator **Challenge** 2 (450 XP)
@@ -11560,7 +11569,7 @@ Tiny beast, unaligned
 **Speed** 20 ft., burrow 5 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 4 (-3) | 12 (+1) 11 (+0) | | 2 (-4) | 12 (+1) | 5 (-3) |
+| 4 (-3) | 12 (+1) | 11 (+0) | 2 (-4) | 12 (+1) | 5 (-3) |
 **Senses** darkvision 30 ft., passive Perception 11
 **Languages** —
 **Challenge** 0 (10 XP)
@@ -11623,7 +11632,7 @@ Small beast, unaligned
 **Speed** 10 ft., fly 60 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 6(-2) | 14 (+2) | 10 (+0) | 3 (-4) | 14 (+2) | 5 (-3) |
+| 6 (-2) | 14 (+2) | 10 (+0) | 3 (-4) | 14 (+2) | 5 (-3) |
 Skills Perception +4
 **Senses** passive Perception 14
 **Languages** —
@@ -11876,7 +11885,7 @@ Huge beast, unaligned
 **Speed** 40 ft., climb 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 23 (+6) | 14 (+2) | 18 (+4) | 7 (-2) | 12 (+1) | 7(-2) |
+| 23 (+6) | 14 (+2) | 18 (+4) | 7 (-2) | 12 (+1) | 7 (-2) |
 Skills Athletics +9, Perception +4
 **Senses** passive Perception 14
 **Languages** —
@@ -11923,7 +11932,7 @@ Large beast, unaligned
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 17 (+3) | 10 (+0) | 16 (+3) | 2 (-4) | 7(-2) | 5 (-3) |
+| 17 (+3) | 10 (+0) | 16 (+3) | 2 (-4) | 7 (-2) | 5 (-3) |
 Senses passive Perception 8
 **Languages** —
 **Challenge** 2 (450 XP)
@@ -11982,7 +11991,7 @@ Huge beast, unaligned
 **Speed** 30 ft., swim 50 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 21 (+5) | 9 (-1) 17 (+3) | 2 (-4) | 10 (+0) | 7 (-2) | |
+| 21 (+5) | 9 (-1) | 17 (+3) | 2 (-4) | 10 (+0) | 7 (-2) |
 **Skills** Stealth +5
 **Senses** passive Perception 10
 **Languages** —
@@ -12047,9 +12056,9 @@ Medium beast, unaligned
 **Armor Class** 11
 **Hit Points** 18 (4d8)
 **Speed** 30 ft., swim 30 ft.
-| STR | DEX CON | INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 12 (+1) 13 (+1) | 11 (+0) | 2 (-4) | 10 (+0) | 3 (-4) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 12 (+1) | 13 (+1) | 11 (+0) | 2 (-4) | 10 (+0) | 3 (-4) |
 Skills Perception +2, Stealth +3
 **Senses** darkvision 30 ft., passive Perception 12
 **Languages** —
@@ -12355,9 +12364,9 @@ Large beast, unaligned
 **Armor Class** 12 (natural armor)
 **Hit Points** 45 (6d10 + 12)
 **Speed** 0 ft., swim 40 ft.
-| STR | CON DEX | INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 18 (+4) 13 (+1) | 15 (+2) | 1 (-5) | 10 (+0) | 4 (-3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 18 (+4) | 13 (+1) | 15 (+2) | 1 (-5) | 10 (+0) | 4 (-3) |
 **Skills** Perception +2
 **Senses** blindsight 30 ft., passive Perception 12
 **Languages** —
@@ -12374,7 +12383,7 @@ Medium beast, unaligned
 **Speed** 50 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 11 (+0) | 13 (+1) 12 (+1) | 2 (-4) | | 12 (+1) | 5 (-3) |
+| 11 (+0) | 13 (+1) | 12 (+1) | 2 (-4) | 12 (+1) | 5 (-3) |
 **Skills** Perception +3
 **Senses** passive Perception 13
 **Languages** —
@@ -12551,7 +12560,7 @@ Large monstrosity, unaligned
 **Speed** 30 ft., climb 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 15 (+2) | 15 (+2) | 12 (+1) | 6(-2) | 10 (+0) | 6 (-2) |
+| 15 (+2) | 15 (+2) | 12 (+1) | 6 (-2) | 10 (+0) | 6 (-2) |
 Skills Stealth +6
 Senses darkvision 60 ft., passive Perception 10
 **Languages** —
@@ -12582,7 +12591,7 @@ Large beast, unaligned
 **Speed** 40 ft., swim 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 20 (+5) | 16 (+3) 10 (+0) | 2 (-4) | 13 (+1) | 7 (-2) | |
+| 20 (+5) | 16 (+3) | 10 (+0) | 2 (-4) | 13 (+1) | 7 (-2) |
 Skills Perception +3
 **Senses** passive Perception 13
 **Languages** —
@@ -12599,7 +12608,7 @@ Medium beast, unaligned
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 15 (+2) | 13 (+1) 10 (+0) | 2 (-4) | | 11 (+0) | 7 (-2) |
+| 15 (+2) | 13 (+1) | 10 (+0) | 2 (-4) | 11 (+0) | 7 (-2) |
 **Senses** passive Perception 10
 **Languages** —
 **Challenge** 1/8 (25 XP)
@@ -12612,7 +12621,7 @@ Tiny beast, unaligned
 **Speed** 0 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 2 (-4) | 16 (+3) | 9 (-1) | 1(-5) | 7(-2) | 2 (-4) |
+| 2 (-4) | 16 (+3) | 9 (-1) | 1 (-5) | 7 (-2) | 2 (-4) |
 Senses darkvision 60 ft., passive Perception 8
 **Languages** —
 **Challenge** 0 (10 XP)
@@ -12655,9 +12664,9 @@ Medium beast, unaligned
 **Armor Class** 12 (natural armor)
 **Hit Points** 22 (4d8 + 4)
 **Speed** 0 ft., swim 40 ft.
-| STR | DEX | CON | INT WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 14 (+2) 13 (+1) | 13 (+1) | 1 (-5) | 10 (+0) | 4 (-3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 14 (+2) | 13 (+1) | 13 (+1) | 1 (-5) | 10 (+0) | 4 (-3) |
 **Skills** Perception +2
 **Senses** blindsight 30 ft., passive Perception 12
 **Languages** —
@@ -12701,7 +12710,7 @@ Large beast, unaligned
 **Speed** 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 18 (+4) | 15 (+2) 14 (+2) | 3 (-4) | | 12 (+1) | 8 (-1) |
+| 18 (+4) | 15 (+2) | 14 (+2) | 3 (-4) | 12 (+1) | 8 (-1) |
 Skills Perception +3, Stealth +6
 **Senses** passive Perception 13
 **Languages** —
@@ -12760,7 +12769,7 @@ Medium swarm of Tiny beasts, unaligned
 **Speed** 0 ft., fly 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 5 (-3) | 15 (+2) 10 (+0) | | 2 (-4) | 12 (+1) | 4 (-3) |
+| 5 (-3) | 15 (+2) | 10 (+0) | 2 (-4) | 12 (+1) | 4 (-3) |
 **Damage Resistances** bludgeoning, piercing, slashing
 **Condition Immunities** charmed, frightened, grappled, paralyzed, petrified, prone, restrained, stunned
 **Senses** blindsight 60 ft., passive Perception 11
@@ -12805,7 +12814,7 @@ Medium swarm of Tiny beasts, unaligned
 **Speed** 0 ft., swim 40 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 16 (+3) 13 (+1) | 9 (-1) | 1 (-5) | 7 (-2) | 2 (-4) | |
+| 16 (+3) | 13 (+1) | 9 (-1) | 1 (-5) | 7 (-2) | 2 (-4) |
 **Damage Resistances** bludgeoning, piercing, slashing **Condition Immunities** charmed, frightened, grappled, paralyzed, petrified, prone, restrained, stunned **Senses** darkvision 60 ft., passive Perception 8 **Languages** — **Challenge** 1 (200 XP)
 **Blood Frenzy.** The swarm has advantage on melee attack rolls against any creature that doesn't have all its hit points.
 **Swarm.** The swarm can occupy another creature's space and vice versa, and the swarm can move through any opening large enough for a Tiny quipper. The swarm can't regain hit points or gain temporary hit points.
@@ -12954,9 +12963,9 @@ Large monstrosity, neutral evil
 **Armor Class** 13 (natural armor)
 **Hit Points** 26 (4d10 + 4)
 **Speed** 50 ft.
-| STR | DEX | CON | INT WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 13 (+1) 16 (+3) | 13 (+1) | 7 (-2) | 11 (+0) | 8 (-1) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 13 (+1) | 16 (+3) | 13 (+1) | 7 (-2) | 11 (+0) | 8 (-1) |
 Skills Perception +4
 **Senses** darkvision 60 ft., passive Perception 14
 **Languages** Goblin, Worg
@@ -12996,9 +13005,9 @@ Medium humanoid (any race), any alignment
 **Armor Class** 12 (15 with mage armor)
 **Hit Points** 99 (18d8 + 18)
 **Speed** 30 ft.
-| STR | DEX | CON INT | WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 10 (+0) | 14 (+2) | 12 (+1) 20 (+5) | 15 (+2) | 16 (+3) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 10 (+0) | 14 (+2) | 12 (+1) | 20 (+5) | 15 (+2) | 16 (+3) |
 Saving Throws Int +9, Wis +6
 **Skills** Arcana +13, History +13
 **Damage Resistance** damage from spells; nonmagical bludgeoning, piercing, and slashing (from stoneskin)
@@ -13027,9 +13036,9 @@ Medium humanoid (any race), any non--good alignment
 **Armor Class** 15 (studded leather)
 **Hit Points** 78 (12d8 + 24)
 **Speed** 30 ft.
-| STR | DEX | CON | INT WIS | CHA |
-| --- | --- | --- | --- | --- |
-| 11 (+0) | 16 (+3) | 14 (+2) 13 (+1) | 11 (+0) | 10 (+0) |
+| STR | DEX | CON | INT | WIS | CHA |
+| --- | --- | --- | --- | --- | --- |
+| 11 (+0) | 16 (+3) | 14 (+2) | 13 (+1) | 11 (+0) | 10 (+0) |
 **Saving Throws** Dex +6, Int +4
 **Skills** Acrobatics +6, Deception +3, Perception +3, Stealth +9
 **Damage Resistances** poison
@@ -13110,7 +13119,7 @@ Medium humanoid (any race), any non--good alignment
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 11 (+0) | 12 (+1) | 10 (+0) 10 (+0) | 11 (+0) | 10 (+0) | |
+| 11 (+0) | 12 (+1) | 10 (+0) | 10 (+0) | 11 (+0) | 10 (+0) |
 **Skills** Deception +2, Religion +2
 **Senses** passive Perception 10
 **Languages** any one language (usually Common) **Challenge** 1/8 (25 XP)
@@ -13239,7 +13248,7 @@ Medium humanoid (any race), any alignment
 **Speed** 25 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 10 (+0) | 10 (+0) | 12 (+1) | 13 (+1) | 13 (+1) 16 (+3) | |
+| 10 (+0) | 10 (+0) | 12 (+1) | 13 (+1) | 13 (+1) | 16 (+3) |
 Skills Medicine +7, Persuasion +3, Religion +4
 **Senses** passive Perception 13
 **Languages** any two languages
@@ -13274,7 +13283,7 @@ Medium humanoid (any race), any alignment
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 10 (+0) | 15 (+2) | 10 (+0) 12 (+1) | 14 (+2) | | 16 (+3) |
+| 10 (+0) | 15 (+2) | 10 (+0) | 12 (+1) | 14 (+2) | 16 (+3) |
 **Skills** Deception +5, Insight +4, Investigation +5, Perception +6, Persuasion +5, Sleight of Hand +4, Stealth +4
 **Senses** passive Perception 16
 **Languages** any two languages
@@ -13292,7 +13301,7 @@ Medium humanoid (any race), any non--good alignment
 **Speed** 30 ft.
 | STR | DEX | CON | INT | WIS | CHA |
 | --- | --- | --- | --- | --- | --- |
-| 15 (+2) | 11 (+0) | 14 (+2) 10 (+0) | 10 (+0) | | 11 (+0) |
+| 15 (+2) | 11 (+0) | 14 (+2) | 10 (+0) | 10 (+0) | 11 (+0) |
 Skills Intimidation +2
 **Senses** passive Perception 10
 **Languages** any one language (usually Common)

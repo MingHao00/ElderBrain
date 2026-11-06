@@ -1,2 +1,6 @@
 .env
 .cursor/session-record-pending.json
+.cache/
+.venv/
+rag/vector_index/
+rag/vector_index_embedding3/

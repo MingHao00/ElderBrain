@@ -2,6 +2,7 @@
 
 2026-10-31 确认：5.1 的旧译名对齐到 5.2 的英文名；
 耳聋的英文和狂战士道途的英文按标准拼写编号。
+2026-11-01 审阅：下列英文名改成英文 PDF 的标题。主持人工具箱范围不同，不改。
 """
 
 NAMED_FROM_REVIEW = "named_from_review"
@@ -35,9 +36,42 @@ REVIEWED_ALIASES = {
 }
 
 
+# 键是中文条目上原来的英文名，值是英文 PDF 的标题。
+HEADING_ALIASES = {
+    "rule": {
+        "Curse Items": "Cursed Items",
+        "Magic Items Resilience": "Magic Item Resilience",
+        "Ranged Attack": "Ranged Attacks",
+        "Saving Throw and Damage": "Saving Throws and Damage",
+        "Step 1:Choose a Class": "Step 1: Choose Class",
+        "Step 2:Determine Origin": "Step 2: Character Origin",
+        "Step 3:Determine Ability Scores": "Step 3: Ability Scores",
+        "Step 4:Choose an Alignment": "Step 4: Alignment",
+        "Step5:Fill In Details": "Step 5: Character Creation Details",
+        "Curse": "Curses and Magical Contagions",
+        "Abilities": "Using Ability Scores",
+    },
+    "glossary": {
+        "Objects": "Object",
+    },
+}
+
+
 def reviewed_english_name(entry_type: str, title_zh: str) -> str:
     """返回已核对的英文名。没有这条对照时返回空字符串。"""
     return REVIEWED_ALIASES.get(entry_type, {}).get(title_zh, "")
+
+
+def canonical_reviewed_heading(
+    entry_type: str,
+    name: str,
+    align_status: str,
+) -> tuple[str, str]:
+    """审阅认定同一条时，改用英文 PDF 的标题编号。"""
+    renamed = HEADING_ALIASES.get(entry_type, {}).get(name, "")
+    if not renamed:
+        return name, align_status
+    return renamed, NAMED_FROM_REVIEW
 
 
 def repair_source_english(name: str, align_status: str) -> tuple[str, str]:

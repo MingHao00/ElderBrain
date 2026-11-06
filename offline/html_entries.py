@@ -7,7 +7,7 @@ from pathlib import Path
 from html_text import html_to_text
 from ids import RULE_VERSION_52, VERSION_TOKEN_52, concept_key, entry_id
 from monster_names import MONSTERS_ABSENT_FROM_ENGLISH, canonical_monster_name
-from reviewed_terms import repair_source_english
+from reviewed_terms import canonical_reviewed_heading, repair_source_english
 from titles import heading_text, split_bilingual_title
 
 SOURCE_ID_52_ZH = "src-srd52-zh"
@@ -65,6 +65,10 @@ def make_catalog_entry(
 ) -> CatalogEntry:
     """组装一条清单记录。编号由版本、类型和英文名决定。"""
     english_name, align_status = repair_source_english(english_name, align_status)
+    if lang == "zh":
+        english_name, align_status = canonical_reviewed_heading(
+            entry_type, english_name, align_status,
+        )
     if entry_type == "monster" and lang == "zh":
         english_name, align_status = canonical_monster_name(english_name, align_status)
     return CatalogEntry(

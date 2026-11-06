@@ -1,0 +1,196 @@
+{
+  "judge_prompt_version": "2026-11-06-v1",
+  "sentence_count": 47,
+  "questions": [
+    {
+      "question_id": "L06",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 1
+    },
+    {
+      "question_id": "L07",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "L08",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "L10",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 1
+    },
+    {
+      "question_id": "M01",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 4
+    },
+    {
+      "question_id": "M03",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "M05",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 5
+    },
+    {
+      "question_id": "M06",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "M08",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "R01",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R02",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R04",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R05",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 3
+    },
+    {
+      "question_id": "R06",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R08",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R09",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 3
+    },
+    {
+      "question_id": "R11",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R12",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R17",
+      "model_name": "deepseek-flash",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "L06",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 1
+    },
+    {
+      "question_id": "L07",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "L08",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "L10",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 1
+    },
+    {
+      "question_id": "M01",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "M03",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "M05",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 4
+    },
+    {
+      "question_id": "M06",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 2
+    },
+    {
+      "question_id": "M08",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 3
+    },
+    {
+      "question_id": "R01",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R02",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R04",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R05",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 1
+    },
+    {
+      "question_id": "R06",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R08",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R09",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R11",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R12",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R17",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    }
+  ]
+}

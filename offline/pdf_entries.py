@@ -17,6 +17,7 @@ def english_entry(
     pdf_name: str,
     line_number: int,
     text: str,
+    align_status: str = NAMED_FROM_HEADING,
 ) -> CatalogEntry:
     """一条英文规则。位置先记行号，法术页码另算。"""
     return make_catalog_entry(
@@ -30,5 +31,5 @@ def english_entry(
         title_zh="",
         location=f"{pdf_name}#line:{line_number}",
         text=text,
-        align_status=NAMED_FROM_HEADING,
+        align_status=align_status,
     )
