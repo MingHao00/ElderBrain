@@ -4,7 +4,12 @@ from datetime import datetime
 from config import REPO_ROOT
 from generation_call import deepseek_yuan, is_deepseek_peak, qwen_yuan
 from generation_prompt import DELIMITER_MARK, render_prompt
-from generation_questions import ROLE_INTERCEPT, ROLE_MODEL, load_generation_questions
+from generation_questions import (
+    ROLE_INTERCEPT,
+    ROLE_MODEL,
+    load_generation_questions,
+    load_holdout_questions,
+)
 from generation_score import parse_generation, score_generation
 
 ACCEPTANCE = REPO_ROOT / "design" / "05-acceptance.md"
@@ -43,6 +48,34 @@ class GenerationQuestionTests(unittest.TestCase):
         self.assertIsNone(clarify.expected_category)
         self.assertTrue(clarify.require_clarify)
         self.assertEqual(self.by_id["R06"].expected_category, "R3")
+
+
+class HoldoutQuestionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.questions = load_holdout_questions(ACCEPTANCE)
+        self.by_id = {item.question_id: item for item in self.questions}
+
+    def test_keeps_all_twenty_holdout_questions(self) -> None:
+        self.assertEqual(len(self.questions), 20)
+        self.assertIn("C02", self.by_id)
+        self.assertIn("V01", self.by_id)
+        self.assertNotIn("L06", self.by_id)
+        self.assertNotIn("C01", self.by_id)
+
+    def test_scope_and_injection_stay_off_the_model(self) -> None:
+        for question_id in ("L17", "C09", "V06", "R13"):
+            self.assertEqual(self.by_id[question_id].role, ROLE_INTERCEPT)
+        self.assertEqual(self.by_id["V01"].role, ROLE_MODEL)
+        self.assertEqual(self.by_id["R03"].expected_category, "R1")
+        self.assertEqual(self.by_id["R07"].expected_category, "R3")
+
+    def test_alignment_control_is_an_answer(self) -> None:
+        control = self.by_id["R20"]
+        self.assertEqual(control.role, ROLE_MODEL)
+        self.assertEqual(control.expected_type, "answer")
+        self.assertIsNone(control.expected_category)
+        self.assertTrue(self.by_id["R10"].require_dm)
+        self.assertTrue(self.by_id["R16"].require_clarify)
 
 
 class GenerationScoreTests(unittest.TestCase):

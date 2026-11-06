@@ -1,0 +1,9 @@
+{"n": 1, "question_id": "L03", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写「中毒生物的攻击检定和属性检定具有劣势」，句子只是这句的同义改写。"}
+{"n": 2, "question_id": "L09", "model_name": "qwen3.7-flash-2026-07-15", "label": "不支持", "reason": "原文标题是「强酸箭」，但没有写「在 SRD 中」。"}
+{"n": 3, "question_id": "L09", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写「对目标进行一次远程法术攻击」，这是该法术的效果。"}
+{"n": 4, "question_id": "L09", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写「若命中，目标立刻受到 4d4 点强酸伤害，并在其下个回合结束时再受到 2d4 点强酸伤害。」"}
+{"n": 5, "question_id": "L09", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写「若未命中，箭矢仍会溅到目标身上，造成初始伤害的一半，且在其下个回合结束时不再造成伤害。」"}
+{"n": 6, "question_id": "R10", "model_name": "qwen3.7-flash-2026-07-15", "label": "不支持", "reason": "句子多出「规则未规定目标必须可见」；原文写的是「当一个你能看见的敌对生物移动离开你的触及范围时」。"}
+{"n": 7, "question_id": "R10", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写「当你攻击一个你看不见的目标时，攻击检定具有劣势。」"}
+{"n": 8, "question_id": "R10", "model_name": "qwen3.7-flash-2026-07-15", "label": "不支持", "reason": "原文没有「最终由 DM 裁定」，只写 GM 可以把擒抱与推撞当作范本，用来即兴裁定其他类似对抗。"}
+{"n": 9, "question_id": "R20", "model_name": "qwen3.7-flash-2026-07-15", "label": "支持", "reason": "原文写「守序邪恶（LE）生物会在传统、忠诚或秩序准则允许的范围内，有条不紊地攫取自己想要的东西。」"}

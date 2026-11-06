@@ -213,8 +213,10 @@ class _Completions:
         temperature: float,
         max_tokens: int,
         messages: list[dict[str, str]],
+        extra_body: dict[str, object],
     ) -> _ChatResponse:
         self.messages.extend(messages)
+        self.extra_body = extra_body
         return _ChatResponse(self.content)
 
 
@@ -229,6 +231,10 @@ class _ChatClient:
 
 
 class GenerationTests(unittest.TestCase):
+    def test_default_model_is_qwen(self) -> None:
+        module = GenerationIntegrationModule(0, 32, _ChatClient("不会被用到"))
+        self.assertEqual(module.model_name, "qwen3.7-flash-2026-07-15")
+
     def test_no_parents_skips_the_api(self) -> None:
         client = _ChatClient("不会被用到")
         module = GenerationIntegrationModule(0.1, 32, client, "test-model")
@@ -247,6 +253,10 @@ class GenerationTests(unittest.TestCase):
         self.assertNotIn("问{context}", system_text)
         self.assertIn("{8d6}", system_text)
         self.assertNotIn(VERSION_SENTENCE, system_text)
+        self.assertIn("entry_id: ", system_text)
+        self.assertIn("location: docs/Spells/Fireball.md#火球术", system_text)
+        self.assertIn("逐字复制", system_text)
+        self.assertEqual(client.chat.completions.extra_body, {"enable_thinking": False})
 
 
 class IndexTests(unittest.TestCase):

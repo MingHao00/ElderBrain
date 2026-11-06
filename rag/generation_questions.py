@@ -9,7 +9,12 @@ from scope import refusal_for
 LANG_ZH = "中"
 VERSION_51 = "5.1"
 SPLIT_DAILY = "日常"
+SPLIT_HOLDOUT = "放行"
+HOLDOUT_COUNT = 20
+CONTROL_QUESTION_ID = "R20"
 SKIP_HEADINGS = ("版本对比", "版本意图", "后续分期")
+HOLDOUT_SKIP_HEADINGS = ("后续分期",)
+HOLDOUT_TABLE_ROW = re.compile(r"^\| ((?:L|M|C|V|R)\d+) \|")
 ROLE_MODEL = "model"
 ROLE_INTERCEPT = "intercept"
 TYPE_ANSWER = "answer"
@@ -46,22 +51,54 @@ def load_generation_questions(acceptance: Path) -> list[GenerationQuestion]:
     return questions
 
 
+def load_holdout_questions(acceptance: Path) -> list[GenerationQuestion]:
+    """20 道放行题都进入复核。R20 用来检查阵营没有被当成现实政治。"""
+    questions: list[GenerationQuestion] = []
+    rows = _table_rows(acceptance, HOLDOUT_SKIP_HEADINGS, HOLDOUT_TABLE_ROW)
+    for row in rows:
+        built = _holdout_from_row(row)
+        if built is not None:
+            questions.append(built)
+    if len(questions) != HOLDOUT_COUNT:
+        raise ValueError(f"放行题应为 {HOLDOUT_COUNT} 道，实际 {len(questions)}")
+    return questions
+
+
+def _holdout_from_row(row: dict[str, str]) -> GenerationQuestion | None:
+    if row["集合"] != SPLIT_HOLDOUT:
+        return None
+    question_id = row["编号"]
+    question = row["问题"]
+    # 类别格写着 R8 对照。它要正常回答，不能按注入题拦掉。
+    if question_id == CONTROL_QUESTION_ID:
+        return _model(question_id, question, TYPE_ANSWER, None, False, False)
+    return _classified(question_id, question, _category(row.get("类别", "")), row)
+
+
 def _question_from_row(row: dict[str, str]) -> GenerationQuestion | None:
     if row["语言"] != LANG_ZH or row["集合"] != SPLIT_DAILY:
         return None
     if "版本" in row and row["版本"] != VERSION_51:
         return None
-    category = _category(row.get("类别", ""))
-    if category in INTERCEPT_CATEGORIES or refusal_for(row["问题"]) is not None:
-        return _intercept(row["编号"], row["问题"])
+    return _classified(row["编号"], row["问题"], _category(row.get("类别", "")), row)
+
+
+def _classified(
+    question_id: str,
+    question: str,
+    category: str,
+    row: dict[str, str],
+) -> GenerationQuestion:
+    if category in INTERCEPT_CATEGORIES or refusal_for(question) is not None:
+        return _intercept(question_id, question)
     if category in REFUSAL_CATEGORIES:
-        return _model(row["编号"], row["问题"], TYPE_REFUSAL, category, False, False)
+        return _model(question_id, question, TYPE_REFUSAL, category, False, False)
     if category == PARTIAL_CATEGORY and row.get("标准证据") == NO_EVIDENCE:
-        return _model(row["编号"], row["问题"], TYPE_REFUSAL, category, False, False)
+        return _model(question_id, question, TYPE_REFUSAL, category, False, False)
     # 有原文的 R2 是部分回答；R7 是反问。二者都不是空拒答。
     require_dm = category == DM_CATEGORY
     require_clarify = category == CLARIFY_CATEGORY
-    return _model(row["编号"], row["问题"], TYPE_ANSWER, None, require_dm, require_clarify)
+    return _model(question_id, question, TYPE_ANSWER, None, require_dm, require_clarify)
 
 
 def _model(
@@ -100,13 +137,17 @@ def _category(cell: str) -> str:
     return token if token.startswith("R") else ""
 
 
-def _table_rows(acceptance: Path) -> list[dict[str, str]]:
+def _table_rows(
+    acceptance: Path,
+    skip_headings: tuple[str, ...] = SKIP_HEADINGS,
+    row_pattern: re.Pattern[str] = TABLE_ROW,
+) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     headers: list[str] = []
     skipping = False
     for line in acceptance.read_text(encoding="utf-8").splitlines():
         if line.startswith("### "):
-            skipping = any(name in line for name in SKIP_HEADINGS)
+            skipping = any(name in line for name in skip_headings)
             headers = []
             continue
         if skipping or not line.startswith("|"):
@@ -115,6 +156,6 @@ def _table_rows(acceptance: Path) -> list[dict[str, str]]:
         if not headers and cells and cells[0] == "编号":
             headers = cells
             continue
-        if headers and TABLE_ROW.match(line):
+        if headers and row_pattern.match(line):
             rows.append(dict(zip(headers, cells, strict=True)))
     return rows

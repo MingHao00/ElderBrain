@@ -32,9 +32,39 @@ class _Reply:
     def __init__(self) -> None:
         self.calls = 0
 
-    def answer(self, question: str, parents: list[RagPiece]) -> str:
+    def answer(
+        self,
+        question: str,
+        parents: list[RagPiece],
+        history: list[dict[str, str]] | None = None,
+    ) -> str:
         self.calls += 1
         return "射程 150 尺。"
+
+
+class _RecordSearch:
+    def __init__(self) -> None:
+        self.queries: list[str] = []
+
+    def hybrid_search(self, question: str) -> list[RagPiece]:
+        self.queries.append(question)
+        return [RagPiece("子块", {"section_id": "fire"})]
+
+
+class _RecordReply:
+    def __init__(self) -> None:
+        self.question = ""
+        self.history: list[dict[str, str]] | None = None
+
+    def answer(
+        self,
+        question: str,
+        parents: list[RagPiece],
+        history: list[dict[str, str]] | None = None,
+    ) -> str:
+        self.question = question
+        self.history = history
+        return "火球术。"
 
 
 class AskTests(unittest.TestCase):
@@ -62,6 +92,35 @@ class AskTests(unittest.TestCase):
         text = rag.ask("火球术的射程是多少")
         self.assertEqual(text, f"{VERSION_SENTENCE}\n\n射程 150 尺。")
         self.assertEqual(reply.calls, 1)
+
+    def test_unconfigured_generation_uses_zero_temperature(self) -> None:
+        rag = ElderBrainRag()
+        rag.retrieval = _Hit()
+        rag.reranker = _Keep()
+        rag.data.parents = {"fire": RagPiece("父节原文", {"section_id": "fire"})}
+        with mock.patch("system.GenerationIntegrationModule") as module_cls:
+            module_cls.return_value.answer.return_value = "正文"
+            rag.ask("火球术的射程是多少")
+        module_cls.assert_called_once_with(0, rag.config.max_tokens)
+
+    def test_history_goes_to_generation_only(self) -> None:
+        rag = ElderBrainRag()
+        search = _RecordSearch()
+        rag.retrieval = search
+        rag.reranker = _Keep()
+        reply = _RecordReply()
+        rag.generation = reply
+        rag.data.parents = {
+            "fire": RagPiece("父节原文", {"section_id": "fire"}),
+        }
+        history = [
+            {"role": "user", "text": "火球术射程"},
+            {"role": "assistant", "text": "150 尺。"},
+        ]
+        rag.ask("上一句说的是哪个法术", history)
+        self.assertEqual(search.queries, ["上一句说的是哪个法术"])
+        self.assertEqual(reply.question, "上一句说的是哪个法术")
+        self.assertEqual(reply.history, history)
 
 
 class MainRefusalTests(unittest.TestCase):

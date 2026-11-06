@@ -11,6 +11,7 @@ if str(_RAG_DIR) not in sys.path:
 from dotenv import load_dotenv
 
 from config import REPO_ROOT, RagConfig
+from generation_call import EXPERIMENT_TEMPERATURE
 from modules.data_preparation import DataPreparationModule, RagPiece
 from modules.generation import NO_EVIDENCE, GenerationIntegrationModule
 from modules.index_construction import IndexConstructionModule, file_sha256
@@ -43,8 +44,12 @@ class ElderBrainRag:
         self.retrieval = RetrievalOptimizationModule(vectorstore, children)
         return len(children)
 
-    def ask(self, question: str) -> str:
-        """版本和提示注入都在检索之前返回。成功的正文补上版本句。"""
+    def ask(
+        self,
+        question: str,
+        history: list[dict[str, str]] | None = None,
+    ) -> str:
+        """版本和提示注入都在检索之前返回。检索只看这一句。"""
         refused = refusal_for(question)
         if refused is not None:
             return refused
@@ -56,16 +61,28 @@ class ElderBrainRag:
         if not parents:
             return NO_EVIDENCE
         if self.generation is None:
+            # 选型记录三把千问温度定在 0，配置里的 0.1 不用于这条短路径。
             self.generation = GenerationIntegrationModule(
-                self.config.temperature,
+                EXPERIMENT_TEMPERATURE,
                 self.config.max_tokens,
             )
-        return _prefix_answer(self.generation.answer(question, parents))
+        return _prefix_answer(self.generation.answer(question, parents, history))
 
     def _rerank(self, question: str, candidates: list[RagPiece]) -> list[RagPiece]:
         if self.reranker is None:
             self.reranker = load_text_reranker()
         return self.reranker.rerank(question, candidates)
+
+
+def _selected_rag() -> ElderBrainRag:
+    """命令行走 embedding-3 索引。默认目录仍是另一套嵌入，维度对不上。"""
+    from modules.api_embeddings import load_embedding3
+    from run_embedding3 import INDEX_DIR
+
+    embedder = load_embedding3()
+    rag = ElderBrainRag(RagConfig(index_dir=INDEX_DIR))
+    rag.index.embeddings = embedder
+    return rag
 
 
 def _chunk_sha256(path: Path) -> str:
@@ -97,7 +114,7 @@ def main() -> None:
     args = parser.parse_args()
     if _print_refusal(args.question):
         return
-    rag = ElderBrainRag()
+    rag = _selected_rag()
     count = rag.build_knowledge_base()
     print(f"已装入 {count} 个检索块")
     if not args.question:

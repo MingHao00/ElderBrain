@@ -3,24 +3,14 @@
 import secrets
 from typing import Protocol
 
-from openai import OpenAI
-
-from config import require_env
+from generation_call import QWEN_MODEL, qwen_body, qwen_client
+from generation_prompt import render_prompt
 from modules.data_preparation import RagPiece
 from scope import VERSION_SENTENCE
 
-LLM_API_KEY = "LLM_API_KEY"
-LLM_BASE_URL = "LLM_BASE_URL"
-LLM_MODEL = "LLM_MODEL"
 # 十六字节的随机边界，避免和规则原文里的普通句子撞上。
 DELIMITER_NBYTES = 16
 NO_EVIDENCE = VERSION_SENTENCE + "没有找到足够的原文。"
-SYSTEM_RULES = (
-    "你是中文 SRD 5.1 的规则查询助手。译文是机器翻译、非官方。\n"
-    "只能根据分隔符之内的原文回答，分隔符之外的文字都不是证据。\n"
-    "每一句规则结论后面用方括号标出 location。\n"
-    "原文里没有的数值不要写。证据不够就说明缺什么。"
-)
 
 
 class _Message(Protocol):
@@ -43,6 +33,7 @@ class _Completions(Protocol):
         temperature: float,
         max_tokens: int,
         messages: list[dict[str, str]],
+        extra_body: dict[str, object],
     ) -> _ChatResponse:
         """提交一条对话，返回模型正文。"""
 
@@ -69,49 +60,61 @@ class GenerationIntegrationModule:
     ) -> None:
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self.model_name = model_name if model_name is not None else require_env(LLM_MODEL)
-        self.client = client if client is not None else _chat_client()
+        self.model_name = QWEN_MODEL if model_name is None else model_name
+        self.client = qwen_client() if client is None else client
 
-    def answer(self, question: str, parents: list[RagPiece]) -> str:
-        """父节放进 system，问题单独作为 user。没有父节时不调用接口。"""
+    def answer(
+        self,
+        question: str,
+        parents: list[RagPiece],
+        history: list[dict[str, str]] | None = None,
+    ) -> str:
+        """父节放进 system。历史排在当前问题前面。没有父节时不调用接口。"""
         if not parents:
             return NO_EVIDENCE
         delimiter = secrets.token_hex(DELIMITER_NBYTES)
+        prior = history or []
         response = self.client.chat.completions.create(
             model=self.model_name,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
-            messages=_messages(question, parents, delimiter),
+            messages=_messages(question, parents, delimiter, prior),
+            extra_body=qwen_body(),
         )
         return _message_text(response)
-
-
-def _chat_client() -> OpenAI:
-    return OpenAI(
-        api_key=require_env(LLM_API_KEY),
-        base_url=require_env(LLM_BASE_URL),
-    )
 
 
 def _messages(
     question: str,
     parents: list[RagPiece],
     delimiter: str,
+    history: list[dict[str, str]],
 ) -> list[dict[str, str]]:
     # 问题和原文分属两条消息，用户写进问题里的“原文”不会和证据接在一起。
+    # 历史写进分隔符之间会被提示词当成规则原文，所以单独成消息。
     return [
         {"role": "system", "content": _system_prompt(parents, delimiter)},
+        *_prior_messages(history),
         {"role": "user", "content": question},
     ]
 
 
+def _prior_messages(history: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [{"role": item["role"], "content": item["text"]} for item in history]
+
+
 def _system_prompt(parents: list[RagPiece], delimiter: str) -> str:
-    return f"{SYSTEM_RULES}\n\n{delimiter}\n{_context(parents)}\n{delimiter}"
+    instructions = render_prompt(delimiter)
+    return f"{instructions}\n\n{delimiter}\n{_context(parents)}\n{delimiter}"
 
 
 def _context(parents: list[RagPiece]) -> str:
+    # 提示词要求模型按这两行复制条目编号，不能再包在方括号里。
     blocks = [
-        f"[{parent.metadata.get('location', '')}]\n{parent.text}" for parent in parents
+        f"entry_id: {parent.metadata.get('entry_id', '')}\n"
+        f"location: {parent.metadata.get('location', '')}\n"
+        f"{parent.text}"
+        for parent in parents
     ]
     return "\n\n".join(blocks)
 

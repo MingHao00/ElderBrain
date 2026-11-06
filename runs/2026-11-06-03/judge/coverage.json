@@ -1,0 +1,51 @@
+{
+  "judge_prompt_version": "2026-11-06-v1",
+  "sentence_count": 9,
+  "questions": [
+    {
+      "question_id": "L03",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 1
+    },
+    {
+      "question_id": "L09",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 4
+    },
+    {
+      "question_id": "M02",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "V01",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R03",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R07",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R10",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 3
+    },
+    {
+      "question_id": "R16",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 0
+    },
+    {
+      "question_id": "R20",
+      "model_name": "qwen3.7-flash-2026-07-15",
+      "cited_sentences": 1
+    }
+  ]
+}
