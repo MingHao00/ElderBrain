@@ -262,12 +262,23 @@ function clipTitle(text) {
   return text.slice(0, TITLE_LIMIT) + "…";
 }
 
+function csrfToken() {
+  if (typeof window.elderbrainCsrf === "function") {
+    return window.elderbrainCsrf();
+  }
+  return "";
+}
+
 function ask(session, messageText, history, serial) {
   typingIndicator.style.display = "flex";
   scrollDown();
   fetch(ASK_PATH, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken(),
+    },
     body: JSON.stringify({question: messageText, history: history}),
   }).then(function (response) {
     return response.json().then(function (payload) {

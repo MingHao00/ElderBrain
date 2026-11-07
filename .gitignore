@@ -4,3 +4,6 @@
 .venv/
 rag/vector_index/
 rag/vector_index_embedding3/
+rag/auth.sqlite
+rag/auth.sqlite-wal
+rag/auth.sqlite-shm

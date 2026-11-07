@@ -7,6 +7,7 @@
   <!-- 版式来自 GrowWithMehran/DeepSeek-Chat-Clone，MIT。见同目录 LICENSE。 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="auth.css">
 </head>
 <body>
   <div class="sidebar">
@@ -22,9 +23,26 @@
     </button>
     <div class="chat-history"></div>
     <div class="sidebar-footer">
-      <div class="user-profile">
-        <div class="user-avatar">本</div>
-        <div class="user-name">本机</div>
+      <div class="account-panel" id="accountPanel">
+        <div id="loggedOut">
+          <input id="loginEmail" type="email" placeholder="邮箱" autocomplete="username">
+          <button id="sendCodeButton" type="button">发送验证码</button>
+          <input id="loginCode" type="text" inputmode="numeric"
+            placeholder="验证码" autocomplete="one-time-code">
+          <button id="verifyCodeButton" type="button">登录</button>
+          <a class="account-link" id="githubLogin" href="/api/auth/github/start">GitHub 登录</a>
+          <div class="account-status" id="loginStatus"></div>
+        </div>
+        <div id="loggedIn" hidden>
+          <div class="user-profile">
+            <div class="user-avatar">登</div>
+            <div>
+              <div class="account-name">已登录</div>
+              <div class="account-role" id="accountRole"></div>
+            </div>
+          </div>
+          <button id="logoutButton" type="button">登出</button>
+        </div>
       </div>
     </div>
   </div>
@@ -65,6 +83,7 @@
       </div>
     </div>
   </div>
+  <script src="auth.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
