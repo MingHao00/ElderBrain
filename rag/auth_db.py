@@ -1,7 +1,8 @@
 """账号、拒绝名单和 OAuth state 的存储。
 
 以后换 PostgreSQL 时只换这一层，以及同样写 SQL 的 auth_credentials.py、
-auth_quota.py。上面的登录和令牌代码不写 SQL。占位符用 ?；换库时改成该驱动的占位符。
+auth_quota.py、audit_store.py。上面的登录和令牌代码不写 SQL。
+占位符用 ?；换库时改成该驱动的占位符。
 """
 
 from __future__ import annotations

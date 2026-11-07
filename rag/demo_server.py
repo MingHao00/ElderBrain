@@ -9,8 +9,17 @@ _RAG_DIR = Path(__file__).resolve().parent
 if str(_RAG_DIR) not in sys.path:
     sys.path.insert(0, str(_RAG_DIR))
 
+from audit_log import UNKNOWN_USER_ID, record_rejection, write_quietly
 from auth_app import AuthApp, open_auth
-from auth_constants import ERR_ANSWER_FAILED, PATH_ASK, PATH_QUERY, QUESTION_TOO_LONG
+from auth_constants import (
+    ERR_ANSWER_FAILED,
+    HTTP_BAD_REQUEST,
+    HTTP_UNPROCESSABLE,
+    PATH_ASK,
+    PATH_QUERY,
+    QUESTION_TOO_LONG,
+)
+from auth_db import AuthDb
 from auth_http import Incoming, Outgoing, json_error
 from auth_routes import route_api
 from config import REPO_ROOT
@@ -67,9 +76,20 @@ class DemoHandler(BaseHTTPRequestHandler):
         try:
             body = self._body()
         except ValueError as exc:
-            self._write(_body_error(path, str(exc)))
+            self._write(self._early_error(path, str(exc)))
             return
         self._write(self._routed(self._incoming(body)))
+
+    def _early_error(self, path: str, text: str) -> Outgoing:
+        """长度超限时正文还没读，审计只记请求头里的长度。"""
+        outgoing = _body_error(path, text)
+        if outgoing.status == HTTP_UNPROCESSABLE:
+            self._note_oversize(text, outgoing.status)
+        return outgoing
+
+    def _note_oversize(self, text: str, status: int) -> None:
+        raw = self.headers.get("Content-Length")
+        write_quietly(lambda: _record_oversize(self.auth.db, text, status, raw))
 
     def log_request(self, code: object = "-", size: object = "-") -> None:
         """查询串可能带授权码，日志只留路径。"""
@@ -127,8 +147,22 @@ class DemoHandler(BaseHTTPRequestHandler):
 
 
 def _body_error(path: str, text: str) -> Outgoing:
-    status = 422 if path in _ASK_PATHS and text == QUESTION_TOO_LONG else 400
+    status = HTTP_BAD_REQUEST
+    if path in _ASK_PATHS and text == QUESTION_TOO_LONG:
+        status = HTTP_UNPROCESSABLE
     return json_error(status, text)
+
+
+def _record_oversize(db: AuthDb, text: str, status: int, raw: str | None) -> None:
+    """失败由 write_quietly 接住，原来的 422 仍然返回。"""
+    record_rejection(db, UNKNOWN_USER_ID, status, text, _declared_length(raw))
+
+
+def _declared_length(value: str | None) -> int:
+    # 负数和超过上限都走这里。此时还不能读正文。
+    if value is None or value.strip() == "":
+        raise ValueError("缺少 Content-Length")
+    return int(value)
 
 
 def _report_failure(exc: Exception) -> None:

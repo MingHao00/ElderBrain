@@ -25,7 +25,14 @@ RESULT_ANSWER, RESULT_REFUSAL = "回答", "拒答"
 RESULT_TYPES = frozenset({RESULT_ANSWER, RESULT_REFUSAL})
 CITATION_PASSED = "通过"
 CITATION_PASSED_AFTER_RETRY, CITATION_FAILED = "重试后通过", "失败"
-CITATION_CHECKS = frozenset({CITATION_PASSED, CITATION_PASSED_AFTER_RETRY, CITATION_FAILED})
+# 引用校验还没接上提问。成功记录先记这个，不能写成「通过」。
+CITATION_UNCHECKED = "未校验"
+CITATION_CHECKS = frozenset({
+    CITATION_PASSED,
+    CITATION_PASSED_AFTER_RETRY,
+    CITATION_FAILED,
+    CITATION_UNCHECKED,
+})
 ACTION_CONNECT_SOURCE, ACTION_DISABLE_SOURCE = "接入来源", "停用来源"
 ACTION_PUBLISH, ACTION_ROLLBACK, ACTION_ADJUST_QUOTA = "发布", "回退", "调整配额"
 ADMIN_ACTIONS = frozenset({
@@ -88,9 +95,8 @@ def build_request_audit(
         FIELD_LANG: _text(lang, FIELD_LANG, False),
         FIELD_DETECTED_VERSION: _text(detected_version, FIELD_DETECTED_VERSION, True),
         FIELD_RESULT_TYPE: _choice(result_type, RESULT_TYPES, FIELD_RESULT_TYPE),
-        FIELD_REFUSAL_CLASS: _text(
-            refusal_class, FIELD_REFUSAL_CLASS, result_type != RESULT_REFUSAL,
-        ),
+        # 页面只有纯文本，拒答类别可能还没有。空字符串表示没拿到。
+        FIELD_REFUSAL_CLASS: _text(refusal_class, FIELD_REFUSAL_CLASS, True),
         FIELD_RETRIEVED: _retrieved(retrieved),
         FIELD_CITED: [
             _text(item, FIELD_ENTRY_ID, False)
