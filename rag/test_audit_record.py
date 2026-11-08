@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 
 from audit_record import (
     ADMIN_AUDIT_RETENTION_DAYS,
+    CITATION_UNCHECKED,
     IP_HASH_RETENTION_DAYS,
     KIND_ADMIN_AUDIT,
     KIND_IP_HASH,
@@ -142,6 +143,15 @@ class AuditRecordTests(unittest.TestCase):
     def test_illegal_admin_action_is_rejected(self) -> None:
         with self.assertRaises(AuditRecordRejected):
             build_admin_audit("admin-3", CREATED, "删除数据")
+
+    def test_unchecked_citation_is_allowed(self) -> None:
+        record = sample_request(citation_check=CITATION_UNCHECKED)
+        self.assertEqual(record["citation_check"], CITATION_UNCHECKED)
+
+    def test_refusal_without_class_is_allowed(self) -> None:
+        record = sample_request(result_type="拒答", refusal_class="")
+        self.assertEqual(record["result_type"], "拒答")
+        self.assertEqual(record["refusal_class"], "")
 
     def test_illegal_citation_check_is_rejected(self) -> None:
         with self.assertRaises(AuditRecordRejected):

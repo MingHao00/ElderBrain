@@ -85,6 +85,15 @@ MAIL_SUBJECT = "ElderBrain 验证码"
 SQLITE_TIMEOUT_SECONDS = 5
 AUTH_DB_NAME = "auth.sqlite"
 
+# 提问响应和审计共用这些状态码，避免两处各写一个数。
+HTTP_OK = 200
+HTTP_BAD_REQUEST = 400
+HTTP_UNAUTHORIZED = 401
+HTTP_FORBIDDEN = 403
+HTTP_UNPROCESSABLE = 422
+HTTP_TOO_MANY = 429
+HTTP_SERVER_ERROR = 500
+
 PATH_ASK = "/api/ask"
 PATH_QUERY = "/api/query"
 PATH_SESSION = "/api/auth/session"
