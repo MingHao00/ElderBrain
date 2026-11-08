@@ -10,8 +10,25 @@ if str(_RAG_DIR) not in sys.path:
 
 from dotenv import load_dotenv
 
-from config import REPO_ROOT, RagConfig
+from audit_record import (
+    CITATION_FAILED,
+    CITATION_PASSED,
+    CITATION_PASSED_AFTER_RETRY,
+    CITATION_UNCHECKED,
+)
+from citation_check import (
+    ATTEMPT_FIRST,
+    ATTEMPT_LAST,
+    OUTCOME_PASS,
+    OUTCOME_RETRY,
+    CitedSentence,
+    RetrievedParent,
+    citation_attempt_outcome,
+    citations_match,
+)
+from config import REPO_ROOT, RULE_VERSION, RagConfig
 from generation_call import EXPERIMENT_TEMPERATURE
+from generation_score import parse_generation
 from modules.data_preparation import DataPreparationModule, RagPiece
 from modules.generation import NO_EVIDENCE, GenerationIntegrationModule
 from modules.index_construction import IndexConstructionModule, file_sha256
@@ -20,6 +37,17 @@ from modules.text_rerank import TextReranker, load_text_reranker
 from scope import VERSION_SENTENCE, refusal_for
 
 load_dotenv(REPO_ROOT / ".env")
+
+
+class CitedReply(str):
+    """一次提问的页面文本。校验结果跟这次文本走，并发时不会串到下一问。"""
+
+    citation_check: str
+
+    def __new__(cls, text: str, citation_check: str) -> "CitedReply":
+        reply = str.__new__(cls, text)
+        reply.citation_check = citation_check
+        return reply
 
 
 class ElderBrainRag:
@@ -49,24 +77,52 @@ class ElderBrainRag:
         question: str,
         history: list[dict[str, str]] | None = None,
     ) -> str:
-        """版本和提示注入都在检索之前返回。检索只看这一句。"""
+        """版本和提示注入都在检索之前返回。检索只看这一句。
+
+        生成之后做引用校验。第一次对不上，用同一批父节再生成一次。
+        """
         refused = refusal_for(question)
         if refused is not None:
-            return refused
+            return _unchecked(refused)
         if self.retrieval is None:
             raise ValueError("请先构建知识库")
         candidates = self.retrieval.hybrid_search(question)
         ranked = self._rerank(question, candidates)[: self.config.top_k]
         parents = self.data.parent_sections(ranked)
         if not parents:
-            return NO_EVIDENCE
-        if self.generation is None:
-            # 选型记录三把千问温度定在 0，配置里的 0.1 不用于这条短路径。
-            self.generation = GenerationIntegrationModule(
-                EXPERIMENT_TEMPERATURE,
-                self.config.max_tokens,
-            )
-        return _prefix_answer(self.generation.answer(question, parents, history))
+            return _unchecked(NO_EVIDENCE)
+        return self._checked_generation(question, parents, history)
+
+    def _generation(self) -> GenerationIntegrationModule:
+        module = self.generation
+        if module is not None:
+            return module
+        # 选型记录三把千问温度定在 0，配置里的 0.1 不用于这条短路径。
+        module = GenerationIntegrationModule(
+            EXPERIMENT_TEMPERATURE,
+            self.config.max_tokens,
+        )
+        self.generation = module
+        return module
+
+    def _checked_generation(
+        self,
+        question: str,
+        parents: list[RagPiece],
+        history: list[dict[str, str]] | None,
+    ) -> str:
+        module = self._generation()
+        retrieved = _retrieved_parents(parents)
+        first = _one_try(
+            module, question, parents, history, retrieved, ATTEMPT_FIRST,
+        )
+        if first is not None:
+            return first
+        last = _one_try(
+            module, question, parents, history, retrieved, ATTEMPT_LAST,
+        )
+        assert last is not None
+        return last
 
     def _rerank(self, question: str, candidates: list[RagPiece]) -> list[RagPiece]:
         if self.reranker is None:
@@ -95,6 +151,98 @@ def _chunk_sha256(path: Path) -> str:
 def _prefix_answer(body: str) -> str:
     # 拒答和证据不足已经带版本句。这里只给模型正文补开头和空行。
     return f"{VERSION_SENTENCE}\n\n{body}"
+
+
+def _unchecked(text: str) -> CitedReply:
+    return CitedReply(text, CITATION_UNCHECKED)
+
+
+def _one_try(
+    module: GenerationIntegrationModule,
+    question: str,
+    parents: list[RagPiece],
+    history: list[dict[str, str]] | None,
+    retrieved: list[RetrievedParent] | None,
+    attempt: int,
+) -> str | None:
+    body = module.answer(question, parents, history)
+    outcome = citation_attempt_outcome(_body_passes(body, retrieved), attempt)
+    if outcome == OUTCOME_RETRY:
+        return None
+    if outcome == OUTCOME_PASS:
+        return _passed_reply(body, attempt)
+    return CitedReply(NO_EVIDENCE, CITATION_FAILED)
+
+
+def _passed_reply(body: str, attempt: int) -> CitedReply:
+    if attempt == ATTEMPT_FIRST:
+        return CitedReply(_prefix_answer(body), CITATION_PASSED)
+    return CitedReply(_prefix_answer(body), CITATION_PASSED_AFTER_RETRY)
+
+
+def _body_passes(body: str, retrieved: list[RetrievedParent] | None) -> bool:
+    # 解析不成句子就不能当成通过。模型不写版本句，版本用规则库常量和条目比。
+    sentences = _cited_sentences(body)
+    # 证据不足时的合法输出是空数组。citations_match 对空列表返回 True，必须在调用前判失败。
+    if not sentences or retrieved is None:
+        return False
+    try:
+        return citations_match(sentences, retrieved, RULE_VERSION)
+    except ValueError:
+        # 格式不被校验函数接受时，按这次失败走重试，不要把提问打成 500。
+        return False
+
+
+def _cited_sentences(body: str) -> list[CitedSentence] | None:
+    payload = parse_generation(body)
+    if payload is None:
+        return None
+    raw = payload.get("sentences")
+    if not isinstance(raw, list):
+        return None
+    return _sentence_list(raw)
+
+
+def _sentence_list(raw: list[object]) -> list[CitedSentence] | None:
+    sentences: list[CitedSentence] = []
+    for item in raw:
+        sentence = _one_sentence(item)
+        if sentence is None:
+            return None
+        sentences.append(sentence)
+    return sentences
+
+
+def _one_sentence(item: object) -> CitedSentence | None:
+    if not isinstance(item, dict):
+        return None
+    text = item.get("text")
+    entry_id = item.get("entry_id")
+    if not isinstance(text, str) or not text.strip():
+        return None
+    if entry_id is None:
+        return CitedSentence(text, None)
+    if isinstance(entry_id, str) and entry_id.strip():
+        return CitedSentence(text, entry_id)
+    return None
+
+
+def _retrieved_parents(parents: list[RagPiece]) -> list[RetrievedParent] | None:
+    retrieved: list[RetrievedParent] = []
+    for parent in parents:
+        item = _one_parent(parent)
+        if item is None:
+            return None
+        retrieved.append(item)
+    return retrieved
+
+
+def _one_parent(parent: RagPiece) -> RetrievedParent | None:
+    entry_id = parent.metadata.get("entry_id", "")
+    rule_version = parent.metadata.get("rule_version", "")
+    if not entry_id.strip() or not rule_version.strip():
+        return None
+    return RetrievedParent(entry_id, parent.text, rule_version)
 
 
 def _print_refusal(question: str) -> bool:

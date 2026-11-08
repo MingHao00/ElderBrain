@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from typing import Callable
 
 from audit_record import (
+    CITATION_CHECKS,
     CITATION_UNCHECKED,
     COUNT_MIN,
     FIELD_CREATED_AT,
@@ -52,9 +53,26 @@ NO_EVIDENCE_TEXT = VERSION_SENTENCE + "没有找到足够的原文。"
 _EMPTY_REASON = ""
 
 
-def record_answer(db: AuthDb, user_id: str, question: str, shown: str) -> None:
-    """成功提问写一条审计。检索和引用列表目前是空的。"""
-    # 现有回答只给页面纯文本。没跑的引用校验不能记成通过。
+def citation_on(shown: str) -> str:
+    """取出文本上的引用校验结果。普通字符串没跑过校验，保持未校验。"""
+    check = getattr(shown, "citation_check", CITATION_UNCHECKED)
+    if isinstance(check, str) and check in CITATION_CHECKS:
+        return check
+    return CITATION_UNCHECKED
+
+
+def record_answer(
+    db: AuthDb,
+    user_id: str,
+    question: str,
+    shown: str,
+    citation_check: str = CITATION_UNCHECKED,
+) -> None:
+    """成功提问写一条审计。检索和引用列表目前是空的。
+
+    没跑引用校验时保持未校验，不能记成通过。
+    """
+    # 调用方没跑校验时用默认值，不能把缺省记成通过。
     index_version, prompt_version, model_id, guard_version = _versions()
     record = build_request_audit(
         _request_id(),
@@ -67,7 +85,7 @@ def record_answer(db: AuthDb, user_id: str, question: str, shown: str) -> None:
         UNKNOWN_REFUSAL_CLASS,
         [],
         [],
-        CITATION_UNCHECKED,
+        citation_check,
         index_version,
         prompt_version,
         model_id,

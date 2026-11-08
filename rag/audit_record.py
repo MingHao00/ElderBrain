@@ -25,7 +25,7 @@ RESULT_ANSWER, RESULT_REFUSAL = "回答", "拒答"
 RESULT_TYPES = frozenset({RESULT_ANSWER, RESULT_REFUSAL})
 CITATION_PASSED = "通过"
 CITATION_PASSED_AFTER_RETRY, CITATION_FAILED = "重试后通过", "失败"
-# 引用校验还没接上提问。成功记录先记这个，不能写成「通过」。
+# 没跑引用校验的成功记录用这个，不能写成「通过」。
 CITATION_UNCHECKED = "未校验"
 CITATION_CHECKS = frozenset({
     CITATION_PASSED,

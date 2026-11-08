@@ -6,6 +6,7 @@ from typing import Callable
 
 from auth_app import AuthApp
 from audit_log import (
+    citation_on,
     error_text,
     record_answer,
     record_limited,
@@ -104,7 +105,12 @@ def _charge(
         _report(on_failure, exc)
         return json_error(HTTP_SERVER_ERROR, ERR_ANSWER_FAILED)
     response = json_response(HTTP_OK, {"answer": shown})
-    write_quietly(lambda: record_answer(app.db, visitor.user_id, question, shown))
+    check = citation_on(shown)
+    write_quietly(
+        lambda: record_answer(
+            app.db, visitor.user_id, question, shown, check,
+        ),
+    )
     return response
 
 

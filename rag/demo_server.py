@@ -9,7 +9,7 @@ _RAG_DIR = Path(__file__).resolve().parent
 if str(_RAG_DIR) not in sys.path:
     sys.path.insert(0, str(_RAG_DIR))
 
-from audit_log import UNKNOWN_USER_ID, record_rejection, write_quietly
+from audit_log import UNKNOWN_USER_ID, citation_on, record_rejection, write_quietly
 from auth_app import AuthApp, open_auth
 from auth_constants import (
     ERR_ANSWER_FAILED,
@@ -25,7 +25,7 @@ from auth_routes import route_api
 from config import REPO_ROOT
 from demo_answer import MAX_BODY_BYTES, present_answer
 from run_generation_experiment import _public_error
-from system import ElderBrainRag, _selected_rag
+from system import CitedReply, ElderBrainRag, _selected_rag
 
 WEB_DIR = REPO_ROOT / "web"
 HOST = "127.0.0.1"
@@ -108,7 +108,9 @@ class DemoHandler(BaseHTTPRequestHandler):
             return json_error(500, ERR_ANSWER_FAILED)
 
     def _answer(self, question: str, history: list[dict[str, str]]) -> str:
-        return present_answer(self.rag.ask(question, history))
+        raw = self.rag.ask(question, history)
+        # 页面文本是新字符串。校验结果要跟着这次回答，不能在格式化时丢掉。
+        return CitedReply(present_answer(raw), citation_on(raw))
 
     def _incoming(self, body: bytes) -> Incoming:
         parsed = urlparse(self.path)
