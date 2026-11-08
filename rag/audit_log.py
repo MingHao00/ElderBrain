@@ -61,16 +61,37 @@ def citation_on(shown: str) -> str:
     return CITATION_UNCHECKED
 
 
+# 一次生成只带输入和输出两个 token 数。
+_USAGE_WIDTH = 2
+
+
+def usages_on(shown: str) -> tuple[tuple[int, int], ...]:
+    """取出各次生成的输入和输出 token。没跑生成时是空元组。"""
+    found = getattr(shown, "usages", ())
+    if not isinstance(found, tuple):
+        return ()
+    pairs: list[tuple[int, int]] = []
+    for item in found:
+        pair = _usage_pair(item)
+        if pair is not None:
+            pairs.append(pair)
+    return tuple(pairs)
+
+
 def record_answer(
     db: AuthDb,
     user_id: str,
     question: str,
     shown: str,
     citation_check: str = CITATION_UNCHECKED,
+    tokens_in: int = COUNT_MIN,
+    tokens_out: int = COUNT_MIN,
+    cost_estimate: float = COUNT_MIN,
 ) -> None:
     """成功提问写一条审计。检索和引用列表目前是空的。
 
     没跑引用校验时保持未校验，不能记成通过。
+    没跑生成时 token 和费用保持 0。
     """
     # 调用方没跑校验时用默认值，不能把缺省记成通过。
     index_version, prompt_version, model_id, guard_version = _versions()
@@ -90,10 +111,9 @@ def record_answer(
         prompt_version,
         model_id,
         guard_version,
-        # token 和费用现有回答不返回，先记 0。
-        COUNT_MIN,
-        COUNT_MIN,
-        COUNT_MIN,
+        tokens_in,
+        tokens_out,
+        cost_estimate,
         _unmeasured_latency(),
     )
     _store_answer(db, record)
@@ -160,6 +180,23 @@ def write_quietly(write: Callable[[], None]) -> None:
         write()
     except Exception as exc:
         _log_failure(exc)
+
+
+def _usage_pair(item: object) -> tuple[int, int] | None:
+    if not isinstance(item, tuple) or len(item) != _USAGE_WIDTH:
+        return None
+    prompt, completion = item
+    if not _usage_count(prompt) or not _usage_count(completion):
+        return None
+    return prompt, completion
+
+
+def _usage_count(value: object) -> bool:
+    return (
+        isinstance(value, int)
+        and not isinstance(value, bool)
+        and value >= COUNT_MIN
+    )
 
 
 def _store_answer(db: AuthDb, record: dict[str, object]) -> None:

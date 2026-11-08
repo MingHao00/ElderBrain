@@ -18,6 +18,7 @@ from auth_constants import (
     QUOTA_MINUTE,
     QUOTA_SITE,
     SHANGHAI_TZ,
+    SITE_DAILY_ALERT_MICRO,
     SITE_DAILY_CAP_MICRO,
 )
 from auth_db import AuthDb
@@ -74,6 +75,22 @@ def release_quota(db: AuthDb, event_id: int) -> None:
         )
 
 
+def settle_cost(db: AuthDb, event_id: int, cost_micro: int) -> bool:
+    """把这次占位的费用改成实际微元。费用为负时抛出 ValueError。
+
+    当日累计从告警线以下跨到线上时，同一事务记下今天已告警。
+    返回值表示事务提交后要不要发信。调用方发信失败不能回滚这笔费用。
+    """
+    if cost_micro < 0:
+        raise ValueError("费用不能为负")
+    with db.immediate() as conn:
+        asked_at = _open_asked_at(conn, event_id)
+        if asked_at is None:
+            return False
+        _set_cost(conn, event_id, cost_micro)
+        return _mark_if_crossed(conn, asked_at, cost_micro)
+
+
 def open_uses(db: AuthDb, user_id: str) -> int:
     """还没退回的次数。测试用来确认空问题没有扣次。"""
     with db.immediate() as conn:
@@ -105,7 +122,7 @@ def format_shanghai(timestamp: int) -> str:
 
 
 def yuan_to_micro(yuan: int) -> int:
-    """测试用整数元换算。运行路径目前只记 0 元。"""
+    """测试用整数元换算。分以下的生成费用要四舍五入，不能用这个函数。"""
     return yuan * MICRO_PER_YUAN
 
 
@@ -153,6 +170,45 @@ def _minute_denial(conn: sqlite3.Connection, user_id: str, now: int) -> QuotaDen
 
 
 def _site_denial(conn: sqlite3.Connection, day_start: int, day_end: int) -> QuotaDeny | None:
+    if _spent_between(conn, day_start, day_end) < SITE_DAILY_CAP_MICRO:
+        return None
+    return QuotaDeny(QUOTA_SITE, day_end)
+
+
+def _open_asked_at(conn: sqlite3.Connection, event_id: int) -> int | None:
+    row = conn.execute(
+        "SELECT asked_at, released FROM quota_uses WHERE id = ?",
+        (event_id,),
+    ).fetchone()
+    # 已经退回的一次不能再记费用，否则失败调用仍会抬高当日累计。
+    if row is None or int(row["released"]) != 0:
+        return None
+    return int(row["asked_at"])
+
+
+def _set_cost(conn: sqlite3.Connection, event_id: int, cost_micro: int) -> None:
+    conn.execute(
+        "UPDATE quota_uses SET cost_micro = ? WHERE id = ?",
+        (cost_micro, event_id),
+    )
+
+
+def _mark_if_crossed(
+    conn: sqlite3.Connection,
+    asked_at: int,
+    cost_micro: int,
+) -> bool:
+    day_start, day_end = _day_bounds(asked_at)
+    total = _spent_between(conn, day_start, day_end)
+    # 这一行已经写进合计。减去它才是跨线前的累计。
+    before = total - cost_micro
+    crossed = before < SITE_DAILY_ALERT_MICRO <= total
+    if not crossed:
+        return False
+    return _insert_alert(conn, day_start)
+
+
+def _spent_between(conn: sqlite3.Connection, day_start: int, day_end: int) -> int:
     row = conn.execute(
         """
         SELECT COALESCE(SUM(cost_micro), 0) FROM quota_uses
@@ -160,9 +216,19 @@ def _site_denial(conn: sqlite3.Connection, day_start: int, day_end: int) -> Quot
         """,
         (day_start, day_end),
     ).fetchone()
-    if int(row[0]) < SITE_DAILY_CAP_MICRO:
-        return None
-    return QuotaDeny(QUOTA_SITE, day_end)
+    return int(row[0])
+
+
+def _insert_alert(conn: sqlite3.Connection, day_start: int) -> bool:
+    # 主键是这一北京时间日的起点。并发时后写入的一方插不进去，就不再发信。
+    try:
+        conn.execute(
+            "INSERT INTO site_cost_alerts (day_start) VALUES (?)",
+            (day_start,),
+        )
+    except sqlite3.IntegrityError:
+        return False
+    return True
 
 
 def _daily_resume(created_at: int, now: int, used: int, next_midnight: int) -> int:

@@ -13,11 +13,13 @@ from auth_mail import send_code_mail
 
 @dataclass
 class AuthApp:
-    """一次进程里的登录依赖。测试可以换掉发信和 GitHub。"""
+    """一次进程里的登录依赖。测试可以换掉发信、GitHub 和费用告警。"""
 
     db: AuthDb
     mailer: Callable[[str, str], None]
     github: GithubTransport | None = None
+    # 缺省走告警邮局。测试注入后不连接 SMTP。
+    alert_deliver: Callable[[str, str], None] | None = None
 
 
 def open_auth(path: Path | None = None) -> AuthApp:

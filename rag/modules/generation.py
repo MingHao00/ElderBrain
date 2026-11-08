@@ -11,6 +11,8 @@ from scope import VERSION_SENTENCE
 # 十六字节的随机边界，避免和规则原文里的普通句子撞上。
 DELIMITER_NBYTES = 16
 NO_EVIDENCE = VERSION_SENTENCE + "没有找到足够的原文。"
+# 厂商没给用量时不估 token。记 0，回答仍然返回。
+MISSING_TOKEN_COUNT = 0
 
 
 class _Message(Protocol):
@@ -48,6 +50,24 @@ class ChatClient(Protocol):
     chat: _ChatCalls
 
 
+class GeneratedText(str):
+    """模型正文。用量缺字段时两个数都是 0，调用方不必再猜。"""
+
+    prompt_tokens: int
+    completion_tokens: int
+
+    def __new__(
+        cls,
+        text: str,
+        prompt_tokens: int,
+        completion_tokens: int,
+    ) -> "GeneratedText":
+        value = str.__new__(cls, text)
+        value.prompt_tokens = prompt_tokens
+        value.completion_tokens = completion_tokens
+        return value
+
+
 class GenerationIntegrationModule:
     """生成只在检索之后调用。"""
 
@@ -81,7 +101,10 @@ class GenerationIntegrationModule:
             messages=_messages(question, parents, delimiter, prior),
             extra_body=qwen_body(),
         )
-        return _message_text(response)
+        text = _message_text(response)
+        # 缺用量时两个数都是 0。不能编造，也不能把已经生成的正文变成失败。
+        prompt, completion = _usage_tokens(response)
+        return GeneratedText(text, prompt, completion)
 
 
 def _messages(
@@ -117,6 +140,36 @@ def _context(parents: list[RagPiece]) -> str:
         for parent in parents
     ]
     return "\n\n".join(blocks)
+
+
+def _usage_tokens(response: object) -> tuple[int, int]:
+    usage = getattr(response, "usage", None)
+    return (
+        _one_token(usage, "prompt_tokens"),
+        _one_token(usage, "completion_tokens"),
+    )
+
+
+def _one_token(usage: object, name: str) -> int:
+    raw = _usage_field(usage, name)
+    if isinstance(raw, bool) or not isinstance(raw, int) or raw < 0:
+        return MISSING_TOKEN_COUNT
+    return raw
+
+
+def _usage_field(usage: object, name: str) -> object:
+    if usage is None:
+        return None
+    if isinstance(usage, dict):
+        return usage.get(name)
+    value = getattr(usage, name, None)
+    # 0 是合法用量。只有字段真的缺了，才去看 model_dump。
+    if value is not None or not hasattr(usage, "model_dump"):
+        return value
+    dumped = usage.model_dump()
+    if isinstance(dumped, dict):
+        return dumped.get(name)
+    return None
 
 
 def _message_text(response: _ChatResponse) -> str:

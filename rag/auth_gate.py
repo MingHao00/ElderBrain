@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import sys
 from typing import Callable
 
+from alert_mail import send_alert_mail
 from auth_app import AuthApp
 from audit_log import (
     citation_on,
@@ -12,10 +14,13 @@ from audit_log import (
     record_limited,
     record_unauthorized,
     record_unprocessable,
+    usages_on,
     write_quietly,
 )
 from auth_constants import (
     ASK_COST_MICRO,
+    COST_ALERT_BODY,
+    COST_ALERT_SUBJECT,
     ERR_ANSWER_FAILED,
     ERR_FORBIDDEN,
     ERR_UNAUTHORIZED,
@@ -26,14 +31,25 @@ from auth_constants import (
     HTTP_TOO_MANY,
     HTTP_UNAUTHORIZED,
     HTTP_UNPROCESSABLE,
+    MICRO_PER_YUAN,
     PATH_ASK,
     PATH_QUERY,
     UNPROCESSABLE_QUESTIONS,
 )
 from auth_http import Incoming, Outgoing, csrf_ok, json_error, json_response
-from auth_quota import QuotaDeny, quota_message, release_quota, reserve_quota
+from auth_quota import (
+    QuotaDeny,
+    quota_message,
+    release_quota,
+    reserve_quota,
+    settle_cost,
+)
 from auth_session import Visitor, bearer_visitor, now_seconds, session_visitor
 from demo_answer import read_turn
+from generation_call import qwen_yuan
+
+# 异常参数可能带邮局密码或收件地址，所以失败日志只留类型名。
+ALERT_SEND_FAILED = "费用告警没有发出"
 
 AnswerFn = Callable[[str, list[dict[str, str]]], str]
 FailFn = Callable[[Exception], None]
@@ -104,14 +120,60 @@ def _charge(
         release_quota(app.db, reserved.event_id)
         _report(on_failure, exc)
         return json_error(HTTP_SERVER_ERROR, ERR_ANSWER_FAILED)
-    response = json_response(HTTP_OK, {"answer": shown})
+    _book(app, reserved.event_id, visitor.user_id, question, shown)
+    return json_response(HTTP_OK, {"answer": shown})
+
+
+def _book(
+    app: AuthApp,
+    event_id: int,
+    user_id: str,
+    question: str,
+    shown: str,
+) -> None:
+    prompt, completion, yuan, micro = _priced(shown)
+    # 费用先提交。发信失败不能把已经给出的回答改成 500，也不能再发一封。
+    if settle_cost(app.db, event_id, micro):
+        _send_cost_alert(app)
     check = citation_on(shown)
     write_quietly(
         lambda: record_answer(
-            app.db, visitor.user_id, question, shown, check,
+            app.db,
+            user_id,
+            question,
+            shown,
+            check,
+            prompt,
+            completion,
+            yuan,
         ),
     )
-    return response
+
+
+def _priced(shown: str) -> tuple[int, int, float, int]:
+    """按每次生成的输入长度分档计价，再把费用相加。"""
+    prompt = 0
+    completion = 0
+    yuan = 0.0
+    micro = 0
+    for call_prompt, call_completion in usages_on(shown):
+        call_yuan = qwen_yuan(call_prompt, call_completion)
+        prompt += call_prompt
+        completion += call_completion
+        yuan += call_yuan
+        micro += round(call_yuan * MICRO_PER_YUAN)
+    return prompt, completion, yuan, micro
+
+
+def _send_cost_alert(app: AuthApp) -> None:
+    try:
+        send_alert_mail(
+            COST_ALERT_SUBJECT,
+            COST_ALERT_BODY,
+            deliver=app.alert_deliver,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"{ALERT_SEND_FAILED} {type(exc).__name__}\n")
 
 
 def _turn(body: bytes) -> Outgoing | tuple[str, list[dict[str, str]]]:

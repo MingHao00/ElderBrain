@@ -41,7 +41,17 @@ MINUTE_WINDOW_SECONDS = 60
 SITE_DAILY_CAP_YUAN = 21
 MICRO_PER_YUAN = 1_000_000
 SITE_DAILY_CAP_MICRO = SITE_DAILY_CAP_YUAN * MICRO_PER_YUAN
-# 现有生成路径不返回 token 费用，接入后先记 0 元。
+# 达到全站每日上限的这个百分比时告警一次。整数除法得到恰好 16.8 元。
+SITE_DAILY_ALERT_PERCENT = 80
+ALERT_PERCENT_SCALE = 100
+SITE_DAILY_ALERT_MICRO = (
+    SITE_DAILY_CAP_MICRO * SITE_DAILY_ALERT_PERCENT // ALERT_PERCENT_SCALE
+)
+COST_ALERT_SUBJECT = f"当日模型费用已达上限的 {SITE_DAILY_ALERT_PERCENT}%"
+COST_ALERT_BODY = (
+    f"全站当日模型费用已达到每日上限的 {SITE_DAILY_ALERT_PERCENT}%。"
+)
+# 提问前先按 0 占位。回答成功后再写成厂商 token 算出的费用。
 ASK_COST_MICRO = 0
 
 # 同时有效的密钥上限。要新建必须先吊销，以后可以改这个数。

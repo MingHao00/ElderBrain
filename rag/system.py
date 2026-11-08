@@ -30,7 +30,7 @@ from config import REPO_ROOT, RULE_VERSION, RagConfig
 from generation_call import EXPERIMENT_TEMPERATURE
 from generation_score import parse_generation
 from modules.data_preparation import DataPreparationModule, RagPiece
-from modules.generation import NO_EVIDENCE, GenerationIntegrationModule
+from modules.generation import MISSING_TOKEN_COUNT, NO_EVIDENCE, GenerationIntegrationModule
 from modules.index_construction import IndexConstructionModule, file_sha256
 from modules.retrieval import RetrievalOptimizationModule
 from modules.text_rerank import TextReranker, load_text_reranker
@@ -40,13 +40,20 @@ load_dotenv(REPO_ROOT / ".env")
 
 
 class CitedReply(str):
-    """一次提问的页面文本。校验结果跟这次文本走，并发时不会串到下一问。"""
+    """一次提问的页面文本。校验结果和各次生成用量跟这次文本走。"""
 
     citation_check: str
+    usages: tuple[tuple[int, int], ...]
 
-    def __new__(cls, text: str, citation_check: str) -> "CitedReply":
+    def __new__(
+        cls,
+        text: str,
+        citation_check: str,
+        usages: tuple[tuple[int, int], ...] = (),
+    ) -> "CitedReply":
         reply = str.__new__(cls, text)
         reply.citation_check = citation_check
+        reply.usages = usages
         return reply
 
 
@@ -113,16 +120,14 @@ class ElderBrainRag:
     ) -> str:
         module = self._generation()
         retrieved = _retrieved_parents(parents)
-        first = _one_try(
-            module, question, parents, history, retrieved, ATTEMPT_FIRST,
+        first_text, first_use = _generate(module, question, parents, history)
+        judged = _judged(first_text, retrieved, ATTEMPT_FIRST, (first_use,))
+        if judged is not None:
+            return judged
+        second_text, second_use = _generate(module, question, parents, history)
+        return _finished(
+            _judged(second_text, retrieved, ATTEMPT_LAST, (first_use, second_use)),
         )
-        if first is not None:
-            return first
-        last = _one_try(
-            module, question, parents, history, retrieved, ATTEMPT_LAST,
-        )
-        assert last is not None
-        return last
 
     def _rerank(self, question: str, candidates: list[RagPiece]) -> list[RagPiece]:
         if self.reranker is None:
@@ -157,27 +162,58 @@ def _unchecked(text: str) -> CitedReply:
     return CitedReply(text, CITATION_UNCHECKED)
 
 
-def _one_try(
+def _generate(
     module: GenerationIntegrationModule,
     question: str,
     parents: list[RagPiece],
     history: list[dict[str, str]] | None,
+) -> tuple[str, tuple[int, int]]:
+    body = module.answer(question, parents, history)
+    return body, _token_pair(body)
+
+
+def _token_pair(body: str) -> tuple[int, int]:
+    return (
+        _token_count(getattr(body, "prompt_tokens", MISSING_TOKEN_COUNT)),
+        _token_count(getattr(body, "completion_tokens", MISSING_TOKEN_COUNT)),
+    )
+
+
+def _token_count(value: object) -> int:
+    # 缺字段或类型不对时记 0。不能编造，也不能因此让这次提问失败。
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return MISSING_TOKEN_COUNT
+    return value
+
+
+def _judged(
+    body: str,
     retrieved: list[RetrievedParent] | None,
     attempt: int,
+    usages: tuple[tuple[int, int], ...],
 ) -> str | None:
-    body = module.answer(question, parents, history)
     outcome = citation_attempt_outcome(_body_passes(body, retrieved), attempt)
     if outcome == OUTCOME_RETRY:
         return None
     if outcome == OUTCOME_PASS:
-        return _passed_reply(body, attempt)
-    return CitedReply(NO_EVIDENCE, CITATION_FAILED)
+        return _passed_reply(body, attempt, usages)
+    return CitedReply(NO_EVIDENCE, CITATION_FAILED, usages)
 
 
-def _passed_reply(body: str, attempt: int) -> CitedReply:
+def _finished(reply: str | None) -> str:
+    # 第二次不会再要求重试。断言只防止校验函数以后改出口径。
+    assert reply is not None
+    return reply
+
+
+def _passed_reply(
+    body: str,
+    attempt: int,
+    usages: tuple[tuple[int, int], ...],
+) -> CitedReply:
     if attempt == ATTEMPT_FIRST:
-        return CitedReply(_prefix_answer(body), CITATION_PASSED)
-    return CitedReply(_prefix_answer(body), CITATION_PASSED_AFTER_RETRY)
+        return CitedReply(_prefix_answer(body), CITATION_PASSED, usages)
+    return CitedReply(_prefix_answer(body), CITATION_PASSED_AFTER_RETRY, usages)
 
 
 def _body_passes(body: str, retrieved: list[RetrievedParent] | None) -> bool:

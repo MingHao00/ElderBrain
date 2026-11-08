@@ -77,6 +77,10 @@ CREATE TABLE IF NOT EXISTS quota_uses (
     cost_micro INTEGER NOT NULL,
     released INTEGER NOT NULL
 );
+-- 一天一行。和费用写在同一事务里，挡住同一天的第二封告警。
+CREATE TABLE IF NOT EXISTS site_cost_alerts (
+    day_start INTEGER PRIMARY KEY
+);
 """
 
 
