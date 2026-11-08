@@ -7,13 +7,11 @@ from generation_score import parse_generation
 MAX_QUESTION_CHARS = 2_000
 MAX_HISTORY_MESSAGES = 8
 MAX_HISTORY_CHARS = 2_000
-# 满额中文问题和历史按 UTF-8 三字节计，再留 JSON 外壳。
+# 历史字段已不再使用，但请求里仍可能夹带。上限沿用原来的预算，避免一次读进过大的 JSON。
 _UTF8_BYTES_PER_CHAR = 3
 _JSON_OVERHEAD_BYTES = 4_096
 _MAX_TEXT_CHARS = MAX_QUESTION_CHARS + MAX_HISTORY_MESSAGES * MAX_HISTORY_CHARS
 MAX_BODY_BYTES = _MAX_TEXT_CHARS * _UTF8_BYTES_PER_CHAR + _JSON_OVERHEAD_BYTES
-# 页面不能提交 system，否则会在原文区外再塞一条系统说明。
-_HISTORY_ROLES = frozenset({"user", "assistant"})
 REFUSAL_LINES = {
     "R1": "所问内容不在已收录的中文 SRD 5.1 里。",
     "R2": "原文不够，写不出这条规则。",
@@ -24,16 +22,16 @@ REFUSAL_LINES = {
 
 def read_question(raw: bytes) -> str:
     """从 JSON 正文取出问题。过长或空问题直接拒绝。"""
-    question, _history = read_turn(raw)
+    question, _conversation_id = read_turn(raw)
     return question
 
 
-def read_turn(raw: bytes) -> tuple[str, list[dict[str, str]]]:
-    """取出问题和可选历史。缺省或空数组表示没有上一句。"""
+def read_turn(raw: bytes) -> tuple[str, str | None]:
+    """取出当前问题和可选的对话编号。历史字段即使带上也不使用。"""
     if len(raw) > MAX_BODY_BYTES:
         raise ValueError("问题太长")
     payload = _object(raw)
-    return _question_text(payload), _history(payload)
+    return _question_text(payload), _conversation_id(payload)
 
 
 def _question_text(payload: dict[str, object]) -> str:
@@ -46,30 +44,15 @@ def _question_text(payload: dict[str, object]) -> str:
     return text
 
 
-def _history(payload: dict[str, object]) -> list[dict[str, str]]:
-    raw = payload.get("history", [])
-    if not isinstance(raw, list):
-        raise ValueError("历史无效")
-    if len(raw) > MAX_HISTORY_MESSAGES:
-        raise ValueError("历史太长")
-    return [_history_item(item) for item in raw]
-
-
-def _history_item(item: object) -> dict[str, str]:
-    if not isinstance(item, dict):
-        raise ValueError("历史无效")
-    role = item.get("role")
-    text = item.get("text")
-    if not isinstance(role, str) or role not in _HISTORY_ROLES:
-        raise ValueError("历史无效")
-    if not isinstance(text, str):
-        raise ValueError("历史无效")
-    cleaned = text.strip()
-    if not cleaned:
-        raise ValueError("历史无效")
-    if len(cleaned) > MAX_HISTORY_CHARS:
-        raise ValueError("历史太长")
-    return {"role": role, "text": cleaned}
+def _conversation_id(payload: dict[str, object]) -> str | None:
+    # 空字符串和别的类型都当成没带编号，由服务端新建。不接受客户端自己编号。
+    raw = payload.get("conversation_id")
+    if not isinstance(raw, str):
+        return None
+    text = raw.strip()
+    if not text:
+        return None
+    return text
 
 
 def present_answer(raw: str) -> str:

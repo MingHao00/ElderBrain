@@ -31,6 +31,7 @@ from auth_routes import route_api
 from config import REPO_ROOT
 from demo_answer import MAX_BODY_BYTES, present_answer
 from run_generation_experiment import _public_error
+from session_card import SessionCard
 from system import CitedReply, ElderBrainRag, _selected_rag
 
 WEB_DIR = REPO_ROOT / "web"
@@ -62,6 +63,10 @@ class DemoHandler(BaseHTTPRequestHandler):
 
     rag: ElderBrainRag
     auth: AuthApp
+
+    def do_DELETE(self) -> None:
+        """删除一场对话。编号在路径里，不读正文。"""
+        self._write(self._routed(self._incoming(b"")))
 
     def do_GET(self) -> None:
         """静态页，以及会话和 GitHub 跳转。"""
@@ -113,10 +118,12 @@ class DemoHandler(BaseHTTPRequestHandler):
             _report_failure(exc)
             return json_error(500, ERR_ANSWER_FAILED)
 
-    def _answer(self, question: str, history: list[dict[str, str]]) -> str:
-        raw = self.rag.ask(question, history)
-        # 页面文本是新字符串。校验结果和各次用量要跟着这次回答。
-        return CitedReply(present_answer(raw), citation_on(raw), usages_on(raw))
+    def _answer(self, question: str, card: SessionCard) -> str:
+        raw = self.rag.ask(question, card)
+        # 页面文本是新字符串。校验、用量和已经通过的句子仍属于这一次。
+        shown = CitedReply(present_answer(raw), citation_on(raw), usages_on(raw))
+        _carry(shown, raw)
+        return shown
 
     def _incoming(self, body: bytes) -> Incoming:
         parsed = urlparse(self.path)
@@ -152,6 +159,14 @@ class DemoHandler(BaseHTTPRequestHandler):
             self.send_header(key, value)
         self.end_headers()
         self.wfile.write(body)
+
+
+def _carry(shown: CitedReply, raw: str) -> None:
+    """校验后的句子跟页面文本走。失败时这些字段是空的，不能把原句补回去。"""
+    shown.sentences = tuple(getattr(raw, "sentences", ()) or ())
+    shown.citations = tuple(getattr(raw, "citations", ()) or ())
+    shown.refusal_category = getattr(raw, "refusal_category", None)
+    shown.card_update = getattr(raw, "card_update", None)
 
 
 def _body_error(path: str, text: str) -> Outgoing:

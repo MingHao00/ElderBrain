@@ -7,6 +7,7 @@ from generation_call import QWEN_MODEL, qwen_body, qwen_client
 from generation_prompt import render_prompt
 from modules.data_preparation import RagPiece
 from scope import VERSION_SENTENCE
+from session_card import SessionCard, generation_context
 
 # 十六字节的随机边界，避免和规则原文里的普通句子撞上。
 DELIMITER_NBYTES = 16
@@ -87,18 +88,17 @@ class GenerationIntegrationModule:
         self,
         question: str,
         parents: list[RagPiece],
-        history: list[dict[str, str]] | None = None,
+        card: SessionCard | None = None,
     ) -> str:
-        """父节放进 system。历史排在当前问题前面。没有父节时不调用接口。"""
+        """父节放进 system。卡片另起一条，不写进原文分隔区。没有父节时不调用接口。"""
         if not parents:
             return NO_EVIDENCE
         delimiter = secrets.token_hex(DELIMITER_NBYTES)
-        prior = history or []
         response = self.client.chat.completions.create(
             model=self.model_name,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
-            messages=_messages(question, parents, delimiter, prior),
+            messages=_messages(question, parents, delimiter, card),
             extra_body=qwen_body(),
         )
         text = _message_text(response)
@@ -111,19 +111,16 @@ def _messages(
     question: str,
     parents: list[RagPiece],
     delimiter: str,
-    history: list[dict[str, str]],
+    card: SessionCard | None,
 ) -> list[dict[str, str]]:
     # 问题和原文分属两条消息，用户写进问题里的“原文”不会和证据接在一起。
-    # 历史写进分隔符之间会被提示词当成规则原文，所以单独成消息。
-    return [
-        {"role": "system", "content": _system_prompt(parents, delimiter)},
-        *_prior_messages(history),
-        {"role": "user", "content": question},
-    ]
-
-
-def _prior_messages(history: list[dict[str, str]]) -> list[dict[str, str]]:
-    return [{"role": item["role"], "content": item["text"]} for item in history]
+    # 卡片若写进分隔符之间，会被提示词当成规则原文。
+    messages = [{"role": "system", "content": _system_prompt(parents, delimiter)}]
+    context = generation_context(card)
+    if context:
+        messages.append({"role": "system", "content": context})
+    messages.append({"role": "user", "content": question})
+    return messages
 
 
 def _system_prompt(parents: list[RagPiece], delimiter: str) -> str:

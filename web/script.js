@@ -6,25 +6,27 @@ const chatTitle = document.querySelector(".chat-title");
 const chatHistory = document.querySelector(".chat-history");
 const greetingMessage = document.getElementById("greetingMessage");
 const ASK_PATH = "/api/ask";
+const CONVERSATIONS_PATH = "/api/conversations";
 const TITLE_LIMIT = 24;
-const STORAGE_KEY = "elderbrain.sessions";
 const UNTITLED = "新对话";
-// 与服务端历史上限一致。超限的请求会被整段拒绝，对话就再也发不出去。
-const MAX_HISTORY_MESSAGES = 8;
-const MAX_HISTORY_CHARS = 2000;
 const MAX_QUESTION_CHARS = 2000;
 const QUESTION_TOO_LONG = "问题太长";
 const ANSWER_FAILED = "回答失败";
 const OFFLINE_NOTICE = "连不上本机服务。";
+const DELETE_FAILED = "没有删除这场对话。";
 
-let sessions = [];
+let conversations = [];
+let messages = [];
 let currentId = "";
-let pendingSerial = 0;
+let viewToken = 0;
+let inflightToken = 0;
+let streamBody = null;
+let streamParts = [];
 
 messageInput.addEventListener("input", function () {
   this.style.height = "auto";
   this.style.height = this.scrollHeight + "px";
-  sendButton.disabled = this.value.trim() === "";
+  sendButton.disabled = this.value.trim() === "" || inflightToken === viewToken;
 });
 
 messageInput.addEventListener("keydown", function (event) {
@@ -40,140 +42,105 @@ sendButton.addEventListener("click", sendMessage);
 document.querySelector(".new-chat-btn").addEventListener("click", startNewChat);
 document.getElementById("clearChat").addEventListener("click", clearCurrent);
 chatHistory.addEventListener("click", onHistoryClick);
-loadSessions();
+boot();
 
-function loadSessions() {
-  const stored = readStore();
-  sessions = stored.sessions;
-  currentId = stored.currentId;
-  if (!findSession(currentId)) {
-    sessions.unshift(blankSession());
-    currentId = sessions[0].id;
-  }
-  showCurrent();
-}
-
-function readStore() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY) || "null";
-    const payload = JSON.parse(raw);
-    if (!payload || typeof payload !== "object") {
-      return emptyStore();
+function boot() {
+  loadList().then(function () {
+    if (!conversations.length) {
+      showBlank();
+      return;
     }
-    const found = Array.isArray(payload.sessions) ? payload.sessions : [];
-    const storedId = typeof payload.currentId === "string" ? payload.currentId : "";
-    return {sessions: keptSessions(found), currentId: storedId};
-  } catch {
-    // 本地记录损坏时从空对话开始，避免整页打不开。
-    return emptyStore();
-  }
+    openConversation(conversations[0].conversation_id);
+  });
 }
 
-function emptyStore() {
-  return {sessions: [], currentId: ""};
+function loadList() {
+  return fetch(CONVERSATIONS_PATH, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: {"X-CSRF-Token": csrfToken()},
+  }).then(function (response) {
+    if (!response.ok) {
+      conversations = [];
+      return;
+    }
+    return response.json().then(function (payload) {
+      const found = payload && payload.conversations;
+      conversations = Array.isArray(found) ? found : [];
+    });
+  }).catch(function () {
+    conversations = [];
+  });
 }
 
-function keptSessions(found) {
-  const normalized = [];
-  found.forEach(function (item) {
-    const session = normalizeSession(item);
-    if (session) {
-      normalized.push(session);
+function openConversation(id) {
+  currentId = id;
+  chatTitle.textContent = clipTitle(titleOf(id));
+  renderSidebar();
+  return fetch(CONVERSATIONS_PATH + "/" + encodeURIComponent(id), {
+    method: "GET",
+    credentials: "same-origin",
+    headers: {"X-CSRF-Token": csrfToken()},
+  }).then(function (response) {
+    if (!response.ok || currentId !== id) {
+      return;
+    }
+    return response.json().then(function (payload) {
+      if (currentId !== id) {
+        return;
+      }
+      const found = payload && payload.messages;
+      messages = Array.isArray(found) ? found : [];
+      renderMessages();
+    });
+  }).catch(function () {
+    if (currentId === id) {
+      showUnsaved(OFFLINE_NOTICE);
     }
   });
-  return normalized;
 }
 
-function normalizeSession(item) {
-  if (!item || typeof item.id !== "string" || item.id.trim() === "") {
-    return null;
-  }
-  const title = typeof item.title === "string" ? item.title.trim() : "";
-  const messages = Array.isArray(item.messages) ? item.messages : [];
-  return {
-    id: item.id,
-    title: title || UNTITLED,
-    messages: messages.filter(validMessage).map(storedMessage),
-  };
-}
-
-function validMessage(message) {
-  if (!message || typeof message.text !== "string") {
-    return false;
-  }
-  const known = message.role === "user" || message.role === "assistant";
-  return known && message.text.trim() !== "";
-}
-
-function storedMessage(message) {
-  return {role: message.role, text: message.text.trim()};
-}
-
-function blankSession() {
-  return {id: newId(), title: UNTITLED, messages: []};
-}
-
-function newId() {
-  if (window.crypto && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return String(Date.now()) + "-" + String(Math.random()).slice(2);
-}
-
-function saveSessions() {
-  const payload = {
-    currentId: currentId,
-    sessions: sessions.map(function (session) {
-      return {id: session.id, title: session.title, messages: session.messages};
-    }),
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-}
-
-function findSession(id) {
-  for (let index = 0; index < sessions.length; index += 1) {
-    if (sessions[index].id === id) {
-      return sessions[index];
+function titleOf(id) {
+  for (let index = 0; index < conversations.length; index += 1) {
+    if (conversations[index].conversation_id === id) {
+      return conversations[index].title || UNTITLED;
     }
   }
-  return null;
+  return UNTITLED;
 }
 
-function currentSession() {
-  return findSession(currentId) || sessions[0];
-}
-
-function showCurrent() {
-  const session = currentSession();
-  currentId = session.id;
-  chatTitle.textContent = session.title;
-  typingIndicator.style.display = session.pending ? "flex" : "none";
+function showBlank() {
+  currentId = "";
+  messages = [];
+  chatTitle.textContent = UNTITLED;
+  typingIndicator.style.display = "none";
   renderSidebar();
-  renderMessages(session);
-  saveSessions();
+  renderMessages();
 }
 
 function renderSidebar() {
   chatHistory.textContent = "";
-  sessions.forEach(function (session) {
-    const item = document.createElement("div");
-    const active = session.id === currentId ? " active" : "";
-    item.className = "chat-item" + active;
-    item.dataset.id = session.id;
-    item.textContent = session.title;
-    chatHistory.append(item);
+  conversations.forEach(function (item) {
+    const row = document.createElement("div");
+    const active = item.conversation_id === currentId ? " active" : "";
+    row.className = "chat-item" + active;
+    row.dataset.id = item.conversation_id;
+    row.textContent = clipTitle(item.title || UNTITLED);
+    chatHistory.append(row);
   });
 }
 
-function renderMessages(session) {
+function renderMessages() {
   const nodes = messagesContainer.querySelectorAll(".message");
   nodes.forEach(function (node) {
     if (node !== greetingMessage) {
       node.remove();
     }
   });
-  session.messages.forEach(function (message) {
-    appendMessage(message.role, message.text, false);
+  messages.forEach(function (message) {
+    if (message && typeof message.text === "string") {
+      appendMessage(message.role, message.text, false);
+    }
   });
   scrollDown();
 }
@@ -183,68 +150,70 @@ function onHistoryClick(event) {
   if (!item || item.dataset.id === currentId) {
     return;
   }
-  currentId = item.dataset.id;
-  showCurrent();
+  viewToken += 1;
+  streamBody = null;
+  streamParts = [];
+  openConversation(item.dataset.id);
 }
 
 function startNewChat() {
-  sessions.unshift(blankSession());
-  currentId = sessions[0].id;
+  viewToken += 1;
+  streamBody = null;
+  streamParts = [];
   messageInput.value = "";
   messageInput.style.height = "auto";
   sendButton.disabled = true;
-  showCurrent();
+  showBlank();
 }
 
 function clearCurrent() {
-  const session = currentSession();
-  session.messages = [];
-  session.pending = null;
-  typingIndicator.style.display = "none";
-  saveSessions();
-  renderMessages(session);
+  if (!currentId) {
+    showBlank();
+    return;
+  }
+  const id = currentId;
+  viewToken += 1;
+  fetch(CONVERSATIONS_PATH + "/" + encodeURIComponent(id), {
+    method: "DELETE",
+    credentials: "same-origin",
+    headers: {"X-CSRF-Token": csrfToken()},
+  }).then(function (response) {
+    if (!response.ok) {
+      showUnsaved(DELETE_FAILED);
+      return;
+    }
+    conversations = conversations.filter(function (item) {
+      return item.conversation_id !== id;
+    });
+    showBlank();
+  }).catch(function () {
+    showUnsaved(OFFLINE_NOTICE);
+  });
 }
 
 function sendMessage() {
   const messageText = messageInput.value.trim();
-  const session = currentSession();
-  if (messageText === "" || session.pending) {
+  if (messageText === "" || inflightToken === viewToken) {
     return;
   }
   if (messageText.length > MAX_QUESTION_CHARS) {
     showUnsaved(QUESTION_TOO_LONG);
     return;
   }
-  const history = requestHistory(session.messages);
-  session.messages.push({role: "user", text: messageText});
-  if (session.title === UNTITLED) {
-    session.title = clipTitle(messageText);
+  const token = viewToken;
+  const originId = currentId;
+  inflightToken = token;
+  streamBody = null;
+  streamParts = [];
+  messages.push({role: "user", text: messageText});
+  if (!originId) {
+    chatTitle.textContent = clipTitle(messageText);
   }
-  pendingSerial += 1;
-  session.pending = pendingSerial;
-  saveSessions();
   appendMessage("user", messageText, true);
-  chatTitle.textContent = session.title;
-  renderSidebar();
   messageInput.value = "";
   messageInput.style.height = "auto";
   sendButton.disabled = true;
-  ask(session, messageText, history, session.pending);
-}
-
-function requestHistory(messages) {
-  const start = Math.max(0, messages.length - MAX_HISTORY_MESSAGES);
-  return messages.slice(start).map(function (message) {
-    return {role: message.role, text: clipHistoryText(message.text)};
-  });
-}
-
-function clipHistoryText(text) {
-  const cleaned = text.trim();
-  if (cleaned.length <= MAX_HISTORY_CHARS) {
-    return cleaned;
-  }
-  return cleaned.slice(0, MAX_HISTORY_CHARS);
+  ask(originId, messageText, token);
 }
 
 function showUnsaved(text) {
@@ -269,7 +238,11 @@ function csrfToken() {
   return "";
 }
 
-function ask(session, messageText, history, serial) {
+function ask(originId, messageText, token) {
+  const payload = {question: messageText};
+  if (originId) {
+    payload.conversation_id = originId;
+  }
   typingIndicator.style.display = "flex";
   scrollDown();
   fetch(ASK_PATH, {
@@ -279,38 +252,118 @@ function ask(session, messageText, history, serial) {
       "Content-Type": "application/json",
       "X-CSRF-Token": csrfToken(),
     },
-    body: JSON.stringify({question: messageText, history: history}),
+    body: JSON.stringify(payload),
   }).then(function (response) {
-    return response.json().then(function (payload) {
-      return {ok: response.ok, payload: payload};
-    });
-  }).then(function (result) {
-    const payload = result.payload || {};
-    if (result.ok && payload.answer) {
-      finishAsk(session, serial, payload.answer, true);
-      return;
+    if (!response.ok) {
+      return response.json().then(function (body) {
+        const message = body && body.error ? body.error : ANSWER_FAILED;
+        finishError(token, message);
+      });
     }
-    // 拒绝和断线只留在页面上。写进历史后，下一句会一直带着失败文案。
-    finishAsk(session, serial, payload.error || ANSWER_FAILED, false);
+    return readLines(response, token);
   }).catch(function () {
-    finishAsk(session, serial, OFFLINE_NOTICE, false);
+    finishError(token, OFFLINE_NOTICE);
   });
 }
 
-function finishAsk(session, serial, text, saved) {
-  if (session.pending !== serial) {
+function readLines(response, token) {
+  if (!response.body || typeof response.body.getReader !== "function") {
+    return response.text().then(function (text) {
+      text.split("\n").forEach(function (line) {
+        applyLine(line, token);
+      });
+    });
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  function pump() {
+    return reader.read().then(function (result) {
+      if (result.done) {
+        buffer += decoder.decode();
+        applyLine(buffer, token);
+        return;
+      }
+      buffer += decoder.decode(result.value, {stream: true});
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+      lines.forEach(function (line) {
+        applyLine(line, token);
+      });
+      return pump();
+    });
+  }
+  return pump();
+}
+
+function applyLine(line, token) {
+  const text = line.trim();
+  if (!text) {
     return;
   }
-  session.pending = null;
-  if (saved) {
-    session.messages.push({role: "assistant", text: text});
-    saveSessions();
+  let event = null;
+  try {
+    event = JSON.parse(text);
+  } catch (error) {
+    finishError(token, ANSWER_FAILED);
+    return;
   }
-  if (session.id !== currentId) {
+  if (!event || token !== viewToken && event.event !== "done") {
+    return;
+  }
+  if (event.event === "version" || event.event === "sentence") {
+    showSentence(event.text, token);
+    return;
+  }
+  if (event.event === "done") {
+    finishDone(token, event.conversation_id);
+  }
+}
+
+function showSentence(text, token) {
+  if (token !== viewToken || typeof text !== "string") {
+    return;
+  }
+  streamParts.push(text);
+  const joined = streamParts.join("\n\n");
+  if (!streamBody) {
+    streamBody = appendMessage("assistant", joined, true);
+    return;
+  }
+  streamBody.textContent = joined;
+  scrollDown();
+}
+
+function finishDone(token, conversationId) {
+  if (token === viewToken && conversationId) {
+    currentId = conversationId;
+    messages.push({role: "assistant", text: streamParts.join("\n\n")});
+  }
+  loadList().then(function () {
+    renderSidebar();
+    if (token === viewToken && currentId) {
+      chatTitle.textContent = clipTitle(titleOf(currentId));
+    }
+    endSend(token);
+  });
+}
+
+function finishError(token, text) {
+  if (token === viewToken) {
+    typingIndicator.style.display = "none";
+    showUnsaved(text);
+  }
+  endSend(token);
+}
+
+function endSend(token) {
+  if (inflightToken === token) {
+    inflightToken = 0;
+  }
+  if (token !== viewToken) {
     return;
   }
   typingIndicator.style.display = "none";
-  appendMessage("assistant", text, true, !saved);
   sendButton.disabled = messageInput.value.trim() === "";
 }
 
@@ -340,6 +393,7 @@ function appendMessage(role, text, stamp, unsaved) {
   messageDiv.append(avatar, content);
   messagesContainer.insertBefore(messageDiv, typingIndicator);
   scrollDown();
+  return body;
 }
 
 function scrollDown() {

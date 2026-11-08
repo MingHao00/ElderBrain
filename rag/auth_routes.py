@@ -7,6 +7,7 @@ from auth_constants import ERR_NOT_FOUND
 from auth_gate import AnswerFn, FailFn, handle_question
 from auth_http import Incoming, Outgoing, json_error
 from auth_login import handle_login
+from conversation_routes import handle_conversations
 
 
 def route_api(
@@ -15,10 +16,13 @@ def route_api(
     answer: AnswerFn,
     on_failure: FailFn | None,
 ) -> Outgoing:
-    """先看登录路径，再看提问。都不是就 404。"""
+    """先看登录路径，再看对话，最后看提问。都不是就 404。"""
     login = handle_login(app, request)
     if login is not None:
         return login
+    stored = handle_conversations(app, request)
+    if stored is not None:
+        return stored
     asked = handle_question(app, request, answer, on_failure)
     if asked is not None:
         return asked

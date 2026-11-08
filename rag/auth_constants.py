@@ -106,6 +106,10 @@ HTTP_SERVER_ERROR = 500
 
 PATH_ASK = "/api/ask"
 PATH_QUERY = "/api/query"
+PATH_CONVERSATIONS = "/api/conversations"
+# 对话编号由服务端生成。客户端自己编的号对不上库里的行。
+CONVERSATION_ID_PREFIX = "c_"
+CONVERSATION_ID_BYTES = 16
 PATH_SESSION = "/api/auth/session"
 PATH_EMAIL_CODE = "/api/auth/email/code"
 PATH_EMAIL_VERIFY = "/api/auth/email/verify"
@@ -141,4 +145,6 @@ QUOTA_MINUTE = "minute"
 QUOTA_SITE = "site"
 SAFE_MAIL_ERRORS = frozenset({ERR_MAIL_UNCONFIGURED, ERR_MAIL_FAILED})
 JSON_TYPE = "application/json; charset=utf-8"
+# 网页在整段校验之后按行推送，不是模型 token 流。
+NDJSON_TYPE = "application/x-ndjson; charset=utf-8"
 TEXT_TYPE = "text/plain; charset=utf-8"

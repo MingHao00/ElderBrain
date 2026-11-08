@@ -27,7 +27,15 @@ from auth_identity import hash_ip, ip_salt
 from auth_quota import reserve_quota, yuan_to_micro
 from auth_routes import route_api
 from auth_session import issue_for, now_seconds
-from auth_testkit import TEST_IP, auth_env, cookie_header, json_bytes, make_request, read_body
+from auth_testkit import (
+    TEST_IP,
+    auth_env,
+    cookie_header,
+    json_bytes,
+    make_request,
+    read_body,
+    read_events,
+)
 from demo_answer import MAX_BODY_BYTES, MAX_QUESTION_CHARS
 from demo_server import DemoHandler
 
@@ -150,7 +158,8 @@ class QuestionAuditTests(unittest.TestCase):
             with redirect_stderr(buffer):
                 response = self._post(PATH_ASK, {"question": question}, headers)
         self.assertEqual(response.status, HTTP_OK)
-        self.assertEqual(read_body(response)["answer"], "规则回答")
+        self.assertEqual(read_events(response)[0]["event"], "version")
+        self.assertEqual(read_events(response)[1]["text"], "规则回答")
         logged = buffer.getvalue()
         self.assertEqual(logged.splitlines(), [f"{AUDIT_WRITE_FAILED} RuntimeError"])
         self.assertNotIn(question, logged)

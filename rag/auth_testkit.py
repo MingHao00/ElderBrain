@@ -68,6 +68,29 @@ def read_body(outgoing: Outgoing) -> dict[str, object]:
     return payload
 
 
+def read_events(outgoing: Outgoing) -> list[dict[str, object]]:
+    """解析网页提问的逐行 JSON。"""
+    events: list[dict[str, object]] = []
+    for line in outgoing.body.decode("utf-8").split("\n"):
+        if not line:
+            continue
+        item = json.loads(line)
+        if not isinstance(item, dict):
+            raise AssertionError("事件不是对象")
+        events.append(item)
+    return events
+
+
+def event_text(outgoing: Outgoing) -> str:
+    """把版本句和已经推出的句子拼起来，便于旧断言查看正文。"""
+    parts = [
+        str(item.get("text", ""))
+        for item in read_events(outgoing)
+        if item.get("event") in {"version", "sentence"}
+    ]
+    return "\n".join(parts)
+
+
 def set_cookie(outgoing: Outgoing, name: str) -> str:
     """从 Set-Cookie 取出一个值。"""
     prefix = name + "="

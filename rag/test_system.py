@@ -13,6 +13,7 @@ from config import RULE_VERSION
 from modules.data_preparation import RagPiece
 from modules.generation import NO_EVIDENCE
 from scope import INJECTION_REFUSAL, REFUSAL, VERSION_SENTENCE
+from session_card import CardEntry, SessionCard
 from system import ElderBrainRag, main
 
 FIREBALL = "srd51:spell:fireball"
@@ -45,17 +46,17 @@ class _Reply:
         self.replies = replies or [_cited(SOURCE_TEXT, FIREBALL)]
         self.calls = 0
         self.parents: list[list[RagPiece]] = []
-        self.histories: list[list[dict[str, str]] | None] = []
+        self.cards: list[object] = []
 
     def answer(
         self,
         question: str,
         parents: list[RagPiece],
-        history: list[dict[str, str]] | None = None,
+        card: object = None,
     ) -> str:
         self.calls += 1
         self.parents.append(parents)
-        self.histories.append(history)
+        self.cards.append(card)
         # 只准备了两次正文。第三次生成说明重试没有停。
         if self.calls > len(self.replies):
             raise AssertionError("不应再生成")
@@ -74,18 +75,18 @@ class _RecordSearch:
 class _RecordReply:
     def __init__(self) -> None:
         self.question = ""
-        self.history: list[dict[str, str]] | None = None
+        self.card: object = None
         self.calls = 0
 
     def answer(
         self,
         question: str,
         parents: list[RagPiece],
-        history: list[dict[str, str]] | None = None,
+        card: object = None,
     ) -> str:
         self.calls += 1
         self.question = question
-        self.history = history
+        self.card = card
         return _cited("火球术。", FIREBALL)
 
 
@@ -127,11 +128,11 @@ class AskTests(unittest.TestCase):
             _cited(SOURCE_TEXT, FIREBALL),
         ])
         _ready(rag, reply)
-        history = [{"role": "user", "text": "上一句"}]
-        text = rag.ask("火球术的射程是多少", history)
+        text = rag.ask("火球术的射程是多少")
         self.assertEqual(reply.calls, 2)
         self.assertIs(reply.parents[0], reply.parents[1])
-        self.assertEqual(reply.histories, [history, history])
+        self.assertEqual(reply.cards[0].entries, ())
+        self.assertEqual(reply.cards[1].entries, ())
         self.assertEqual(text, f"{VERSION_SENTENCE}\n\n{_cited(SOURCE_TEXT, FIREBALL)}")
         self.assertEqual(text.citation_check, CITATION_PASSED_AFTER_RETRY)
 
@@ -170,7 +171,7 @@ class AskTests(unittest.TestCase):
             rag.ask("火球术的射程是多少")
         module_cls.assert_called_once_with(0, rag.config.max_tokens)
 
-    def test_history_goes_to_generation_only(self) -> None:
+    def test_card_title_is_in_the_query_not_the_answer(self) -> None:
         rag = ElderBrainRag()
         search = _RecordSearch()
         rag.retrieval = search
@@ -178,15 +179,17 @@ class AskTests(unittest.TestCase):
         reply = _RecordReply()
         rag.generation = reply
         rag.data.parents = {"fire": _parent_piece()}
-        history = [
-            {"role": "user", "text": "火球术射程"},
-            {"role": "assistant", "text": "150 尺。"},
-        ]
-        rag.ask("上一句说的是哪个法术", history)
-        self.assertEqual(search.queries, ["上一句说的是哪个法术"])
+        card = SessionCard(
+            RULE_VERSION,
+            (CardEntry(FIREBALL, "spell.fireball", "卡片标题", None),),
+        )
+        rag.ask("升环呢", card)
+        self.assertIn("升环呢", search.queries[0])
+        self.assertIn("卡片标题", search.queries[0])
+        self.assertNotIn("助手原文", search.queries[0])
         self.assertEqual(reply.calls, 1)
-        self.assertEqual(reply.question, "上一句说的是哪个法术")
-        self.assertEqual(reply.history, history)
+        self.assertEqual(reply.question, "升环呢")
+        self.assertEqual(reply.card.entries[0].title, "卡片标题")
 
 
 class MainRefusalTests(unittest.TestCase):

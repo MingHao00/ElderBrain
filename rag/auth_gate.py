@@ -12,6 +12,7 @@ from audit_log import (
     error_text,
     record_answer,
     record_limited,
+    record_rejection,
     record_unauthorized,
     record_unprocessable,
     usages_on,
@@ -26,7 +27,6 @@ from auth_constants import (
     ERR_UNAUTHORIZED,
     HTTP_BAD_REQUEST,
     HTTP_FORBIDDEN,
-    HTTP_OK,
     HTTP_SERVER_ERROR,
     HTTP_TOO_MANY,
     HTTP_UNAUTHORIZED,
@@ -36,22 +36,26 @@ from auth_constants import (
     PATH_QUERY,
     UNPROCESSABLE_QUESTIONS,
 )
-from auth_http import Incoming, Outgoing, csrf_ok, json_error, json_response
+from auth_http import Incoming, Outgoing, csrf_ok, json_error
 from auth_quota import (
     QuotaDeny,
+    Reserved,
     quota_message,
     release_quota,
     reserve_quota,
     settle_cost,
 )
 from auth_session import Visitor, bearer_visitor, now_seconds, session_visitor
+from conversation_store import commit_turn, conversation_owner, load_card
 from demo_answer import read_turn
 from generation_call import qwen_yuan
+from session_card import SessionCard, empty_card
+from turn_render import card_update_of, render_ask, render_query
 
 # 异常参数可能带邮局密码或收件地址，所以失败日志只留类型名。
 ALERT_SEND_FAILED = "费用告警没有发出"
 
-AnswerFn = Callable[[str, list[dict[str, str]]], str]
+AnswerFn = Callable[[str, SessionCard], str]
 FailFn = Callable[[Exception], None]
 
 
@@ -65,9 +69,9 @@ def handle_question(
     if request.method != "POST":
         return None
     if request.path == PATH_ASK:
-        return _gated(app, request, answer, on_failure, _from_cookie, True)
+        return _gated(app, request, answer, on_failure, _from_cookie, True, True)
     if request.path == PATH_QUERY:
-        return _gated(app, request, answer, on_failure, _from_key, False)
+        return _gated(app, request, answer, on_failure, _from_key, False, False)
     return None
 
 
@@ -78,12 +82,13 @@ def _gated(
     on_failure: FailFn | None,
     identify: Callable[[AuthApp, Incoming], Visitor | None],
     need_csrf: bool,
+    stream: bool,
 ) -> Outgoing:
     parsed = _turn(request.body)
     if isinstance(parsed, Outgoing):
         write_quietly(lambda: _audit_turn(app, request.body, parsed))
         return parsed
-    question, history = parsed
+    question, conversation_id = parsed
     visitor = identify(app, request)
     if visitor is None:
         response = json_error(HTTP_UNAUTHORIZED, ERR_UNAUTHORIZED)
@@ -91,37 +96,32 @@ def _gated(
         return response
     if need_csrf and not csrf_ok(request):
         return json_error(HTTP_FORBIDDEN, ERR_FORBIDDEN)
-    return _charge(app, visitor, question, history, answer, on_failure)
+    return _charge(app, visitor, question, conversation_id, answer, on_failure, stream)
 
 
 def _charge(
     app: AuthApp,
     visitor: Visitor,
     question: str,
-    history: list[dict[str, str]],
+    conversation_id: str | None,
     answer: AnswerFn,
     on_failure: FailFn | None,
+    stream: bool,
 ) -> Outgoing:
-    reserved = reserve_quota(
-        app.db,
-        visitor.user_id,
-        visitor.created_at,
-        ASK_COST_MICRO,
-        now_seconds(),
-    )
-    if isinstance(reserved, QuotaDeny):
-        message = quota_message(reserved.kind, reserved.resume_at)
-        response = json_error(HTTP_TOO_MANY, message)
-        write_quietly(lambda: record_limited(app.db, visitor.user_id, message))
-        return response
+    denied = _not_owner(app, visitor, question, conversation_id)
+    if denied is not None:
+        return denied
+    reserved = _reserve(app, visitor)
+    if isinstance(reserved, Outgoing):
+        return reserved
     try:
-        shown = answer(question, history)
+        shown = answer(question, _card(app, conversation_id))
     except Exception as exc:
         release_quota(app.db, reserved.event_id)
         _report(on_failure, exc)
         return json_error(HTTP_SERVER_ERROR, ERR_ANSWER_FAILED)
     _book(app, reserved.event_id, visitor.user_id, question, shown)
-    return json_response(HTTP_OK, {"answer": shown})
+    return _saved(app, visitor, question, conversation_id, shown, stream)
 
 
 def _book(
@@ -176,7 +176,74 @@ def _send_cost_alert(app: AuthApp) -> None:
         sys.stderr.write(f"{ALERT_SEND_FAILED} {type(exc).__name__}\n")
 
 
-def _turn(body: bytes) -> Outgoing | tuple[str, list[dict[str, str]]]:
+def _not_owner(
+    app: AuthApp,
+    visitor: Visitor,
+    question: str,
+    conversation_id: str | None,
+) -> Outgoing | None:
+    if conversation_id is None:
+        return None
+    if conversation_owner(app.db, conversation_id) == visitor.user_id:
+        return None
+    response = json_error(HTTP_FORBIDDEN, ERR_FORBIDDEN)
+    write_quietly(lambda: _audit_forbidden(app, visitor.user_id, question))
+    return response
+
+
+def _audit_forbidden(app: AuthApp, user_id: str, question: str) -> None:
+    record_rejection(app.db, user_id, HTTP_FORBIDDEN, ERR_FORBIDDEN, len(question))
+
+
+def _reserve(app: AuthApp, visitor: Visitor) -> Reserved | Outgoing:
+    reserved = reserve_quota(
+        app.db,
+        visitor.user_id,
+        visitor.created_at,
+        ASK_COST_MICRO,
+        now_seconds(),
+    )
+    if isinstance(reserved, QuotaDeny):
+        return _limited(app, visitor, reserved)
+    return reserved
+
+
+def _limited(app: AuthApp, visitor: Visitor, reserved: QuotaDeny) -> Outgoing:
+    message = quota_message(reserved.kind, reserved.resume_at)
+    response = json_error(HTTP_TOO_MANY, message)
+    write_quietly(lambda: record_limited(app.db, visitor.user_id, message))
+    return response
+
+
+def _card(app: AuthApp, conversation_id: str | None) -> SessionCard:
+    if conversation_id is None:
+        return empty_card()
+    return load_card(app.db, conversation_id)
+
+
+def _saved(
+    app: AuthApp,
+    visitor: Visitor,
+    question: str,
+    conversation_id: str | None,
+    shown: str,
+    stream: bool,
+) -> Outgoing:
+    stored_id = commit_turn(
+        app.db,
+        visitor.user_id,
+        conversation_id,
+        question,
+        str(shown),
+        card_update_of(shown),
+        now_seconds(),
+    )
+    if stream:
+        return render_ask(shown, stored_id)
+    return render_query(shown, stored_id)
+
+
+def _turn(body: bytes) -> Outgoing | tuple[str, str | None]:
     try:
         return read_turn(body)
     except ValueError as exc:

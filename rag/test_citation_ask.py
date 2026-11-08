@@ -22,13 +22,11 @@ from auth_testkit import (
     TEST_IP,
     auth_env,
     cookie_header,
+    event_text,
     json_bytes,
     make_request,
-    read_body,
 )
 from demo_server import DemoHandler
-from modules.generation import NO_EVIDENCE
-from scope import REFUSAL
 from system import ElderBrainRag
 from test_system import (
     BAD_SENTENCE,
@@ -84,7 +82,7 @@ class CitationAuditTests(unittest.TestCase):
         refused = ElderBrainRag()
         refused.retrieval = _Explode()
         refusal = self._ask(refused, "2024 的武器精通")
-        self.assertEqual(read_body(refusal)["answer"], REFUSAL)
+        self.assertIn("2024", event_text(refusal))
         self.assertEqual(_stored(self.app.db.path, "2024 的武器精通"), CITATION_UNCHECKED)
 
         empty = ElderBrainRag()
@@ -93,7 +91,7 @@ class CitationAuditTests(unittest.TestCase):
         reply = _Reply()
         empty.generation = reply
         missing = self._ask(empty, "火球术的射程是多少")
-        self.assertEqual(read_body(missing)["answer"], NO_EVIDENCE)
+        self.assertIn("没有找到足够的原文", event_text(missing))
         self.assertEqual(reply.calls, 0)
         question = "火球术的射程是多少"
         self.assertEqual(_stored(self.app.db.path, question), CITATION_UNCHECKED)
@@ -110,9 +108,10 @@ class CitationAuditTests(unittest.TestCase):
         question = f"火球术射程{index}"
         response = self._ask(rag, question)
         self.assertEqual(response.status, HTTP_OK)
-        shown = str(read_body(response)["answer"])
+        shown = event_text(response)
         if expected == CITATION_FAILED:
-            self.assertEqual(shown, NO_EVIDENCE)
+            self.assertIn("没有找到足够的原文", shown)
+            self.assertNotIn(BAD_SENTENCE, shown)
         else:
             self.assertIn("150", shown)
         self.assertEqual(reply.calls, calls)

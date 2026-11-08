@@ -39,6 +39,7 @@ from auth_testkit import (
     cookie_header,
     json_bytes,
     make_request,
+    event_text,
     read_body,
 )
 from demo_server import DemoHandler
@@ -145,7 +146,7 @@ class AskCostTests(unittest.TestCase):
         ])
         response = self._ask(rag, _QUESTION)
         self.assertEqual(response.status, HTTP_OK)
-        self.assertEqual(str(read_body(response)["answer"]), NO_EVIDENCE)
+        self.assertIn("没有找到足够的原文", event_text(response))
         self.assertEqual(client.calls, 2)
         record = _audit(self.app.db.path, _QUESTION)
         self.assertEqual(record[FIELD_TOKENS_IN], _PROMPT_TOKENS + _RETRY_PROMPT)
@@ -160,7 +161,7 @@ class AskCostTests(unittest.TestCase):
         response = self._ask(rag, _QUESTION)
         self.assertEqual(response.status, HTTP_OK)
         self.assertEqual(client.calls, 1)
-        self.assertIn(SOURCE_TEXT, str(read_body(response)["answer"]))
+        self.assertIn(SOURCE_TEXT, event_text(response))
         record = _audit(self.app.db.path, _QUESTION)
         self.assertEqual(record[FIELD_TOKENS_IN], 0)
         self.assertEqual(record[FIELD_TOKENS_OUT], 0)
@@ -177,7 +178,7 @@ class AskCostTests(unittest.TestCase):
         empty.reranker = _Keep()
         second = self._ask(empty, _QUESTION)
         self.assertEqual(second.status, HTTP_OK)
-        self.assertEqual(str(read_body(second)["answer"]), NO_EVIDENCE)
+        self.assertIn("没有找到足够的原文", event_text(second))
         self.assertEqual(_spend(self.app.db.path), 0)
         for question in (_REFUSAL_QUESTION, _QUESTION):
             record = _audit(self.app.db.path, question)
@@ -243,7 +244,7 @@ class AskCostTests(unittest.TestCase):
             with redirect_stderr(buffer):
                 response = self._ask(rag, _QUESTION)
         self.assertEqual(response.status, HTTP_OK)
-        self.assertIn(SOURCE_TEXT, str(read_body(response)["answer"]))
+        self.assertIn(SOURCE_TEXT, event_text(response))
         self.assertEqual(self.attempts, 1)
         later = self._ask(rag, "发信失败后的下一问")
         self.assertEqual(later.status, HTTP_OK)

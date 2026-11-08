@@ -34,7 +34,17 @@ from modules.generation import MISSING_TOKEN_COUNT, NO_EVIDENCE, GenerationInteg
 from modules.index_construction import IndexConstructionModule, file_sha256
 from modules.retrieval import RetrievalOptimizationModule
 from modules.text_rerank import TextReranker, load_text_reranker
-from scope import VERSION_SENTENCE, refusal_for
+from scope import INJECTION_REFUSAL, VERSION_SENTENCE, refusal_for
+from session_card import (
+    CATEGORY_INJECTION,
+    CATEGORY_NO_EVIDENCE,
+    CATEGORY_OUT_OF_SCOPE,
+    CardEntry,
+    SessionCard,
+    empty_card,
+    entries_for_citations,
+    retrieval_query,
+)
 
 load_dotenv(REPO_ROOT / ".env")
 
@@ -54,6 +64,10 @@ class CitedReply(str):
         reply = str.__new__(cls, text)
         reply.citation_check = citation_check
         reply.usages = usages
+        reply.sentences = ()
+        reply.citations = ()
+        reply.refusal_category = None
+        reply.card_update = None
         return reply
 
 
@@ -79,26 +93,25 @@ class ElderBrainRag:
         self.retrieval = RetrievalOptimizationModule(vectorstore, children)
         return len(children)
 
-    def ask(
-        self,
-        question: str,
-        history: list[dict[str, str]] | None = None,
-    ) -> str:
-        """版本和提示注入都在检索之前返回。检索只看这一句。
+    def ask(self, question: str, card: SessionCard | None = None) -> str:
+        """版本和提示注入都在检索之前返回。检索带上卡片里的标题。
 
-        生成之后做引用校验。第一次对不上，用同一批父节再生成一次。
+        生成之后做整段引用校验。第一次对不上，用同一批父节再生成一次。
+        客户端历史不从这里进入。
         """
+        active = card or empty_card()
         refused = refusal_for(question)
         if refused is not None:
-            return _unchecked(refused)
+            return _unchecked(refused, _scope_category(refused))
         if self.retrieval is None:
             raise ValueError("请先构建知识库")
-        candidates = self.retrieval.hybrid_search(question)
-        ranked = self._rerank(question, candidates)[: self.config.top_k]
+        query = retrieval_query(question, active)
+        candidates = self.retrieval.hybrid_search(query)
+        ranked = self._rerank(query, candidates)[: self.config.top_k]
         parents = self.data.parent_sections(ranked)
         if not parents:
-            return _unchecked(NO_EVIDENCE)
-        return self._checked_generation(question, parents, history)
+            return _unchecked(NO_EVIDENCE, CATEGORY_NO_EVIDENCE)
+        return self._checked_generation(question, parents, active)
 
     def _generation(self) -> GenerationIntegrationModule:
         module = self.generation
@@ -116,17 +129,17 @@ class ElderBrainRag:
         self,
         question: str,
         parents: list[RagPiece],
-        history: list[dict[str, str]] | None,
+        card: SessionCard,
     ) -> str:
         module = self._generation()
         retrieved = _retrieved_parents(parents)
-        first_text, first_use = _generate(module, question, parents, history)
-        judged = _judged(first_text, retrieved, ATTEMPT_FIRST, (first_use,))
+        first_text, first_use = _generate(module, question, parents, card)
+        judged = _judged(first_text, retrieved, ATTEMPT_FIRST, (first_use,), parents)
         if judged is not None:
             return judged
-        second_text, second_use = _generate(module, question, parents, history)
+        second_text, second_use = _generate(module, question, parents, card)
         return _finished(
-            _judged(second_text, retrieved, ATTEMPT_LAST, (first_use, second_use)),
+            _judged(second_text, retrieved, ATTEMPT_LAST, (first_use, second_use), parents),
         )
 
     def _rerank(self, question: str, candidates: list[RagPiece]) -> list[RagPiece]:
@@ -158,17 +171,26 @@ def _prefix_answer(body: str) -> str:
     return f"{VERSION_SENTENCE}\n\n{body}"
 
 
-def _unchecked(text: str) -> CitedReply:
-    return CitedReply(text, CITATION_UNCHECKED)
+def _unchecked(text: str, category: str) -> CitedReply:
+    reply = CitedReply(text, CITATION_UNCHECKED)
+    reply.sentences = (CitedSentence(_after_version(text), None),)
+    reply.refusal_category = category
+    return reply
+
+
+def _scope_category(text: str) -> str:
+    if text == INJECTION_REFUSAL:
+        return CATEGORY_INJECTION
+    return CATEGORY_OUT_OF_SCOPE
 
 
 def _generate(
     module: GenerationIntegrationModule,
     question: str,
     parents: list[RagPiece],
-    history: list[dict[str, str]] | None,
+    card: SessionCard,
 ) -> tuple[str, tuple[int, int]]:
-    body = module.answer(question, parents, history)
+    body = module.answer(question, parents, card)
     return body, _token_pair(body)
 
 
@@ -191,13 +213,14 @@ def _judged(
     retrieved: list[RetrievedParent] | None,
     attempt: int,
     usages: tuple[tuple[int, int], ...],
+    parents: list[RagPiece],
 ) -> str | None:
     outcome = citation_attempt_outcome(_body_passes(body, retrieved), attempt)
     if outcome == OUTCOME_RETRY:
         return None
     if outcome == OUTCOME_PASS:
-        return _passed_reply(body, attempt, usages)
-    return CitedReply(NO_EVIDENCE, CITATION_FAILED, usages)
+        return _passed_reply(body, attempt, usages, parents)
+    return _no_evidence(usages)
 
 
 def _finished(reply: str | None) -> str:
@@ -210,10 +233,46 @@ def _passed_reply(
     body: str,
     attempt: int,
     usages: tuple[tuple[int, int], ...],
+    parents: list[RagPiece],
 ) -> CitedReply:
+    check = CITATION_PASSED_AFTER_RETRY
     if attempt == ATTEMPT_FIRST:
-        return CitedReply(_prefix_answer(body), CITATION_PASSED, usages)
-    return CitedReply(_prefix_answer(body), CITATION_PASSED_AFTER_RETRY, usages)
+        check = CITATION_PASSED
+    reply = CitedReply(_prefix_answer(body), check, usages)
+    sentences = _cited_sentences(body) or []
+    reply.sentences = tuple(sentences)
+    reply.citations = _citations(sentences, parents)
+    reply.card_update = reply.citations or None
+    return reply
+
+
+def _no_evidence(usages: tuple[tuple[int, int], ...]) -> CitedReply:
+    # 两次都对不上时不保留模型原句，卡片也不要写成这些句子。
+    reply = CitedReply(NO_EVIDENCE, CITATION_FAILED, usages)
+    reply.sentences = (CitedSentence(_after_version(NO_EVIDENCE), None),)
+    reply.refusal_category = CATEGORY_NO_EVIDENCE
+    return reply
+
+
+def _citations(
+    sentences: list[CitedSentence],
+    parents: list[RagPiece],
+) -> tuple[CardEntry, ...]:
+    metadata: dict[str, dict[str, str]] = {}
+    for parent in parents:
+        entry_id = parent.metadata.get("entry_id", "")
+        if entry_id and entry_id not in metadata:
+            metadata[entry_id] = parent.metadata
+    cited = [item.entry_id for item in sentences if item.entry_id]
+    return entries_for_citations(cited, metadata)
+
+
+def _after_version(text: str) -> str:
+    if text.startswith(VERSION_SENTENCE):
+        rest = text[len(VERSION_SENTENCE) :].strip()
+        if rest:
+            return rest
+    return text.strip()
 
 
 def _body_passes(body: str, retrieved: list[RetrievedParent] | None) -> bool:
