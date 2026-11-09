@@ -30,8 +30,10 @@ from auth_testkit import (
     read_body,
 )
 from config import RULE_VERSION
+from conversation_store import commit_turn, delete_conversation
 from demo_answer import MAX_QUESTION_CHARS
 from demo_server import DemoHandler
+from session_card import CardEntry
 from modules.data_preparation import RagPiece
 from modules.generation import DELIMITER_NBYTES, GenerationIntegrationModule
 from scope import INJECTION_REFUSAL, REFUSAL, VERSION_SENTENCE
@@ -48,11 +50,19 @@ OTHER_TITLE = "不该写入的治疗术标题"
 CONCEPT = "concept.fireball.card"
 LOCATION = "docs/only-location.md"
 ASSISTANT_MARK = "只有助手原文才会出现的句子。"
+KEPT_ANSWER = "生成已经完成的回答正文。"
 HISTORY_MARK = "客户端夹带的历史原文。"
 BAD_SENTENCE = "治疗术射程 30 尺。"
 PATH_CONVERSATIONS = "/api/conversations"
 SECTION_FIRE = "fire"
 SECTION_HEAL = "heal"
+_COUNT_MESSAGES = (
+    "SELECT COUNT(*) FROM conversation_messages WHERE conversation_id = ?"
+)
+_COUNT_CONVERSATIONS = (
+    "SELECT COUNT(*) FROM conversations WHERE conversation_id = ?"
+)
+_COUNT_CARDS = "SELECT COUNT(*) FROM session_cards WHERE conversation_id = ?"
 _QUERY_FIELDS = frozenset({
     "conversation_id",
     "version",
@@ -205,6 +215,59 @@ class ConversationTests(unittest.TestCase):
         self.assertIn(missing.status, (HTTP_FORBIDDEN, 404))
         self.assertEqual(_list(self._get(PATH_CONVERSATIONS)), [])
         self.assertIn(QUESTION, _audit_text(self.app.db.path))
+
+    def test_commit_after_delete_leaves_no_rows(self) -> None:
+        conversation_id = commit_turn(
+            self.app.db,
+            self.account.user_id,
+            None,
+            QUESTION,
+            ASSISTANT_MARK,
+            None,
+            now_seconds(),
+        )
+        removed = delete_conversation(
+            self.app.db,
+            self.account.user_id,
+            conversation_id,
+        )
+        self.assertTrue(removed)
+        returned = commit_turn(
+            self.app.db,
+            self.account.user_id,
+            conversation_id,
+            FOLLOW,
+            KEPT_ANSWER,
+            (CardEntry(ENTRY, CONCEPT, TITLE, LOCATION),),
+            now_seconds(),
+        )
+        self.assertEqual(returned, conversation_id)
+        self.assertEqual(_stored_rows(self.app.db.path, conversation_id), (0, 0, 0))
+
+    def test_delete_during_answer_keeps_the_reply_and_the_quota(self) -> None:
+        created, _prompt = self._ask_prompt({"question": QUESTION})
+        conversation_id = str(_events(created)[-1]["conversation_id"])
+        spent = open_uses(self.app.db, self.account.user_id)
+
+        def answer(_question: str, _card: object) -> str:
+            removed = self._delete(conversation_id)
+            self.assertEqual(removed.status, HTTP_OK)
+            return KEPT_ANSWER
+
+        request = make_request(
+            "POST",
+            PATH_ASK,
+            json_bytes({"question": FOLLOW, "conversation_id": conversation_id}),
+            self.headers,
+        )
+        response = route_api(self.app, request, answer, None)
+        self.assertEqual(response.status, HTTP_OK)
+        body = response.body.decode("utf-8")
+        self.assertIn(KEPT_ANSWER, body)
+        self.assertIn(conversation_id, body)
+        self.assertEqual(_stored_rows(self.app.db.path, conversation_id), (0, 0, 0))
+        # 生成回调里才删除。费用已经结算，不能因为对话没了就退回。
+        self.assertEqual(open_uses(self.app.db, self.account.user_id), spent + 1)
 
     def test_empty_or_long_question_does_not_create_a_conversation(self) -> None:
         empty = self._ask({"question": "  "})
@@ -441,6 +504,24 @@ def _delimiter_line(line: str, width: int) -> bool:
     if len(line) != width:
         return False
     return all(char in "0123456789abcdef" for char in line)
+
+
+def _stored_rows(path: Path, conversation_id: str) -> tuple[int, int, int]:
+    """消息、对话、卡片三张表里这个编号各有多少行。"""
+    return (
+        _count_where(path, _COUNT_MESSAGES, conversation_id),
+        _count_where(path, _COUNT_CONVERSATIONS, conversation_id),
+        _count_where(path, _COUNT_CARDS, conversation_id),
+    )
+
+
+def _count_where(path: Path, sql: str, conversation_id: str) -> int:
+    conn = sqlite3.connect(path)
+    try:
+        row = conn.execute(sql, (conversation_id,)).fetchone()
+    finally:
+        conn.close()
+    return int(row[0])
 
 
 def _audit_text(path: Path) -> str:

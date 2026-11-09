@@ -142,9 +142,15 @@ def commit_turn(
     card_entries: tuple[CardEntry, ...] | None,
     now: int,
 ) -> str:
-    """回答成功之后才落盘。没有新引用就不改卡片。"""
+    """回答成功之后才落盘。没有新引用就不改卡片。
+
+    生成期间对话可能已被删掉。费用已经结算，这时不再写入，原编号照样返回。
+    """
     with db.immediate() as conn:
         _ensure(conn)
+        # 提问门闩只在生成前查过一次。此刻已不属于该用户时，再写就是无主消息。
+        if conversation_id is not None and not _belongs(conn, user_id, conversation_id):
+            return conversation_id
         stored_id = _open_conversation(
             conn,
             user_id,
