@@ -16,7 +16,9 @@ from auth_constants import (
     NEW_ACCOUNT_WINDOW_SECONDS,
     QUOTA_DAILY,
     QUOTA_MINUTE,
+    QUOTA_SETTLED,
     QUOTA_SITE,
+    QUOTA_UNSETTLED,
     SHANGHAI_TZ,
     SITE_DAILY_ALERT_MICRO,
     SITE_DAILY_CAP_MICRO,
@@ -79,9 +81,9 @@ def release_quota(db: AuthDb, event_id: int) -> None:
 
 
 def settle_cost(db: AuthDb, event_id: int, cost_micro: int) -> bool:
-    """把这次占位的费用改成实际微元。费用为负时抛出 ValueError。
+    """把这次占位的费用改成实际微元，并标成已结算。费用为负时抛出 ValueError。
 
-    当日累计从告警线以下跨到线上时，同一事务记下今天已告警。
+    告警只比较已结算费用。从告警线以下跨到线上时，同一事务记下今天已告警。
     返回值表示事务提交后要不要发信。调用方发信失败不能回滚这笔费用。
     """
     if cost_micro < 0:
@@ -132,7 +134,7 @@ def record_idle_cost(db: AuthDb, user_id: str, cost_micro: int, now: int) -> boo
         now: 记入哪一天的时间戳。
 
     Returns:
-        本次是否从告警线以下跨到线上。调用方再发信。
+        已结算费用是否从告警线以下跨到线上。未结算提问预占不参与比较。调用方再发信。
 
     Raises:
         ValueError: 费用为负，或 user_id 不是已有账号。
@@ -142,7 +144,14 @@ def record_idle_cost(db: AuthDb, user_id: str, cost_micro: int, now: int) -> boo
     with db.immediate() as conn:
         if not _billable_user(conn, user_id):
             raise ValueError("费用必须记在真实用户上")
-        _insert_use(conn, user_id, now, cost_micro, USE_KIND_IDLE)
+        _insert_use(
+            conn,
+            user_id,
+            now,
+            cost_micro,
+            USE_KIND_IDLE,
+            QUOTA_SETTLED,
+        )
         return _mark_if_crossed(conn, now, cost_micro)
 
 
@@ -229,9 +238,10 @@ def _open_asked_at(conn: sqlite3.Connection, event_id: int) -> int | None:
 
 
 def _set_cost(conn: sqlite3.Connection, event_id: int, cost_micro: int) -> None:
+    # 写成实际费用后才进入告警累计。预占留在行上时不能把跨线前金额抬过告警线。
     conn.execute(
-        "UPDATE quota_uses SET cost_micro = ? WHERE id = ?",
-        (cost_micro, event_id),
+        "UPDATE quota_uses SET cost_micro = ?, settled = ? WHERE id = ?",
+        (cost_micro, QUOTA_SETTLED, event_id),
     )
 
 
@@ -241,8 +251,9 @@ def _mark_if_crossed(
     cost_micro: int,
 ) -> bool:
     day_start, day_end = _day_bounds(asked_at)
-    total = _spent_between(conn, day_start, day_end)
-    # 这一行已经写进合计。减去它才是跨线前的累计。
+    # 预占还在库里时闲置摘要可能先入账。把预占算进跨线前，会错过这一天仅有的一次告警。
+    total = _settled_between(conn, day_start, day_end)
+    # 这一行已经按实际费用写入已结算合计。减去它才是跨线前的累计。
     before = total - cost_micro
     crossed = before < SITE_DAILY_ALERT_MICRO <= total
     if not crossed:
@@ -251,13 +262,34 @@ def _mark_if_crossed(
 
 
 def _spent_between(conn: sqlite3.Connection, day_start: int, day_end: int) -> int:
-    row = conn.execute(
+    # 上限要算上未结算预占，否则并发的第二笔提问会在结算前通过。
+    return _sum_cost(conn, day_start, day_end, settled_only=False)
+
+
+def _settled_between(conn: sqlite3.Connection, day_start: int, day_end: int) -> int:
+    return _sum_cost(conn, day_start, day_end, settled_only=True)
+
+
+def _sum_cost(
+    conn: sqlite3.Connection,
+    day_start: int,
+    day_end: int,
+    settled_only: bool,
+) -> int:
+    if settled_only:
+        sql = """
+            SELECT COALESCE(SUM(cost_micro), 0) FROM quota_uses
+            WHERE released = 0 AND settled = ?
+                AND asked_at >= ? AND asked_at < ?
         """
-        SELECT COALESCE(SUM(cost_micro), 0) FROM quota_uses
-        WHERE released = 0 AND asked_at >= ? AND asked_at < ?
-        """,
-        (day_start, day_end),
-    ).fetchone()
+        params: tuple[int, ...] = (QUOTA_SETTLED, day_start, day_end)
+    else:
+        sql = """
+            SELECT COALESCE(SUM(cost_micro), 0) FROM quota_uses
+            WHERE released = 0 AND asked_at >= ? AND asked_at < ?
+        """
+        params = (day_start, day_end)
+    row = conn.execute(sql, params).fetchone()
     return int(row[0])
 
 
@@ -330,13 +362,16 @@ def _insert_use(
     now: int,
     cost_micro: int,
     kind: str = USE_KIND_ASK,
+    settled: int = QUOTA_UNSETTLED,
 ) -> int:
+    # 提问插入时还是预占。闲置摘要没有预占，调用方传入已结算的实际费用。
     cursor = conn.execute(
         """
-        INSERT INTO quota_uses (user_id, asked_at, cost_micro, released, use_kind)
-        VALUES (?, ?, ?, 0, ?)
+        INSERT INTO quota_uses (
+            user_id, asked_at, cost_micro, released, use_kind, settled
+        ) VALUES (?, ?, ?, 0, ?, ?)
         """,
-        (user_id, now, cost_micro, kind),
+        (user_id, now, cost_micro, kind, settled),
     )
     return int(cursor.lastrowid)
 

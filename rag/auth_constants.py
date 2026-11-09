@@ -51,8 +51,8 @@ COST_ALERT_SUBJECT = f"当日模型费用已达上限的 {SITE_DAILY_ALERT_PERCE
 COST_ALERT_BODY = (
     f"全站当日模型费用已达到每日上限的 {SITE_DAILY_ALERT_PERCENT}%。"
 )
-# 提问前先按 0 占位。回答成功后再写成厂商 token 算出的费用。
-ASK_COST_MICRO = 0
+# 预占整笔上限，因为输入 token 没有硬上限，小于上限的估价在并发下仍会超支。
+ASK_COST_MICRO = SITE_DAILY_CAP_MICRO
 
 # 同时有效的密钥上限。要新建必须先吊销，以后可以改这个数。
 MAX_ACTIVE_API_KEYS = 2
@@ -156,6 +156,9 @@ QUOTA_SITE = "site"
 # 提问占次数。闲置摘要只进当日费用，计次查询要跳过。
 USE_KIND_ASK = "ask"
 USE_KIND_IDLE = "idle"
+# 未结算预占只计入全站上限。告警不能把这笔还没花出去的金额当成已经跨线。
+QUOTA_UNSETTLED = 0
+QUOTA_SETTLED = 1
 SAFE_MAIL_ERRORS = frozenset({ERR_MAIL_UNCONFIGURED, ERR_MAIL_FAILED})
 JSON_TYPE = "application/json; charset=utf-8"
 # 网页在整段校验之后按行推送，不是模型 token 流。

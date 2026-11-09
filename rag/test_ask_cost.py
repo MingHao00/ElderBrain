@@ -15,6 +15,7 @@ import alert_mail
 from audit_record import FIELD_COST_ESTIMATE, FIELD_TOKENS_IN, FIELD_TOKENS_OUT
 from auth_app import AuthApp
 from auth_constants import (
+    ASK_COST_MICRO,
     ERR_ANSWER_FAILED,
     HTTP_OK,
     HTTP_SERVER_ERROR,
@@ -22,6 +23,7 @@ from auth_constants import (
     MICRO_PER_YUAN,
     MINUTE_WINDOW_SECONDS,
     PATH_ASK,
+    QUOTA_SITE,
     SHANGHAI_TZ,
     SITE_DAILY_ALERT_MICRO,
     SITE_DAILY_CAP_MICRO,
@@ -30,7 +32,16 @@ from auth_constants import (
 from auth_db import Account, AuthDb
 from auth_http import Outgoing
 from auth_identity import hash_ip, ip_salt
-from auth_quota import Reserved, reserve_quota, settle_cost, yuan_to_micro
+from auth_quota import (
+    QuotaDeny,
+    Reserved,
+    record_idle_cost,
+    release_quota,
+    reserve_quota,
+    settle_cost,
+    site_spent_micro,
+    yuan_to_micro,
+)
 from auth_routes import route_api
 from auth_session import issue_for, now_seconds
 from auth_testkit import (
@@ -79,6 +90,10 @@ _ALERT_PROMPT = 1
 _ALERT_COMPLETION = 21_000_000
 # 还差 1 微元到全站上限。这一问会跨过去，但仍然返回答案。
 _MICRO_SHORT_OF_CAP = 1
+# 远小于上限和 80% 告警线。用来确认结算写回的是实际费用。
+_SMALL_ACTUAL_MICRO = 1
+# 两笔同时占位。同一分钟最多 10 次，所以时间要错开。
+_CONCURRENT_HOLDS = 2
 _QUESTION = "火球术的射程是多少"
 _REFUSAL_QUESTION = "2024 的武器精通"
 _ZONE = ZoneInfo(SHANGHAI_TZ)
@@ -304,6 +319,102 @@ class AskCostTests(unittest.TestCase):
         self.assertFalse(settle_cost(self.app.db, later.event_id, _MICRO_SHORT_OF_CAP))
         self.assertTrue(settle_cost(self.app.db, second.event_id, SITE_DAILY_ALERT_MICRO))
 
+    def test_parallel_holds_let_one_ask_past_the_site_cap(self) -> None:
+        moment = _shanghai(2026, 11, 7, 12, 30)
+        # 错开滑动窗口后，被拒的原因只会是全站上限。
+        moments = [
+            moment + index * _MINUTE_GAP
+            for index in range(_CONCURRENT_HOLDS)
+        ]
+        results: list[Reserved | QuotaDeny] = []
+        lock = threading.Lock()
+        barrier = threading.Barrier(_CONCURRENT_HOLDS)
+
+        def worker(asked_at: int) -> None:
+            barrier.wait()
+            result = self._try_hold(asked_at)
+            with lock:
+                results.append(result)
+
+        threads = [
+            threading.Thread(target=worker, args=(asked_at,))
+            for asked_at in moments
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        reserved = [item for item in results if isinstance(item, Reserved)]
+        denied = [item for item in results if isinstance(item, QuotaDeny)]
+        self.assertEqual(len(reserved), 1)
+        self.assertEqual(len(denied), 1)
+        self.assertEqual(denied[0].kind, QUOTA_SITE)
+
+    def test_unsettled_hold_blocks_the_next_ask(self) -> None:
+        moment = _shanghai(2026, 11, 7, 13, 0)
+        first = self._reserve(moment, ASK_COST_MICRO)
+        self.assertEqual(site_spent_micro(self.app.db, moment), SITE_DAILY_CAP_MICRO)
+        denied = self._try_hold(moment + _MINUTE_GAP)
+        self.assertIsInstance(denied, QuotaDeny)
+        assert isinstance(denied, QuotaDeny)
+        self.assertEqual(denied.kind, QUOTA_SITE)
+        settled = settle_cost(self.app.db, first.event_id, _SMALL_ACTUAL_MICRO)
+        self.assertFalse(settled)
+        allowed = self._try_hold(moment + _MINUTE_GAP + _MINUTE_GAP)
+        self.assertIsInstance(allowed, Reserved)
+
+    def test_release_clears_the_site_hold(self) -> None:
+        moment = _shanghai(2026, 11, 7, 14, 0)
+        first = self._reserve(moment, ASK_COST_MICRO)
+        self.assertEqual(site_spent_micro(self.app.db, moment), SITE_DAILY_CAP_MICRO)
+        release_quota(self.app.db, first.event_id)
+        self.assertEqual(site_spent_micro(self.app.db, moment), 0)
+        second = self._try_hold(moment + _MINUTE_GAP)
+        self.assertIsInstance(second, Reserved)
+
+    def test_hold_alerts_only_when_settle_crosses(self) -> None:
+        moment = _shanghai(2026, 11, 7, 15, 0)
+        held = self._reserve(moment, ASK_COST_MICRO)
+        # 预占已经压过告警线，但发信要等实际费用跨线。
+        self.assertGreaterEqual(
+            site_spent_micro(self.app.db, moment),
+            SITE_DAILY_ALERT_MICRO,
+        )
+        self.assertEqual(_alert_count(self.app.db.path), 0)
+        below = settle_cost(self.app.db, held.event_id, _SMALL_ACTUAL_MICRO)
+        self.assertFalse(below)
+        self.assertEqual(_alert_count(self.app.db.path), 0)
+        crossing = self._reserve(moment + _MINUTE_GAP, ASK_COST_MICRO)
+        self.assertEqual(_alert_count(self.app.db.path), 0)
+        alerted = settle_cost(
+            self.app.db,
+            crossing.event_id,
+            SITE_DAILY_ALERT_MICRO,
+        )
+        self.assertTrue(alerted)
+        self.assertEqual(_alert_count(self.app.db.path), 1)
+
+    def test_idle_crosses_alert_while_question_hold_is_open(self) -> None:
+        moment = _shanghai(2026, 11, 7, 16, 0)
+        # 已结算合计停在告警线下一微元，闲置摘要再记一微元就会跨线。
+        booked_micro = SITE_DAILY_ALERT_MICRO - _SMALL_ACTUAL_MICRO
+        self.assertLess(booked_micro, SITE_DAILY_ALERT_MICRO)
+        booked = self._reserve(moment, booked_micro)
+        self.assertFalse(settle_cost(self.app.db, booked.event_id, booked_micro))
+        held = self._reserve(moment + _MINUTE_GAP, ASK_COST_MICRO)
+        idle_at = moment + _MINUTE_GAP + _MINUTE_GAP
+        crossed = record_idle_cost(
+            self.app.db,
+            self.account.user_id,
+            _SMALL_ACTUAL_MICRO,
+            idle_at,
+        )
+        self.assertTrue(crossed)
+        self.assertEqual(_alert_count(self.app.db.path), 1)
+        settled = settle_cost(self.app.db, held.event_id, _SMALL_ACTUAL_MICRO)
+        self.assertFalse(settled)
+        self.assertEqual(_alert_count(self.app.db.path), 1)
+
     def _deliver(self, subject: str, body: str) -> None:
         self.sent.append((subject, body))
 
@@ -323,16 +434,22 @@ class AskCostTests(unittest.TestCase):
         return route_api(self.app, request, handler._answer, None)
 
     def _reserve(self, moment: int, cost_micro: int = 0) -> Reserved:
-        result = reserve_quota(
+        result = self._try_hold_cost(moment, cost_micro)
+        self.assertIsInstance(result, Reserved)
+        assert isinstance(result, Reserved)
+        return result
+
+    def _try_hold(self, moment: int) -> Reserved | QuotaDeny:
+        return self._try_hold_cost(moment, ASK_COST_MICRO)
+
+    def _try_hold_cost(self, moment: int, cost_micro: int) -> Reserved | QuotaDeny:
+        return reserve_quota(
             self.app.db,
             self.account.user_id,
             self.account.created_at,
             cost_micro,
             moment,
         )
-        self.assertIsInstance(result, Reserved)
-        assert isinstance(result, Reserved)
-        return result
 
     def _assert_mail_has_no_secrets(self, subject: str, body: str) -> None:
         text = subject + body
@@ -481,6 +598,15 @@ def _audit(path: Path, question: str) -> dict[str, object]:
         if record.get("question") == question:
             return record
     raise AssertionError("没有这条审计")
+
+
+def _alert_count(path: Path) -> int:
+    conn = sqlite3.connect(path)
+    try:
+        row = conn.execute("SELECT COUNT(*) FROM site_cost_alerts").fetchone()
+    finally:
+        conn.close()
+    return int(row[0])
 
 
 def _spend(path: Path) -> int:
