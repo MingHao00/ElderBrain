@@ -234,13 +234,12 @@ def main() -> None:
 
 
 def _attach_published(rag: ElderBrainRag, auth: AuthApp, database_url: str) -> None:
-    # 每次查询再读指针。启动时抄下来的话，发布和回退要重启才生效。
+    # 父节随每次提问读到的已发布块现拼。启动时装本地清单会把旧正文固定到进程退出。
     store = PgChunkIndex(
         connect_postgres(database_url),
         lambda: published_index_version(auth.db),
     )
     store.ensure_schema()
-    rag.data.load()
     rag.retrieval = _published_search(store, rag, auth.db)
 
 

@@ -589,6 +589,219 @@ def _as_list(value: object) -> list[object]:
     return value
 
 
+SECTION_FIRE = "srd51:spell:fireball"
+SECTION_OWL = "srd51:rule:owl"
+OLD_PARENT = "已发布旧版射程一百五十尺"
+NEW_PARENT = "已发布新版射程六十尺"
+LOCAL_FIRE = "启动时本地清单里的火球术句子"
+LOCAL_OWL = "启动时本地清单里的猫头鹰句子"
+FIRE_EARLY = "前半射程"
+FIRE_LATE = "后半范围"
+OWL_BODY = "猫头鹰在夜里飞"
+ORPHAN_BODY = "无节号孤立句"
+FIRE_CHUNK_EARLY = "srd51:spell:fireball#zh#0"
+FIRE_CHUNK_LATE = "srd51:spell:fireball#zh#1"
+OWL_CHUNK = "srd51:rule:owl#zh#0"
+
+
+class PublishedParentTests(unittest.TestCase):
+    def test_ask_parent_follows_published_pointer(self) -> None:
+        conn = FakeConn()
+        conn.committed = [
+            _published_row(PUBLISHED, OLD_PARENT, FIRE_CHUNK_EARLY, SECTION_FIRE),
+            _published_row(BUILDING, NEW_PARENT, FIRE_CHUNK_EARLY, SECTION_FIRE),
+        ]
+        pointer = {"value": PUBLISHED}
+        inner = PgChunkIndex(lambda: conn, lambda: pointer["value"])
+        store = _FlipAfterSearch(inner, pointer, BUILDING)
+        embed = _RecordingEmbed()
+        rag, reply = _asking_rag(store, embed, {SECTION_FIRE: LOCAL_FIRE}, _KeepRank())
+        rag.ask(QUERY)
+        # search 返回后指针已切走。拼父节若再读库，这次就会拿到新版本。
+        self.assertEqual(pointer["value"], BUILDING)
+        self.assertEqual(store.visible_reads, 1)
+        self.assertEqual(embed.calls, 1)
+        first = _new_parents(self, reply, 0)
+        self.assertEqual([piece.text for piece in first], [OLD_PARENT])
+        before = len(reply.parents)
+        pointer["value"] = BUILDING
+        rag.ask(QUERY)
+        # 引用校验失败会用同一批父节再生成一次。取这次提问的第一份记录。
+        second = _new_parents(self, reply, before)
+        self.assertEqual([piece.text for piece in second], [NEW_PARENT])
+        self.assertNotIn(OLD_PARENT, second[0].text)
+        self.assertNotIn(LOCAL_FIRE, second[0].text)
+        self.assertEqual(store.visible_reads, 2)
+        self.assertEqual(embed.calls, 2)
+
+    def test_ask_joins_published_chunks_not_startup_text(self) -> None:
+        conn = FakeConn()
+        conn.committed = [
+            _published_row(PUBLISHED, FIRE_LATE, FIRE_CHUNK_LATE, SECTION_FIRE),
+            _published_row(PUBLISHED, FIRE_EARLY, FIRE_CHUNK_EARLY, SECTION_FIRE),
+            _published_row(PUBLISHED, ORPHAN_BODY, "orphan", ""),
+            _published_row(
+                PUBLISHED,
+                OWL_BODY,
+                OWL_CHUNK,
+                SECTION_OWL,
+                _vector(0.0, 1.0),
+            ),
+        ]
+        store = PgChunkIndex(lambda: conn, lambda: PUBLISHED)
+        embed = _RecordingEmbed()
+        local = {SECTION_FIRE: LOCAL_FIRE, SECTION_OWL: LOCAL_OWL}
+        rag, reply = _asking_rag(
+            store,
+            embed,
+            local,
+            _SectionOrder((SECTION_FIRE, SECTION_OWL)),
+        )
+        rag.ask(QUERY)
+        self.assertEqual(embed.calls, 1)
+        parents = _new_parents(self, reply, 0)
+        self.assertEqual(
+            [piece.text for piece in parents],
+            [f"{FIRE_EARLY}\n\n{FIRE_LATE}", OWL_BODY],
+        )
+        joined = "\n".join(piece.text for piece in parents)
+        self.assertNotIn(LOCAL_FIRE, joined)
+        self.assertNotIn(LOCAL_OWL, joined)
+        self.assertNotIn(ORPHAN_BODY, joined)
+
+
+class _FlipAfterSearch:
+    """检索读完就把指针拨走，用来抓住拼父节时的第二次读取。"""
+
+    def __init__(self, inner: PgChunkIndex, pointer: dict[str, str], nxt: str) -> None:
+        self.inner = inner
+        self.pointer = pointer
+        self.nxt = nxt
+        self.visible_reads = 0
+
+    def visible_chunks(
+        self,
+        rule_version: str,
+        enabled_source_ids: Sequence[str],
+    ) -> list[RagPiece]:
+        self.visible_reads += 1
+        return self.inner.visible_chunks(rule_version, enabled_source_ids)
+
+    def search(
+        self,
+        rule_version: str,
+        enabled_source_ids: Sequence[str],
+        query_vector: Sequence[float],
+        limit: int,
+    ) -> list[RagPiece]:
+        found = self.inner.search(
+            rule_version,
+            enabled_source_ids,
+            query_vector,
+            limit,
+        )
+        self.pointer["value"] = self.nxt
+        return found
+
+
+class _KeepRank:
+    def rerank(self, question: str, pieces: list[RagPiece]) -> list[RagPiece]:
+        del question
+        return list(pieces)
+
+
+class _SectionOrder:
+    def __init__(self, order: tuple[str, ...]) -> None:
+        self.order = order
+
+    def rerank(self, question: str, pieces: list[RagPiece]) -> list[RagPiece]:
+        del question
+        return sorted(pieces, key=self._rank)
+
+    def _rank(self, piece: RagPiece) -> int:
+        section_id = piece.metadata.get("section_id", "")
+        if section_id in self.order:
+            return self.order.index(section_id)
+        return len(self.order)
+
+
+class _RecordParents:
+    def __init__(self) -> None:
+        self.parents: list[list[RagPiece]] = []
+
+    def answer(
+        self,
+        question: str,
+        parents: list[RagPiece],
+        card: object = None,
+    ) -> str:
+        del question, card
+        self.parents.append(list(parents))
+        return "不是引用"
+
+
+def _asking_rag(
+    store: object,
+    embed: _RecordingEmbed,
+    local_parents: dict[str, str],
+    reranker: object,
+) -> tuple[ElderBrainRag, _RecordParents]:
+    rag = ElderBrainRag()
+    rag.retrieval = PublishedHybridSearch(
+        store,
+        embed.embed_query,
+        lambda: (SOURCE_ID,),
+    )
+    rag.reranker = reranker
+    reply = _RecordParents()
+    rag.generation = reply
+    rag.data.parents = {
+        section_id: RagPiece(
+            text,
+            {
+                "section_id": section_id,
+                "entry_id": "srd51:spell:fireball",
+                "rule_version": RULE_VERSION,
+            },
+        )
+        for section_id, text in local_parents.items()
+    }
+    return rag, reply
+
+
+def _new_parents(
+    case: unittest.TestCase,
+    reply: _RecordParents,
+    index: int,
+) -> list[RagPiece]:
+    case.assertGreater(len(reply.parents), index)
+    return reply.parents[index]
+
+
+def _published_row(
+    index_version: str,
+    body: str,
+    chunk_id: str,
+    section_id: str,
+    embedding: tuple[float, ...] | None = None,
+) -> dict[str, object]:
+    return {
+        "index_version": index_version,
+        "chunk_id": chunk_id,
+        "rule_version": RULE_VERSION,
+        "source_id": SOURCE_ID,
+        "body": body,
+        "metadata": {
+            "chunk_id": chunk_id,
+            "section_id": section_id,
+            "entry_id": "srd51:spell:fireball",
+            "rule_version": RULE_VERSION,
+            "source_id": SOURCE_ID,
+        },
+        "embedding": list(embedding or _vector(1.0)),
+    }
+
+
 class DemoStartupTests(unittest.TestCase):
     def test_missing_database_url_does_not_build_faiss(self) -> None:
         removed = {DATABASE_URL_ENV: ""}

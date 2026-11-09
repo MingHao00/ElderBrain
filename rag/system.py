@@ -32,6 +32,7 @@ from generation_score import parse_generation
 from modules.data_preparation import DataPreparationModule, RagPiece
 from modules.generation import MISSING_TOKEN_COUNT, NO_EVIDENCE, GenerationIntegrationModule
 from modules.index_construction import IndexConstructionModule, file_sha256
+from modules.published_retrieval import PublishedHybridSearch, parent_sections_from_chunks
 from modules.retrieval import RetrievalOptimizationModule
 from modules.text_rerank import TextReranker, load_text_reranker
 from scope import INJECTION_REFUSAL, VERSION_SENTENCE, refusal_for
@@ -106,9 +107,9 @@ class ElderBrainRag:
         if self.retrieval is None:
             raise ValueError("请先构建知识库")
         query = retrieval_query(question, active)
-        candidates = self.retrieval.hybrid_search(query)
+        candidates, published = _retrieve_for_ask(self.retrieval, query)
         ranked = self._rerank(query, candidates)[: self.config.top_k]
-        parents = self.data.parent_sections(ranked)
+        parents = _parents_for_ask(self.data, ranked, published)
         if not parents:
             return _unchecked(NO_EVIDENCE, CATEGORY_NO_EVIDENCE)
         return self._checked_generation(question, parents, active)
@@ -146,6 +147,26 @@ class ElderBrainRag:
         if self.reranker is None:
             self.reranker = load_text_reranker()
         return self.reranker.rerank(question, candidates)
+
+
+def _retrieve_for_ask(
+    retrieval: RetrievalOptimizationModule | PublishedHybridSearch,
+    query: str,
+) -> tuple[list[RagPiece], tuple[RagPiece, ...] | None]:
+    if isinstance(retrieval, PublishedHybridSearch):
+        return retrieval.search_with_published(query)
+    return retrieval.hybrid_search(query), None
+
+
+def _parents_for_ask(
+    data: DataPreparationModule,
+    ranked: list[RagPiece],
+    published: tuple[RagPiece, ...] | None,
+) -> list[RagPiece]:
+    # None 才是本地 FAISS。已发布路径没有块时也不能退回启动清单。
+    if published is None:
+        return data.parent_sections(ranked)
+    return parent_sections_from_chunks(published, ranked)
 
 
 def _selected_rag() -> ElderBrainRag:
