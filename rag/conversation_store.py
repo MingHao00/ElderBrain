@@ -87,6 +87,23 @@ def load_card(db: AuthDb, conversation_id: str) -> SessionCard:
         return _load_card(conn, conversation_id)
 
 
+def session_card_exists(db: AuthDb, conversation_id: str) -> bool:
+    """这场对话在 session_cards 里有没有一行。
+
+    没有行时 load_card 仍返回空卡片，不能靠条目是否为空判断行在不在。
+
+    Args:
+        db: 账号库。
+        conversation_id: 这场对话。
+
+    Returns:
+        有这一行时为 True。条目是空数组也算有。
+    """
+    with db.immediate() as conn:
+        _ensure(conn)
+        return _card_exists(conn, conversation_id)
+
+
 def list_conversations(db: AuthDb, user_id: str) -> list[dict[str, str]]:
     """最近更新的在前。侧栏不用再排一次。"""
     with db.immediate() as conn:

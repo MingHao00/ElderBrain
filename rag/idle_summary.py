@@ -20,7 +20,12 @@ from auth_constants import MICRO_PER_YUAN, SITE_DAILY_CAP_MICRO
 from auth_db import AuthDb
 from auth_quota import record_idle_cost, site_spent_micro
 from config import RULE_VERSION
-from conversation_store import DueTurn, apply_idle_card, load_due_turns
+from conversation_store import (
+    DueTurn,
+    apply_idle_card,
+    load_due_turns,
+    session_card_exists,
+)
 from generation_call import QWEN_MODEL, complete, qwen_body, qwen_client, qwen_yuan
 from session_card import CardEntry, SessionCard, generation_context
 
@@ -187,20 +192,117 @@ def _fold_one(
     # 先看费用再调模型。到了上限就不调用，也不把原话标成已折。
     if _at_cap(db, now):
         return False
+    # 没有卡片行就写不进去，未折原话会一直到点。调用前跳过，才不会反复记费。
+    if not session_card_exists(db, turn.conversation_id):
+        return False
     brief = _invoke(summarize, turn)
     if brief is None:
+        return False
+    entries = _discussed_entries(brief.entries, turn)
+    # 给了条目但一条都对不上。保持原状，下次再试，这次不记费。
+    if entries is None:
         return False
     applied = apply_idle_card(
         db,
         turn.conversation_id,
         turn.message_ids,
         turn.latest_user_message_id,
-        brief.entries,
+        entries,
         _kept_version(brief, turn.card),
     )
+    # 调用期间行被删掉。写失败不能记费，否则下一轮扫描还会再记一笔。
+    if not applied and not session_card_exists(db, turn.conversation_id):
+        return False
     # 模型已经花了钱。新问题只挡住覆盖卡片，费用仍进当日累计。
     _charge(db, turn.user_id, brief, now, on_alert)
     return applied
+
+
+def _discussed_entries(
+    entries: tuple[CardEntry, ...],
+    turn: DueTurn,
+) -> tuple[CardEntry, ...] | None:
+    """空列表仍交给写入。讨论过的条目被滤光时返回 None，表示这次失败。
+
+    Args:
+        entries: 模型返回的条目。
+        turn: 这次读到的未折原话和当时的卡片。
+
+    Returns:
+        可以整卡替换的条目。一条都不剩时返回 None。空输入返回空元组。
+    """
+    if not entries:
+        return entries
+    kept = tuple(_keep_discussed(entry, turn) for entry in entries)
+    discussed = tuple(item for item in kept if item is not None)
+    if not discussed:
+        return None
+    return discussed
+
+
+def _keep_discussed(entry: CardEntry, turn: DueTurn) -> CardEntry | None:
+    if not _entry_id_discussed(entry.entry_id, turn):
+        return None
+    return _ground_entry(entry, turn)
+
+
+def _entry_id_discussed(entry_id: str, turn: DueTurn) -> bool:
+    if not entry_id:
+        return False
+    if any(item.entry_id == entry_id for item in turn.card.entries):
+        return True
+    # 原话里的编号必须是空白隔开的整词，短碎片不能算讨论过。
+    return _in_utterances(entry_id, turn.utterances)
+
+
+def _ground_entry(entry: CardEntry, turn: DueTurn) -> CardEntry:
+    current = _same_entry(turn.card, entry.entry_id)
+    concept = None if current is None else current.concept_key
+    title = None if current is None else current.title
+    return CardEntry(
+        entry.entry_id,
+        _accepted_field(entry.concept_key, concept, turn.utterances),
+        _accepted_field(entry.title, title, turn.utterances),
+        entry.location,
+    )
+
+
+def _accepted_field(
+    proposed: str | None,
+    current: str | None,
+    utterances: tuple[str, ...],
+) -> str | None:
+    """对不上卡片上的原字段、也不在原话里时，退回卡片已有的值。"""
+    if proposed is not None and _field_attested(proposed, current, utterances):
+        return proposed
+    return current
+
+
+def _field_attested(
+    proposed: str,
+    current: str | None,
+    utterances: tuple[str, ...],
+) -> bool:
+    if not proposed:
+        return False
+    # 卡片字段要整段相等。原话里也只认空白隔开的整词。
+    if current is not None and proposed == current:
+        return True
+    return _in_utterances(proposed, utterances)
+
+
+def _same_entry(card: SessionCard, entry_id: str) -> CardEntry | None:
+    for item in card.entries:
+        if item.entry_id == entry_id:
+            return item
+    return None
+
+
+def _in_utterances(needle: str, utterances: tuple[str, ...]) -> bool:
+    if not needle:
+        return False
+    # 子串会把「术」「spell」从更长的词里抠出来。只认空白隔开的整词。
+    return any(needle in text.split() for text in utterances)
 
 
 def _at_cap(db: AuthDb, now: int) -> bool:

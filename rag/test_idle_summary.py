@@ -56,7 +56,8 @@ _COMPLETION_TOKENS = 500
 # 输出单价下跨过 16.8 元，又不到 21 元。
 _ALERT_PROMPT = 1
 _ALERT_COMPLETION = 21_000_000
-_QUESTION = "火球术怎么施放"
+# 要写上的编号、概念和标题必须出现在未折原话里，摘要才会收下。
+_QUESTION = "火球术怎么施放 srd51:spell:shield concept.shield 护盾术"
 _FOLLOW = "升环呢"
 _ASSISTANT = "只有助手原文才会出现的句子。火球术伤害是 8d6。"
 _CONCLUSION = "火球术伤害是 8d6，这是结论不应该进卡片。"
@@ -66,6 +67,16 @@ _TITLE = "卡片标题火球术"
 _NEW_ENTRY = "srd51:spell:shield"
 _NEW_CONCEPT = "concept.shield"
 _NEW_TITLE = "护盾术"
+# 这些字符串不在未折原话里，也不在开场卡片上。
+_ABSENT_ENTRY = "srd51:spell:meteor"
+_ABSENT_CONCEPT = "concept.meteor"
+_ABSENT_TITLE = "流星爆"
+_FAKE_TITLE = "杜撰标题不会进卡片"
+# 这些碎片只嵌在更长的词里，空白分词后不是独立的整词。
+_FRAGMENT_ENTRY = "spell"
+_FRAGMENT_CONCEPT = "shield"
+_FRAGMENT_TITLE = "术"
+_FRAGMENT_PHRASE = "火球术"
 _FAKE_USER = "site"
 
 
@@ -390,6 +401,206 @@ class IdleSummaryTests(unittest.TestCase):
         self.assertNotEqual(stored.entries[0].entry_id, _NEW_ENTRY)
         self.assertEqual(_folded_users(self.db.path, conversation_id), [0, 0])
         self.assertIn(_FOLLOW, _user_bodies(self.db.path, conversation_id))
+        # 新问题只挡住覆盖。模型已经调用，这一次费用仍要记。
+        expected = round(qwen_yuan(_PROMPT_TOKENS, _COMPLETION_TOKENS) * MICRO_PER_YUAN)
+        self.assertEqual(_spend(self.db.path), expected)
+
+    def test_missing_card_row_skips_summary_and_charge(self) -> None:
+        asked = _at(2026, 11, 8, 19, 15)
+        conversation_id = self._talk(asked)
+        _delete_card(self.db.path, conversation_id)
+        self.assertEqual(_card_count(self.db.path, conversation_id), 0)
+        calls: list[int] = []
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            calls.append(1)
+            return _brief()
+
+        moment = asked + IDLE_SUMMARY_SECONDS
+        before = _spend(self.db.path)
+        first = scan_idle_summaries(self.db, summarize, moment)
+        second = scan_idle_summaries(self.db, summarize, moment)
+        self.assertEqual(first, 0)
+        self.assertEqual(second, 0)
+        self.assertEqual(calls, [])
+        self.assertEqual(_spend(self.db.path), before)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [0])
+        self.assertEqual(_card_count(self.db.path, conversation_id), 0)
+
+    def test_card_deleted_during_summary_is_not_charged(self) -> None:
+        asked = _at(2026, 11, 8, 19, 20)
+        conversation_id = self._talk(asked)
+        calls: list[int] = []
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            calls.append(1)
+            _delete_card(self.db.path, conversation_id)
+            return IdleBrief(
+                (CardEntry(_ENTRY, _CONCEPT, _TITLE),),
+                "5.1",
+                _PROMPT_TOKENS,
+                _COMPLETION_TOKENS,
+            )
+
+        moment = asked + IDLE_SUMMARY_SECONDS
+        before = _spend(self.db.path)
+        found = scan_idle_summaries(self.db, summarize, moment)
+        self.assertEqual(found, 0)
+        self.assertEqual(calls, [1])
+        self.assertEqual(_spend(self.db.path), before)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [0])
+        again = scan_idle_summaries(self.db, summarize, moment)
+        self.assertEqual(again, 0)
+        self.assertEqual(calls, [1])
+        self.assertEqual(_spend(self.db.path), before)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [0])
+
+    def test_undiscussed_entry_is_left_unfolded_without_cost(self) -> None:
+        asked = _at(2026, 11, 8, 19, 25)
+        conversation_id = self._talk(asked)
+        calls: list[int] = []
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            calls.append(1)
+            return IdleBrief(
+                (CardEntry(_ABSENT_ENTRY, _ABSENT_CONCEPT, _ABSENT_TITLE),),
+                "5.1",
+                _PROMPT_TOKENS,
+                _COMPLETION_TOKENS,
+            )
+
+        moment = asked + IDLE_SUMMARY_SECONDS
+        first = scan_idle_summaries(self.db, summarize, moment)
+        second = scan_idle_summaries(self.db, summarize, moment)
+        stored = load_card(self.db, conversation_id)
+        self.assertEqual(first, 0)
+        self.assertEqual(second, 0)
+        self.assertEqual(calls, [1, 1])
+        self.assertEqual(stored.entries[0].entry_id, _ENTRY)
+        self.assertEqual(stored.entries[0].concept_key, _CONCEPT)
+        self.assertEqual(stored.entries[0].title, _TITLE)
+        self.assertEqual(len(stored.entries), 1)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [0])
+        self.assertEqual(_spend(self.db.path), 0)
+        raw = _card_json(self.db.path, conversation_id)
+        self.assertNotIn(_ABSENT_ENTRY, raw)
+        self.assertNotIn(_ABSENT_TITLE, raw)
+
+    def test_fabricated_title_keeps_the_card_title(self) -> None:
+        asked = _at(2026, 11, 8, 19, 35)
+        conversation_id = self._talk(asked)
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            return IdleBrief(
+                (CardEntry(_ENTRY, _ABSENT_CONCEPT, _FAKE_TITLE),),
+                "5.1",
+                _PROMPT_TOKENS,
+                _COMPLETION_TOKENS,
+            )
+
+        found = scan_idle_summaries(self.db, summarize, asked + IDLE_SUMMARY_SECONDS)
+        stored = load_card(self.db, conversation_id)
+        self.assertEqual(found, 1)
+        self.assertEqual(len(stored.entries), 1)
+        self.assertEqual(stored.entries[0].entry_id, _ENTRY)
+        self.assertEqual(stored.entries[0].concept_key, _CONCEPT)
+        self.assertEqual(stored.entries[0].title, _TITLE)
+        self.assertNotEqual(stored.entries[0].title, _FAKE_TITLE)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [1])
+        expected = round(qwen_yuan(_PROMPT_TOKENS, _COMPLETION_TOKENS) * MICRO_PER_YUAN)
+        self.assertEqual(_spend(self.db.path), expected)
+        self.assertNotIn(_FAKE_TITLE, _card_json(self.db.path, conversation_id))
+
+    def test_utterance_fragments_are_not_written(self) -> None:
+        asked = _at(2026, 11, 8, 19, 40)
+        conversation_id = self._talk(asked)
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            return IdleBrief(
+                (CardEntry(_FRAGMENT_ENTRY, _FRAGMENT_CONCEPT, _FRAGMENT_TITLE),),
+                "5.1",
+                _PROMPT_TOKENS,
+                _COMPLETION_TOKENS,
+            )
+
+        found = scan_idle_summaries(self.db, summarize, asked + IDLE_SUMMARY_SECONDS)
+        stored = load_card(self.db, conversation_id)
+        self.assertEqual(found, 0)
+        self.assertEqual(len(stored.entries), 1)
+        self.assertEqual(stored.entries[0].entry_id, _ENTRY)
+        self.assertEqual(stored.entries[0].concept_key, _CONCEPT)
+        self.assertEqual(stored.entries[0].title, _TITLE)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [0])
+        self.assertEqual(_spend(self.db.path), 0)
+
+    def test_unmatched_fields_stay_empty_for_spoken_entry(self) -> None:
+        asked = _at(2026, 11, 8, 19, 50)
+        conversation_id = self._talk(asked)
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            return IdleBrief(
+                (CardEntry(_NEW_ENTRY, _FRAGMENT_CONCEPT, _FRAGMENT_PHRASE),),
+                "5.1",
+                _PROMPT_TOKENS,
+                _COMPLETION_TOKENS,
+            )
+
+        found = scan_idle_summaries(self.db, summarize, asked + IDLE_SUMMARY_SECONDS)
+        stored = load_card(self.db, conversation_id)
+        self.assertEqual(found, 1)
+        self.assertEqual(len(stored.entries), 1)
+        self.assertEqual(stored.entries[0].entry_id, _NEW_ENTRY)
+        self.assertIsNone(stored.entries[0].concept_key)
+        self.assertIsNone(stored.entries[0].title)
+        self.assertNotEqual(stored.entries[0].concept_key, _FRAGMENT_CONCEPT)
+        self.assertNotEqual(stored.entries[0].title, _FRAGMENT_PHRASE)
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [1])
+        expected = round(qwen_yuan(_PROMPT_TOKENS, _COMPLETION_TOKENS) * MICRO_PER_YUAN)
+        self.assertEqual(_spend(self.db.path), expected)
+
+    def test_empty_entry_list_still_folds_and_charges(self) -> None:
+        asked = _at(2026, 11, 8, 19, 45)
+        conversation_id = self._talk(asked)
+
+        def summarize(
+            utterances: tuple[str, ...],
+            card: SessionCard,
+        ) -> IdleBrief | None:
+            del utterances, card
+            return IdleBrief((), "5.1", _PROMPT_TOKENS, _COMPLETION_TOKENS)
+
+        found = scan_idle_summaries(self.db, summarize, asked + IDLE_SUMMARY_SECONDS)
+        stored = load_card(self.db, conversation_id)
+        self.assertEqual(found, 1)
+        self.assertEqual(stored.entries, ())
+        self.assertEqual(stored.rule_version, "5.1")
+        self.assertEqual(_folded_users(self.db.path, conversation_id), [1])
+        expected = round(qwen_yuan(_PROMPT_TOKENS, _COMPLETION_TOKENS) * MICRO_PER_YUAN)
+        self.assertEqual(_spend(self.db.path), expected)
 
     def test_site_cap_does_not_call_or_fold(self) -> None:
         asked = _at(2026, 11, 8, 20, 0)
@@ -680,6 +891,23 @@ def _user_bodies(path: Path, conversation_id: str) -> list[str]:
         (conversation_id, "user"),
     )
     return [str(row[0]) for row in rows]
+
+
+def _delete_card(path: Path, conversation_id: str) -> None:
+    _write(
+        path,
+        "DELETE FROM session_cards WHERE conversation_id = ?",
+        (conversation_id,),
+    )
+
+
+def _card_count(path: Path, conversation_id: str) -> int:
+    row = _one(
+        path,
+        "SELECT COUNT(*) FROM session_cards WHERE conversation_id = ?",
+        (conversation_id,),
+    )
+    return int(row[0])
 
 
 def _set_rule_version(path: Path, conversation_id: str, version: str) -> None:
