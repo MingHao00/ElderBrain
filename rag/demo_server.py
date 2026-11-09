@@ -28,12 +28,15 @@ from auth_constants import (
     PATH_QUERY,
     QUESTION_TOO_LONG,
 )
+from admin_store import published_index_version
 from auth_db import AuthDb
 from auth_http import Incoming, Outgoing, json_error
 from auth_routes import route_api
-from config import REPO_ROOT
+from config import REPO_ROOT, require_env
 from demo_answer import MAX_BODY_BYTES, present_answer
 from idle_summary import start_idle_scan, summarize_with_qwen
+from modules.published_retrieval import PublishedHybridSearch, enabled_source_ids
+from modules.vector_store import DATABASE_URL_ENV, PgChunkIndex, connect_postgres
 from run_generation_experiment import _public_error
 from session_card import SessionCard
 from system import CitedReply, ElderBrainRag, _selected_rag
@@ -196,12 +199,24 @@ def _report_failure(exc: Exception) -> None:
     print(_public_error(exc))
 
 
-def main() -> None:
-    """装好检索块后在本机端口提供页面。闲置摘要在别的线程里扫。"""
+def open_published_demo() -> tuple[ElderBrainRag, AuthApp]:
+    """接上已发布向量库。没有 DATABASE_URL 时失败，不建 FAISS。
+
+    返回已经装好检索的 RAG 和账号库。连接失败时抛出 ConnectionError，且不附带连接串。
+    """
+    # 缺少连接串就停。退回本地 FAISS 会读到未发布版本。
+    database_url = require_env(DATABASE_URL_ENV)
     rag = _selected_rag()
-    count = rag.build_knowledge_base()
+    auth = open_auth()
+    _attach_published(rag, auth, database_url)
+    return rag, auth
+
+
+def main() -> None:
+    """装好已发布检索后在本机端口提供页面。闲置摘要在别的线程里扫。"""
+    rag, auth = open_published_demo()
     DemoHandler.rag = rag
-    DemoHandler.auth = open_auth()
+    DemoHandler.auth = auth
     # 不放进提问请求里等模型，所以下一问不会被这次压缩挡住。
     idle = start_idle_scan(
         DemoHandler.auth.db,
@@ -209,13 +224,42 @@ def main() -> None:
         on_alert=_alert_site_cost,
     )
     server = ThreadingHTTPServer((HOST, PORT), DemoHandler)
-    print(f"已装入 {count} 个检索块")
+    print(f"已装入 {_chunk_count(rag)} 个检索块")
     print(f"http://{HOST}:{PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         idle.stop.set()
         server.server_close()
+
+
+def _attach_published(rag: ElderBrainRag, auth: AuthApp, database_url: str) -> None:
+    # 每次查询再读指针。启动时抄下来的话，发布和回退要重启才生效。
+    store = PgChunkIndex(
+        connect_postgres(database_url),
+        lambda: published_index_version(auth.db),
+    )
+    store.ensure_schema()
+    rag.data.load()
+    rag.retrieval = _published_search(store, rag, auth.db)
+
+
+def _published_search(
+    store: PgChunkIndex,
+    rag: ElderBrainRag,
+    db: AuthDb,
+) -> PublishedHybridSearch:
+    embeddings = rag.index.embeddings
+    if embeddings is None:
+        raise ValueError("嵌入客户端未配置")
+    return PublishedHybridSearch(store, embeddings.embed_query, lambda: enabled_source_ids(db))
+
+
+def _chunk_count(rag: ElderBrainRag) -> int:
+    retrieval = rag.retrieval
+    if not isinstance(retrieval, PublishedHybridSearch):
+        raise ValueError("检索未接上已发布索引")
+    return retrieval.visible_count()
 
 
 def _alert_site_cost() -> None:

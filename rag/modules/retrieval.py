@@ -110,3 +110,28 @@ def _one_per_section(pieces: list[RagPiece]) -> list[RagPiece]:
 def _piece(doc: Document) -> RagPiece:
     metadata = {key: str(value) for key, value in doc.metadata.items()}
     return RagPiece(text=doc.page_content, metadata=metadata)
+
+
+def bm25_hits(pieces: list[RagPiece], query: str) -> list[RagPiece]:
+    """只在给定块上计算 BM25，并丢掉非正分。
+
+    返回按分数从高到低、最多 CANDIDATE_K 条。pieces 为空时返回空列表。
+    调用方必须先去掉未发布和已停用来源的块，这里不会再过滤版本。
+    """
+    if not pieces:
+        return []
+    retriever = BM25Retriever.from_documents(
+        _as_documents(pieces),
+        preprocess_func=tokenize_cjk,
+        k=CANDIDATE_K,
+    )
+    return [_piece(doc) for doc in _positive_bm25(retriever, query)]
+
+
+def fuse_hits(vector_pieces: list[RagPiece], lexical_pieces: list[RagPiece]) -> list[RagPiece]:
+    """倒数排名融合后，每个父节只留排名最高的一块。
+
+    向量命中先计入，BM25 随后计入。两边都空时返回空列表。
+    """
+    fused = _rrf(_as_documents(vector_pieces), _as_documents(lexical_pieces))
+    return _one_per_section([_piece(doc) for doc in fused])
