@@ -94,7 +94,15 @@ class AuditRecordTests(unittest.TestCase):
         refused = sample_request(result_type="拒答", refusal_class="R2")
         self.assertEqual(refused["result_type"], "拒答")
         self.assertEqual(refused["refusal_class"], "R2")
-        for action in ("接入来源", "停用来源", "发布", "回退", "调整配额"):
+        for action in (
+            "接入来源",
+            "停用来源",
+            "启用来源",
+            "发布",
+            "回退",
+            "调整配额",
+            "重建索引",
+        ):
             admin = build_admin_audit("admin-3", CREATED, action)
             self.assertEqual(admin["action"], action)
 
@@ -141,8 +149,11 @@ class AuditRecordTests(unittest.TestCase):
             hash_client_ip(SAMPLE_IP, "")
 
     def test_illegal_admin_action_is_rejected(self) -> None:
-        with self.assertRaises(AuditRecordRejected):
-            build_admin_audit("admin-3", CREATED, "删除数据")
+        # 近义自由字符串不能混进允许集合。重建必须用具名动作。
+        for action in ("删除数据", "重建一下"):
+            with self.subTest(action=action):
+                with self.assertRaises(AuditRecordRejected):
+                    build_admin_audit("admin-3", CREATED, action)
 
     def test_unchecked_citation_is_allowed(self) -> None:
         record = sample_request(citation_check=CITATION_UNCHECKED)

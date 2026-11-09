@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from admin_routes import handle_admin
 from auth_app import AuthApp
 from auth_constants import ERR_NOT_FOUND
 from auth_gate import AnswerFn, FailFn, handle_question
@@ -16,13 +17,16 @@ def route_api(
     answer: AnswerFn,
     on_failure: FailFn | None,
 ) -> Outgoing:
-    """先看登录路径，再看对话，最后看提问。都不是就 404。"""
+    """先看登录和对话，再看管理，最后看提问。都不是就 404。"""
     login = handle_login(app, request)
     if login is not None:
         return login
     stored = handle_conversations(app, request)
     if stored is not None:
         return stored
+    admin = handle_admin(app, request)
+    if admin is not None:
+        return admin
     asked = handle_question(app, request, answer, on_failure)
     if asked is not None:
         return asked

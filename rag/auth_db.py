@@ -21,6 +21,7 @@ from auth_constants import (
     PROVIDER_EMAIL,
     PROVIDER_GITHUB,
     SQLITE_TIMEOUT_SECONDS,
+    USE_KIND_ASK,
 )
 from auth_identity import new_user_id
 
@@ -70,18 +71,27 @@ CREATE TABLE IF NOT EXISTS api_keys (
     created_at INTEGER NOT NULL,
     revoked_at INTEGER
 );
+-- 默认 ask 与 USE_KIND_ASK 相同。旧库没有 use_kind 时再 ALTER。
 CREATE TABLE IF NOT EXISTS quota_uses (
     id INTEGER PRIMARY KEY,
     user_id TEXT NOT NULL,
     asked_at INTEGER NOT NULL,
     cost_micro INTEGER NOT NULL,
-    released INTEGER NOT NULL
+    released INTEGER NOT NULL,
+    use_kind TEXT NOT NULL DEFAULT 'ask'
 );
 -- 一天一行。和费用写在同一事务里，挡住同一天的第二封告警。
 CREATE TABLE IF NOT EXISTS site_cost_alerts (
     day_start INTEGER PRIMARY KEY
 );
 """
+
+# SQLite 的 ALTER TABLE 不能给默认值绑定 ?。取值来自常量，不是外部输入。
+_ADD_USE_KIND = (
+    "ALTER TABLE quota_uses ADD COLUMN use_kind TEXT NOT NULL DEFAULT '"
+    + USE_KIND_ASK
+    + "'"
+)
 
 
 @dataclass(frozen=True)
@@ -162,6 +172,8 @@ class AuthDb:
         conn = self._connect()
         try:
             conn.executescript(_SCHEMA)
+            # 已有库的建表语句没有 use_kind。缺了再补，不能假设表是空的。
+            _ensure_use_kind(conn)
             conn.commit()
         finally:
             conn.close()
@@ -176,6 +188,15 @@ class AuthDb:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
+
+
+def _ensure_use_kind(conn: sqlite3.Connection) -> None:
+    """旧库补上 use_kind。已有的行按提问计次。"""
+    rows = conn.execute("PRAGMA table_info(quota_uses)").fetchall()
+    names = {str(row["name"]) for row in rows}
+    if "use_kind" in names:
+        return
+    conn.execute(_ADD_USE_KIND)
 
 
 def default_db_path() -> Path:

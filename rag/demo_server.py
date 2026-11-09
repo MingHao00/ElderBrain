@@ -9,6 +9,7 @@ _RAG_DIR = Path(__file__).resolve().parent
 if str(_RAG_DIR) not in sys.path:
     sys.path.insert(0, str(_RAG_DIR))
 
+from alert_mail import send_alert_mail
 from audit_log import (
     UNKNOWN_USER_ID,
     citation_on,
@@ -18,6 +19,8 @@ from audit_log import (
 )
 from auth_app import AuthApp, open_auth
 from auth_constants import (
+    COST_ALERT_BODY,
+    COST_ALERT_SUBJECT,
     ERR_ANSWER_FAILED,
     HTTP_BAD_REQUEST,
     HTTP_UNPROCESSABLE,
@@ -30,6 +33,7 @@ from auth_http import Incoming, Outgoing, json_error
 from auth_routes import route_api
 from config import REPO_ROOT
 from demo_answer import MAX_BODY_BYTES, present_answer
+from idle_summary import start_idle_scan, summarize_with_qwen
 from run_generation_experiment import _public_error
 from session_card import SessionCard
 from system import CitedReply, ElderBrainRag, _selected_rag
@@ -193,18 +197,37 @@ def _report_failure(exc: Exception) -> None:
 
 
 def main() -> None:
-    """装好检索块后在本机端口提供页面。"""
+    """装好检索块后在本机端口提供页面。闲置摘要在别的线程里扫。"""
     rag = _selected_rag()
     count = rag.build_knowledge_base()
     DemoHandler.rag = rag
     DemoHandler.auth = open_auth()
+    # 不放进提问请求里等模型，所以下一问不会被这次压缩挡住。
+    idle = start_idle_scan(
+        DemoHandler.auth.db,
+        summarize_with_qwen,
+        on_alert=_alert_site_cost,
+    )
     server = ThreadingHTTPServer((HOST, PORT), DemoHandler)
     print(f"已装入 {count} 个检索块")
     print(f"http://{HOST}:{PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
+        idle.stop.set()
         server.server_close()
+
+
+def _alert_site_cost() -> None:
+    # 费用已经提交。发信失败不能回滚，日志也不写邮局返回的正文。
+    try:
+        send_alert_mail(
+            COST_ALERT_SUBJECT,
+            COST_ALERT_BODY,
+            deliver=DemoHandler.auth.alert_deliver,
+        )
+    except Exception as exc:
+        sys.stderr.write(f"费用告警没有发出 {type(exc).__name__}\n")
 
 
 if __name__ == "__main__":

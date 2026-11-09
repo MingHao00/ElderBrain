@@ -8,6 +8,7 @@ from typing import Callable
 from alert_mail import send_alert_mail
 from auth_app import AuthApp
 from audit_log import (
+    NO_EVIDENCE_TEXT,
     citation_on,
     error_text,
     record_answer,
@@ -18,6 +19,7 @@ from audit_log import (
     usages_on,
     write_quietly,
 )
+from admin_store import source_is_enabled
 from auth_constants import (
     ASK_COST_MICRO,
     COST_ALERT_BODY,
@@ -36,6 +38,7 @@ from auth_constants import (
     PATH_QUERY,
     UNPROCESSABLE_QUESTIONS,
 )
+from config import SOURCE_ID
 from auth_http import Incoming, Outgoing, csrf_ok, json_error
 from auth_quota import (
     QuotaDeny,
@@ -115,7 +118,7 @@ def _charge(
     if isinstance(reserved, Outgoing):
         return reserved
     try:
-        shown = answer(question, _card(app, conversation_id))
+        shown = _shown(app, question, conversation_id, answer)
     except Exception as exc:
         release_quota(app.db, reserved.event_id)
         _report(on_failure, exc)
@@ -148,6 +151,19 @@ def _book(
             yuan,
         ),
     )
+
+
+def _shown(
+    app: AuthApp,
+    question: str,
+    conversation_id: str | None,
+    answer: AnswerFn,
+) -> str:
+    """来源仍启用时走原来的检索和生成。停用时不再调用它们。"""
+    if source_is_enabled(app.db, SOURCE_ID):
+        return answer(question, _card(app, conversation_id))
+    # 和没有父节时同一句，但引用结果保持未校验，避免每问都进审核队列。
+    return NO_EVIDENCE_TEXT
 
 
 def _priced(shown: str) -> tuple[int, int, float, int]:

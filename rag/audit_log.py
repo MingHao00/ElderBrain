@@ -8,8 +8,11 @@ import sys
 from datetime import datetime, timezone
 from typing import Callable
 
+from admin_queue import REVIEW_REASON_CITATION_FAILED, enqueue_review
+from admin_store import published_index_version
 from audit_record import (
     CITATION_CHECKS,
+    CITATION_FAILED,
     CITATION_UNCHECKED,
     COUNT_MIN,
     FIELD_CREATED_AT,
@@ -94,11 +97,12 @@ def record_answer(
     没跑生成时 token 和费用保持 0。
     """
     # 调用方没跑校验时用默认值，不能把缺省记成通过。
-    index_version, prompt_version, model_id, guard_version = _versions()
+    created_at = _moment()
+    index_version, prompt_version, model_id, guard_version = _versions(db)
     record = build_request_audit(
         _request_id(),
         user_id,
-        _moment(),
+        created_at,
         question,
         ANSWER_LANG,
         UNDETECTED_VERSION,
@@ -117,6 +121,9 @@ def record_answer(
         _unmeasured_latency(),
     )
     _store_answer(db, record)
+    # 只有两次校验都失败才入队。停用拒答是未校验，不会走到这里。
+    if citation_check == CITATION_FAILED:
+        enqueue_review(db, REVIEW_REASON_CITATION_FAILED, question, created_at)
 
 
 def record_rejection(
@@ -212,10 +219,18 @@ def _store_answer(db: AuthDb, record: dict[str, object]) -> None:
     )
 
 
-def _versions() -> tuple[str, str, str, str]:
-    """索引、提示词、模型和拦截。没有独立版本号时用现成常量。"""
-    # 来源编号是建库用的。提示词和拦截还没有版本常量，记规则版本。
-    return SOURCE_ID, RULE_VERSION, QWEN_MODEL, RULE_VERSION
+def _versions(db: AuthDb) -> tuple[str, str, str, str]:
+    """索引用已发布指针。还没有发布记录时仍用来源编号。"""
+    # 提示词和拦截还没有版本常量，记规则版本。
+    return _index_version(db), RULE_VERSION, QWEN_MODEL, RULE_VERSION
+
+
+def _index_version(db: AuthDb) -> str:
+    """没有指针时保持原来的来源编号，避免旧审计的写法被改掉。"""
+    published = published_index_version(db)
+    if published is None:
+        return SOURCE_ID
+    return published
 
 
 def _result_type(shown: str) -> str:

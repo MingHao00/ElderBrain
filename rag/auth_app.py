@@ -20,6 +20,8 @@ class AuthApp:
     github: GithubTransport | None = None
     # 缺省走告警邮局。测试注入后不连接 SMTP。
     alert_deliver: Callable[[str, str], None] | None = None
+    # 重建只调用这个函数。缺省不碰嵌入接口。
+    index_builder: Callable[[], str] | None = None
 
 
 def open_auth(path: Path | None = None) -> AuthApp:

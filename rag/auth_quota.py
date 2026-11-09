@@ -20,6 +20,9 @@ from auth_constants import (
     SHANGHAI_TZ,
     SITE_DAILY_ALERT_MICRO,
     SITE_DAILY_CAP_MICRO,
+    USE_KIND_ASK,
+    USE_KIND_IDLE,
+    USER_ID_PREFIX,
 )
 from auth_db import AuthDb
 
@@ -92,16 +95,55 @@ def settle_cost(db: AuthDb, event_id: int, cost_micro: int) -> bool:
 
 
 def open_uses(db: AuthDb, user_id: str) -> int:
-    """还没退回的次数。测试用来确认空问题没有扣次。"""
+    """还没退回的提问次数。闲置摘要不占次数。"""
     with db.immediate() as conn:
         row = conn.execute(
             """
             SELECT COUNT(*) FROM quota_uses
-            WHERE user_id = ? AND released = 0
+            WHERE user_id = ? AND released = 0 AND use_kind = ?
             """,
-            (user_id,),
+            (user_id, USE_KIND_ASK),
         ).fetchone()
         return int(row[0])
+
+
+def site_spent_micro(db: AuthDb, now: int) -> int:
+    """这一北京时间日未退回的费用微元，含闲置摘要。
+
+    Args:
+        db: 账号库。
+        now: 用来判断属于哪一天的时间戳。
+
+    Returns:
+        当日 cost_micro 合计。没有记录时为 0。
+    """
+    with db.immediate() as conn:
+        day_start, day_end = _day_bounds(now)
+        return _spent_between(conn, day_start, day_end)
+
+
+def record_idle_cost(db: AuthDb, user_id: str, cost_micro: int, now: int) -> bool:
+    """把闲置摘要记入全站当日费用。这一行不占该用户的次数。
+
+    Args:
+        db: 账号库。
+        user_id: 这场对话的主人，必须是账号表里的编号。
+        cost_micro: 这次调用的微元。缺用量时调用方传入 0。
+        now: 记入哪一天的时间戳。
+
+    Returns:
+        本次是否从告警线以下跨到线上。调用方再发信。
+
+    Raises:
+        ValueError: 费用为负，或 user_id 不是已有账号。
+    """
+    if cost_micro < 0:
+        raise ValueError("费用不能为负")
+    with db.immediate() as conn:
+        if not _billable_user(conn, user_id):
+            raise ValueError("费用必须记在真实用户上")
+        _insert_use(conn, user_id, now, cost_micro, USE_KIND_IDLE)
+        return _mark_if_crossed(conn, now, cost_micro)
 
 
 def quota_message(kind: str, resume_at: int) -> str:
@@ -246,17 +288,20 @@ def _count_between(
     end: int,
     inclusive: bool,
 ) -> int:
+    # 闲置摘要的 use_kind 不是提问，每日和每分钟都不计这一行。
     if inclusive:
         sql = """
             SELECT COUNT(*) FROM quota_uses
-            WHERE user_id = ? AND released = 0 AND asked_at > ? AND asked_at <= ?
+            WHERE user_id = ? AND released = 0 AND use_kind = ?
+                AND asked_at > ? AND asked_at <= ?
         """
     else:
         sql = """
             SELECT COUNT(*) FROM quota_uses
-            WHERE user_id = ? AND released = 0 AND asked_at >= ? AND asked_at < ?
+            WHERE user_id = ? AND released = 0 AND use_kind = ?
+                AND asked_at >= ? AND asked_at < ?
         """
-    row = conn.execute(sql, (user_id, start, end)).fetchone()
+    row = conn.execute(sql, (user_id, USE_KIND_ASK, start, end)).fetchone()
     return int(row[0])
 
 
@@ -270,23 +315,41 @@ def _minute_times(
         conn.execute(
             """
             SELECT asked_at FROM quota_uses
-            WHERE user_id = ? AND released = 0 AND asked_at > ? AND asked_at <= ?
+            WHERE user_id = ? AND released = 0 AND use_kind = ?
+                AND asked_at > ? AND asked_at <= ?
             ORDER BY asked_at ASC
             """,
-            (user_id, start, now),
+            (user_id, USE_KIND_ASK, start, now),
         ).fetchall()
     )
 
 
-def _insert_use(conn: sqlite3.Connection, user_id: str, now: int, cost_micro: int) -> int:
+def _insert_use(
+    conn: sqlite3.Connection,
+    user_id: str,
+    now: int,
+    cost_micro: int,
+    kind: str = USE_KIND_ASK,
+) -> int:
     cursor = conn.execute(
         """
-        INSERT INTO quota_uses (user_id, asked_at, cost_micro, released)
-        VALUES (?, ?, ?, 0)
+        INSERT INTO quota_uses (user_id, asked_at, cost_micro, released, use_kind)
+        VALUES (?, ?, ?, 0, ?)
         """,
-        (user_id, now, cost_micro),
+        (user_id, now, cost_micro, kind),
     )
     return int(cursor.lastrowid)
+
+
+def _billable_user(conn: sqlite3.Connection, user_id: str) -> bool:
+    # 拒绝 site 这类假编号。费用只能挂在账号表里的那个人身上。
+    if not user_id.startswith(USER_ID_PREFIX):
+        return False
+    row = conn.execute(
+        "SELECT 1 FROM accounts WHERE user_id = ?",
+        (user_id,),
+    ).fetchone()
+    return row is not None
 
 
 def _day_bounds(now: int) -> tuple[int, int]:

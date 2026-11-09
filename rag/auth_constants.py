@@ -118,6 +118,12 @@ PATH_GITHUB_START = "/api/auth/github/start"
 PATH_GITHUB_CALLBACK = "/api/auth/github/callback"
 PATH_KEYS = "/api/keys"
 PATH_KEYS_REVOKE = "/api/keys/revoke"
+PATH_ADMIN_SOURCE_DISABLE = "/api/admin/sources/disable"
+PATH_ADMIN_SOURCE_ENABLE = "/api/admin/sources/enable"
+PATH_ADMIN_INDEX_REBUILD = "/api/admin/index/rebuild"
+PATH_ADMIN_INDEX_PUBLISH = "/api/admin/index/publish"
+PATH_ADMIN_INDEX_ROLLBACK = "/api/admin/index/rollback"
+PATH_ADMIN_REVIEW_QUEUE = "/api/admin/review-queue"
 
 ERR_UNAUTHORIZED = "请重新登录，或检查密钥"
 ERR_FORBIDDEN = "无权限"
@@ -136,6 +142,10 @@ ERR_GITHUB_FAILED = "GitHub 登录失败"
 ERR_KEY_LIMIT = "请先吊销一把密钥"
 ERR_KEY_MISSING = "没有这把密钥"
 ERR_NOT_FOUND = "没有这个接口"
+ERR_SOURCE_MISSING = "没有这个来源"
+ERR_INDEX_MISSING = "没有这个索引版本"
+ERR_INDEX_UNCONFIGURED = "索引构建未配置"
+ERR_INDEX_EXISTS = "索引版本已存在"
 EMPTY_QUESTION = "请写下问题"
 QUESTION_TOO_LONG = "问题太长"
 UNPROCESSABLE_QUESTIONS = frozenset({EMPTY_QUESTION, QUESTION_TOO_LONG})
@@ -143,6 +153,9 @@ UNPROCESSABLE_QUESTIONS = frozenset({EMPTY_QUESTION, QUESTION_TOO_LONG})
 QUOTA_DAILY = "daily"
 QUOTA_MINUTE = "minute"
 QUOTA_SITE = "site"
+# 提问占次数。闲置摘要只进当日费用，计次查询要跳过。
+USE_KIND_ASK = "ask"
+USE_KIND_IDLE = "idle"
 SAFE_MAIL_ERRORS = frozenset({ERR_MAIL_UNCONFIGURED, ERR_MAIL_FAILED})
 JSON_TYPE = "application/json; charset=utf-8"
 # 网页在整段校验之后按行推送，不是模型 token 流。
