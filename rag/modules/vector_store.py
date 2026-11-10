@@ -114,7 +114,7 @@ class PgChunkIndex:
         def work(conn: _SqlConnection) -> None:
             conn.execute(DELETE_VERSION_SQL, (version,))
             if rows:
-                conn.executemany(INSERT_CHUNK_SQL, rows)
+                _insert_many(conn, rows)
 
         # 指针在另一个库。这里没有发布函数可调用。
         _in_transaction(self._connect, work)
@@ -223,6 +223,25 @@ def _register_json(conn: object) -> None:
     if adapters is None:
         raise ConnectionError("PostgreSQL 连接失败：缺少类型适配")
     adapters.register_dumper(dict, JsonbDumper)
+
+
+def _insert_many(conn: _SqlConnection, rows: Sequence[Sequence[object]]) -> None:
+    # psycopg 3 的连接对象没有 executemany，批量插入在游标上。
+    insert = getattr(conn, "executemany", None)
+    if callable(insert):
+        insert(INSERT_CHUNK_SQL, rows)
+        return
+    _open_cursor(conn).executemany(INSERT_CHUNK_SQL, rows)
+
+
+def _open_cursor(conn: _SqlConnection) -> _SqlConnection:
+    open_cursor = getattr(conn, "cursor", None)
+    if not callable(open_cursor):
+        raise RuntimeError("数据库连接不能批量写入")
+    cursor = open_cursor()
+    if not hasattr(cursor, "executemany"):
+        raise RuntimeError("数据库连接不能批量写入")
+    return cursor
 
 
 def _in_transaction(

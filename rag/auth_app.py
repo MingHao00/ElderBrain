@@ -22,6 +22,8 @@ class AuthApp:
     alert_deliver: Callable[[str, str], None] | None = None
     # 重建只调用这个函数。缺省不碰嵌入接口。
     index_builder: Callable[[], str] | None = None
+    # 登记失败时撤掉刚写入的向量。缺省不连接向量库。
+    drop_index_version: Callable[[str], None] | None = None
 
 
 def open_auth(path: Path | None = None) -> AuthApp:

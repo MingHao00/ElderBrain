@@ -156,6 +156,16 @@ class VersionWriteTests(unittest.TestCase):
         self.assertEqual(conn.rollback_count, 1)
         self.assertEqual(conn.committed[0]["body"], "旧正文")
 
+    def test_replace_uses_cursor_without_connection_executemany(self) -> None:
+        conn = _CursorConn()
+        store = PgChunkIndex(lambda: conn, lambda: None)
+        store.replace_version(BUILDING, [_chunk("游标写入", chunk_id="cur-1")])
+        self.assertEqual(len(conn.batches), 1)
+        sql, rows = conn.batches[0]
+        self.assertIn("INSERT", sql)
+        self.assertEqual(rows[0][4], "游标写入")
+        self.assertNotIn("published_pointer", sql)
+
     def test_delete_version_is_one_transaction(self) -> None:
         conn = FakeConn()
         conn.committed = [
@@ -338,6 +348,48 @@ class FakeConn:
         if len(params) != VISIBLE_PARAMS:
             raise AssertionError("可见块参数个数不符")
         return _project(_filtered(self.pending, params))
+
+
+class _CursorConn:
+    """模仿 psycopg 3：连接能 execute，批量插入只在游标上。"""
+
+    def __init__(self) -> None:
+        self.statements: list[tuple[str, tuple[object, ...]]] = []
+        self._cursor = _BatchCursor()
+
+    def __enter__(self) -> "_CursorConn":
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
+        del exc_type, exc, tb
+
+    def transaction(self) -> "_CursorConn":
+        return self
+
+    def execute(
+        self,
+        sql: str,
+        params: Sequence[object] | None = None,
+    ) -> object:
+        bound = tuple(params) if params is not None else ()
+        self.statements.append((sql, bound))
+        return _FakeCursor([])
+
+    def cursor(self) -> "_BatchCursor":
+        return self._cursor
+
+    @property
+    def batches(self) -> list[tuple[str, tuple[tuple[object, ...], ...]]]:
+        return self._cursor.batches
+
+
+class _BatchCursor:
+    def __init__(self) -> None:
+        self.batches: list[tuple[str, tuple[tuple[object, ...], ...]]] = []
+
+    def executemany(self, sql: str, params_seq: Sequence[Sequence[object]]) -> None:
+        rows = tuple(tuple(row) for row in params_seq)
+        self.batches.append((sql, rows))
 
 
 class _FakeTx:

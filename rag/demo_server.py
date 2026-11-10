@@ -32,7 +32,8 @@ from admin_store import published_index_version
 from auth_db import AuthDb
 from auth_http import Incoming, Outgoing, json_error
 from auth_routes import route_api
-from config import REPO_ROOT, require_env
+from config import DEFAULT_CHUNK_FILE, REPO_ROOT, require_env
+from index_build import make_demo_builder, taken_index_versions
 from demo_answer import MAX_BODY_BYTES, present_answer
 from idle_summary import start_idle_scan, summarize_with_qwen
 from modules.published_retrieval import PublishedHybridSearch, enabled_source_ids
@@ -241,6 +242,25 @@ def _attach_published(rag: ElderBrainRag, auth: AuthApp, database_url: str) -> N
     )
     store.ensure_schema()
     rag.retrieval = _published_search(store, rag, auth.db)
+    _install_index_builder(auth, store)
+
+
+def _install_index_builder(auth: AuthApp, store: PgChunkIndex) -> None:
+    """保存重建入口。第一次重建才读清单，启动时不嵌入、不写向量。"""
+    auth.index_builder = make_demo_builder(
+        DEFAULT_CHUNK_FILE,
+        _embedding3_documents,
+        store.replace_version,
+        lambda: taken_index_versions(auth.db),
+    )
+    auth.drop_index_version = store.delete_version
+
+
+def _embedding3_documents(texts: list[str]) -> list[list[float]]:
+    # 客户端在重建时创建。进程启动不计算向量。
+    from modules.api_embeddings import load_embedding3
+
+    return load_embedding3().embed_documents(texts)
 
 
 def _published_search(

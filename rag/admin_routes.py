@@ -10,10 +10,10 @@ from admin_store import (
     AdminRejected,
     publish_index,
     published_index_version,
-    rebuild_index,
     rollback_index,
     set_source_enabled,
 )
+from index_build import rebuild_registered
 from auth_app import AuthApp
 from auth_constants import (
     ERR_FORBIDDEN,
@@ -115,7 +115,13 @@ def _source(
 
 
 def _rebuild(app: AuthApp, actor_id: str, now: datetime) -> Outgoing:
-    version = rebuild_index(app.db, actor_id, app.index_builder, now)
+    version = rebuild_registered(
+        app.db,
+        actor_id,
+        app.index_builder,
+        app.drop_index_version,
+        now,
+    )
     return json_response(HTTP_OK, _published_body(app, version))
 
 
