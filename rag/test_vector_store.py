@@ -860,9 +860,8 @@ class DemoStartupTests(unittest.TestCase):
         with mock.patch.dict(os.environ, removed, clear=False):
             with mock.patch.object(IndexConstructionModule, "build", side_effect=_built):
                 with mock.patch("demo_server._selected_rag", side_effect=_built) as selected:
-                    with mock.patch("demo_server.start_idle_scan", side_effect=_built):
-                        with self.assertRaises(ValueError) as caught:
-                            main()
+                    with self.assertRaises(ValueError) as caught:
+                        main()
         self.assertIn(DATABASE_URL_ENV, str(caught.exception))
         selected.assert_not_called()
 
@@ -885,6 +884,51 @@ class DemoStartupTests(unittest.TestCase):
         self.assertIs(opened, rag)
         self.assertIs(opened_auth, auth)
         self.assertIsInstance(rag.retrieval, PublishedHybridSearch)
+
+    def test_main_does_not_start_idle_scan(self) -> None:
+        import demo_server
+
+        store = mock.Mock()
+        store.visible_chunks.return_value = []
+        rag = mock.Mock()
+        rag.retrieval = PublishedHybridSearch(store, lambda _query: [], lambda: ())
+        auth = mock.Mock()
+        server = mock.Mock()
+        scan_name = getattr(demo_server, "start_idle_scan", None)
+        if callable(scan_name):
+            scan_target = "demo_server.start_idle_scan"
+        else:
+            scan_target = "idle_summary.start_idle_scan"
+        handler = demo_server.DemoHandler
+        had_rag = "rag" in handler.__dict__
+        had_auth = "auth" in handler.__dict__
+        previous_rag = handler.__dict__.get("rag")
+        previous_auth = handler.__dict__.get("auth")
+        try:
+            with mock.patch(
+                "demo_server.open_published_demo",
+                return_value=(rag, auth),
+            ):
+                with mock.patch(
+                    "demo_server.ThreadingHTTPServer",
+                    return_value=server,
+                ):
+                    with mock.patch(scan_target) as scan:
+                        main()
+            server.serve_forever.assert_called_once()
+            scan.assert_not_called()
+        finally:
+            if had_rag:
+                handler.rag = previous_rag
+            elif hasattr(handler, "rag"):
+                del handler.rag
+            if had_auth:
+                handler.auth = previous_auth
+            elif hasattr(handler, "auth"):
+                del handler.auth
+        if not callable(scan_name):
+            self.assertFalse(callable(getattr(demo_server, "start_idle_scan", None)))
+            self.assertNotIn("start_idle_scan", main.__code__.co_names)
 
 
 def _built(*_args: object, **_kwargs: object) -> None:
