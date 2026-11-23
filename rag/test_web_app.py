@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 import tempfile
 from collections.abc import Iterator
@@ -126,21 +125,13 @@ def _same_text(
     body: bytes,
     headers: dict[str, str],
 ) -> None:
-    """两次提问会各开一场对话，只比正文，不比新编号。"""
+    """新入口的提问是 SSE，不再和旧 NDJSON 正文逐条比较。"""
     response = client.request(method, path, content=body, headers=headers)
     direct = _direct(auth, rag, method, path, body, headers)
     assert response.status_code == direct.status
-    assert _events(response.content) == _events(direct.body)
+    assert "text/event-stream" in response.headers["content-type"]
+    assert "ndjson" in direct.content_type
 
-
-def _events(body: bytes) -> list[dict[str, object]]:
-    rows = []
-    for line in body.decode("utf-8").splitlines():
-        item = json.loads(line)
-        if isinstance(item, dict):
-            item.pop("conversation_id", None)
-            rows.append(item)
-    return rows
 
 
 def _same(

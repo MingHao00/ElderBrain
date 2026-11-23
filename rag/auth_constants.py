@@ -101,10 +101,13 @@ HTTP_BAD_REQUEST = 400
 HTTP_UNAUTHORIZED = 401
 HTTP_FORBIDDEN = 403
 HTTP_UNPROCESSABLE = 422
+HTTP_CONFLICT = 409
 HTTP_TOO_MANY = 429
 HTTP_SERVER_ERROR = 500
 
 PATH_ASK = "/api/ask"
+PATH_ASK_PAUSE = "/api/ask/pause"
+PATH_ASK_CONTINUE = "/api/ask/continue"
 PATH_QUERY = "/api/query"
 PATH_CONVERSATIONS = "/api/conversations"
 # 对话编号由服务端生成。客户端自己编的号对不上库里的行。
@@ -127,6 +130,9 @@ PATH_ADMIN_REVIEW_QUEUE = "/api/admin/review-queue"
 
 ERR_UNAUTHORIZED = "请重新登录，或检查密钥"
 ERR_FORBIDDEN = "无权限"
+ERR_TURN_RUNNING = "这轮还在回答"
+ERR_TURN_IDLE = "这轮没有在回答"
+ERR_CONVERSATION_REQUIRED = "请带上对话号"
 ERR_ANSWER_FAILED = "回答失败"
 ERR_JSON = "请求不是 JSON"
 ERR_EMAIL = "邮箱不正确"

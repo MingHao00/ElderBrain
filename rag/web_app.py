@@ -6,6 +6,7 @@ from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
+from fastapi.sse import EventSourceResponse
 
 from audit_log import citation_on, usages_on
 from auth_app import AuthApp
@@ -14,11 +15,17 @@ from auth_constants import (
     ERR_JSON,
     HTTP_SERVER_ERROR,
     HTTP_UNPROCESSABLE,
+    PATH_ASK,
+    PATH_ASK_CONTINUE,
+    PATH_ASK_PAUSE,
     QUESTION_TOO_LONG,
     TEXT_TYPE,
 )
 from auth_http import Incoming, Outgoing, json_error
+from ask_routes import attach_pause, post_ask, post_continue, post_pause
+from ask_runtime import AskDenied, AskRuntime, denied_response
 from auth_routes import route_api
+from turn_run import CheckpointStore, TurnModel, TurnTool
 from demo_answer import MAX_BODY_BYTES, present_answer
 from demo_server import (
     CONTENT_TYPES,
@@ -43,7 +50,13 @@ ROOT_PATH = "/"
 TAIL_PATH = "/{path:path}"
 
 
-def build_web_app(rag: ElderBrainRag, auth: AuthApp) -> FastAPI:
+def build_web_app(
+    rag: ElderBrainRag,
+    auth: AuthApp,
+    model: TurnModel | None = None,
+    tool: TurnTool | None = None,
+    store: CheckpointStore | None = None,
+) -> FastAPI:
     """装上检索和账号库。文档页关掉，避免盖住原来的 404。"""
     app = FastAPI(
         docs_url=None,
@@ -53,6 +66,10 @@ def build_web_app(rag: ElderBrainRag, auth: AuthApp) -> FastAPI:
     )
     app.state.rag = rag
     app.state.auth = auth
+    app.state.answer = answer_with(rag)
+    app.state.on_failure = _report_failure
+    app.state.runtime = AskRuntime(model, tool, store)
+    app.add_exception_handler(AskDenied, denied_response)
     app.middleware("http")(_capture_body)
     _mount(app)
     return app
@@ -73,6 +90,19 @@ def answer_with(
 
 
 def _mount(app: FastAPI) -> None:
+    app.add_api_route(
+        PATH_ASK,
+        post_ask,
+        methods=[POST_METHOD],
+        response_class=EventSourceResponse,
+    )
+    app.add_api_route(PATH_ASK_PAUSE, post_pause, methods=[POST_METHOD])
+    app.add_api_route(
+        PATH_ASK_CONTINUE,
+        post_continue,
+        methods=[POST_METHOD],
+        response_class=EventSourceResponse,
+    )
     app.add_api_route(ROOT_PATH, _read, methods=[GET_METHOD])
     app.add_api_route(TAIL_PATH, _read, methods=[GET_METHOD])
     app.add_api_route(ROOT_PATH, _post, methods=[POST_METHOD])
@@ -121,7 +151,8 @@ def _api(request: Request, method: str) -> Response:
     loaded = _post_body(request, auth) if method == POST_METHOD else b""
     if isinstance(loaded, Outgoing):
         return _to_response(loaded)
-    return _routed(auth, rag, _incoming(request, method, loaded))
+    routed = _routed(auth, rag, _incoming(request, method, loaded))
+    return attach_pause(request, routed)
 
 
 def _routed(auth: AuthApp, rag: ElderBrainRag, incoming: Incoming) -> Response:

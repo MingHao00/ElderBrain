@@ -153,23 +153,36 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(own[0]["text"], QUESTION)
 
     def test_web_streams_checked_sentences_and_query_returns_json(self) -> None:
-        web, _prompt = self._ask_prompt({"question": QUESTION})
-        events = _events(web)
-        self.assertIn("ndjson", web.content_type)
+        from fastapi.testclient import TestClient
+        from web_app import build_web_app
+
+        app = build_web_app(self.rag, self.app)
+        with TestClient(app) as client:
+            web = client.post(
+                PATH_ASK,
+                content=json_bytes({"question": QUESTION}),
+                headers=self.headers,
+            )
+        events = _sse_events(web.content)
+        self.assertIn("text/event-stream", web.headers["content-type"])
         self.assertEqual(
-            [item["event"] for item in events],
-            ["version", "sentence", "sentence", "done"],
+            [name for name, _payload in events],
+            ["delta", "delta", "delta", "done"],
         )
-        self.assertEqual(events[0]["text"], VERSION_SENTENCE)
-        self.assertEqual(events[1]["text"], ASSISTANT_MARK)
-        self.assertEqual(events[1]["entry_id"], ENTRY)
-        self.assertIsNone(events[2]["entry_id"])
-        conversation_id = str(events[-1]["conversation_id"])
+        self.assertEqual(events[0][1]["text"], VERSION_SENTENCE)
+        self.assertEqual(events[1][1]["text"], ASSISTANT_MARK)
+        self.assertEqual(events[2][1]["text"], "过渡一句。")
+        self.assertNotIn("entry_id", events[1][1])
+        conversation_id = str(_list(self._get(PATH_CONVERSATIONS))[0]["conversation_id"])
+        stored = _messages(self._get(PATH_CONVERSATIONS + "/" + conversation_id))
+        self.assertEqual(events[-1][1]["text"], stored[-1]["text"])
 
         query = self._query({"question": FOLLOW, "conversation_id": conversation_id})
         body = read_body(query)
         self.assertIn("json", query.content_type)
         self.assertNotIn("ndjson", query.content_type)
+        self.assertNotIn("event-stream", query.content_type)
+
         self.assertEqual(query.body.count(b"\n"), 0)
         self.assertEqual(frozenset(body), _QUERY_FIELDS)
         self.assertEqual(body["conversation_id"], conversation_id)
@@ -459,6 +472,25 @@ def _cited_bad() -> str:
         "sentences": [{"text": BAD_SENTENCE, "entry_id": OTHER}],
     }
     return json.dumps(payload, ensure_ascii=False)
+
+
+
+def _sse_events(raw: bytes) -> list[tuple[str, dict[str, object]]]:
+    found: list[tuple[str, dict[str, object]]] = []
+    for block in raw.decode("utf-8").split("\n\n"):
+        name = None
+        data = None
+        for line in block.split("\n"):
+            if line.startswith("event:"):
+                name = line.split(":", 1)[1].strip()
+            elif line.startswith("data:"):
+                data = line.split(":", 1)[1].strip()
+        if name is None or data is None:
+            continue
+        payload = json.loads(data)
+        if isinstance(payload, dict):
+            found.append((name, payload))
+    return found
 
 
 def _events(outgoing: Outgoing) -> list[dict[str, object]]:
