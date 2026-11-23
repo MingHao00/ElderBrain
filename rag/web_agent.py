@@ -1,6 +1,7 @@
 """网页提问的 Agent 核心。
 
-只装已有的规则检索和网页搜索。检查点由调用方传入，本模块不连接数据库。
+装上已有的规则检索、网页搜索和本对话记忆搜索。
+检查点由调用方传入，本模块不连接数据库。
 """
 
 from collections.abc import Sequence
@@ -15,6 +16,7 @@ from langchain_core.tools import BaseTool, tool
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Checkpointer
 
+import agent_memory
 import rag_search as published_rules
 import web_tools
 
@@ -92,6 +94,32 @@ def _call_limit() -> ToolCallLimitMiddleware:
     )
 
 
+def _thread_id(runtime: ToolRuntime) -> str:
+    """当前工具调用的线程号。缺失时搜索不会落到别的对话。"""
+    config = runtime.config
+    if not isinstance(config, dict):
+        return ""
+    configurable = config.get(agent_memory.CONFIGURABLE_KEY)
+    if not isinstance(configurable, dict):
+        return ""
+    thread_id = configurable.get(agent_memory.THREAD_ID_KEY, "")
+    if isinstance(thread_id, str):
+        return thread_id
+    return ""
+
+
+def _memory_search_tool(archive: agent_memory.MemoryArchive) -> BaseTool:
+    """包装本对话记忆搜索。次数仍算进同一轮的工具上限。"""
+
+    @tool
+    def memory_search(query: str, runtime: ToolRuntime) -> list[str]:
+        """搜索本对话里被压缩换下的原文。"""
+        conversation_id = _thread_id(runtime)
+        return agent_memory.memory_search(archive, conversation_id, query)
+
+    return memory_search
+
+
 def build_web_agent(
     model: BaseChatModel,
     pinned: published_rules.PinnedIndex,
@@ -99,8 +127,9 @@ def build_web_agent(
     search_client: web_tools.SearchClient,
     *,
     checkpointer: Checkpointer = None,
+    archive: agent_memory.MemoryArchive | None = None,
 ) -> CompiledStateGraph:
-    """装上检索和网页搜索，并限制一轮里的工具调用次数。
+    """装上检索、网页搜索和记忆搜索，并限制一轮里的工具调用次数。
 
     Args:
         model: 对话模型。测试传入按脚本回答的假模型。
@@ -108,13 +137,16 @@ def build_web_agent(
         search_parents: 按查询词和版本号返回父节的检索函数。
         search_client: 网页搜索客户端。本函数不创建网络客户端。
         checkpointer: 调用方传入的检查点。不传则不保存这一轮。
+        archive: 被换下原文的存档。不传则使用空存档，工具仍在名单里。
 
     Returns:
         可 invoke 的 Agent 图。
     """
-    tools = [
+    store = archive if archive is not None else agent_memory.MemoryArchive()
+    tools: list[BaseTool] = [
         _rag_search_tool(pinned, search_parents),
         _web_search_tool(search_client),
+        _memory_search_tool(store),
     ]
     return create_agent(
         model,

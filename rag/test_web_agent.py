@@ -24,6 +24,7 @@ from web_agent import SYSTEM_PROMPT, TOOL_RUN_LIMIT, build_web_agent
 
 RAG_TOOL = "rag_search"
 WEB_TOOL = "web_search"
+MEMORY_TOOL = "memory_search"
 PINNED_VERSION = "pinned-2026-11-22"
 QUESTION = "火球术怎么施放？"
 RAG_QUERY = "火球术"
@@ -158,7 +159,7 @@ def test_search_then_web_then_answer() -> None:
     result = _run(model, parents, client, QUESTION, THREAD_BOTH)
     assert SYSTEM_PROMPT == EXPECTED_PROMPT
     assert EXPECTED_PROMPT in model.system_prompts
-    assert model.bound_names == [RAG_TOOL, WEB_TOOL]
+    assert model.bound_names == [RAG_TOOL, WEB_TOOL, MEMORY_TOOL]
     assert parents.calls == [(RAG_QUERY, PINNED_VERSION)]
     assert client.calls == [(WEB_QUERY, SEARCH_LIMIT)]
     assert _final_text(result) == FINAL_AFTER_BOTH
