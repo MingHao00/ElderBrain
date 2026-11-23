@@ -44,6 +44,17 @@ class TurnCheckpoint:
     answer_committed: bool
 
 
+@dataclass
+class TurnQuotaState:
+    """这一轮占了没有、费用和审计收口。不写入检查点，暂停形状保持不变。"""
+
+    reserved: bool = False
+    event_id: int | None = None
+    has_body: bool = False
+    cost_micro: int = 0
+    audit_closed: bool = False
+
+
 @dataclass(frozen=True)
 class TurnState:
     """交给模型的当前轮。继续时沿用检查点里的用户消息和工具结果。"""
@@ -136,6 +147,7 @@ class TurnRun:
         self._tool_done = threading.Event()
         self._cancelled = threading.Event()
         self._pause_processed = False
+        self.quota = TurnQuotaState()
 
     @property
     def thread_id(self) -> str:
