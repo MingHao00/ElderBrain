@@ -1,7 +1,7 @@
 """本地演示页。静态文件和提问都走本机，密钥留在环境变量。"""
 
 import sys
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -211,17 +211,20 @@ def open_published_demo() -> tuple[ElderBrainRag, AuthApp]:
 
 def main() -> None:
     """装好已发布检索后在本机端口提供页面。"""
+    from web_app import build_web_app
+
     rag, auth = open_published_demo()
-    DemoHandler.rag = rag
-    DemoHandler.auth = auth
-    server = ThreadingHTTPServer((HOST, PORT), DemoHandler)
+    app = build_web_app(rag, auth)
     print(f"已装入 {_chunk_count(rag)} 个检索块")
     print(f"http://{HOST}:{PORT}")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        server.server_close()
+    serve_web_app(app)
 
+
+def serve_web_app(app: object) -> None:
+    """本机端口运行这一个 FastAPI 应用。测试可以换掉它。"""
+    import uvicorn
+
+    uvicorn.run(app, host=HOST, port=PORT)
 
 def _attach_published(rag: ElderBrainRag, auth: AuthApp, database_url: str) -> None:
     # 父节随每次提问读到的已发布块现拼。启动时装本地清单会把旧正文固定到进程退出。

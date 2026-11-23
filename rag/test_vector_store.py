@@ -893,7 +893,6 @@ class DemoStartupTests(unittest.TestCase):
         rag = mock.Mock()
         rag.retrieval = PublishedHybridSearch(store, lambda _query: [], lambda: ())
         auth = mock.Mock()
-        server = mock.Mock()
         scan_name = getattr(demo_server, "start_idle_scan", None)
         if callable(scan_name):
             scan_target = "demo_server.start_idle_scan"
@@ -909,13 +908,10 @@ class DemoStartupTests(unittest.TestCase):
                 "demo_server.open_published_demo",
                 return_value=(rag, auth),
             ):
-                with mock.patch(
-                    "demo_server.ThreadingHTTPServer",
-                    return_value=server,
-                ):
+                with mock.patch("demo_server.serve_web_app") as serve:
                     with mock.patch(scan_target) as scan:
                         main()
-            server.serve_forever.assert_called_once()
+            serve.assert_called_once()
             scan.assert_not_called()
         finally:
             if had_rag:
