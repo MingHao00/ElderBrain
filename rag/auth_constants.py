@@ -27,6 +27,8 @@ SESSION_COOKIE = "__Host-eb_session"
 CSRF_COOKIE = "__Host-eb_csrf"
 # 入库前会转成小写。
 CSRF_HEADER = "x-csrf-token"
+# 提问响应在正文流出之前用这个头带上本轮对话号。
+CONVERSATION_HEADER = "x-conversation-id"
 CSRF_TOKEN_BYTES = 32
 
 # 每日次数和全站费用按北京时间的自然日重置。

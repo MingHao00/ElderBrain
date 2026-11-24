@@ -25,6 +25,7 @@ from ask_turn import _done_id, iter_legacy, iter_turn
 from audit_log import error_text
 from auth_app import AuthApp
 from auth_constants import (
+    CONVERSATION_HEADER,
     ERR_ANSWER_FAILED,
     ERR_TURN_IDLE,
     HTTP_OK,
@@ -32,8 +33,12 @@ from auth_constants import (
     HTTP_UNPROCESSABLE,
 )
 from auth_routes import route_api
-from auth_session import Visitor
-from conversation_store import conversation_owner, new_conversation_id
+from auth_session import Visitor, now_seconds
+from conversation_store import (
+    conversation_owner,
+    ensure_conversation,
+    new_conversation_id,
+)
 from fastapi import Depends, Request
 from fastapi.responses import JSONResponse, Response
 from turn_run import MISSING_CHECKPOINT
@@ -41,14 +46,23 @@ from turn_run import MISSING_CHECKPOINT
 _NO_LEGACY = None
 
 
-def open_ask(request: Request) -> AskReady:
+def open_ask(request: Request, response: Response) -> AskReady:
     """POST /api/ask 在推流前先做完拒绝。"""
     runtime: AskRuntime = request.app.state.runtime
     auth: AuthApp = request.app.state.auth
     body = _body(request)
     if runtime.model is None or runtime.tool is None:
-        return _legacy(request, auth, runtime, body)
-    return _live(request, auth, runtime, body)
+        ready = _legacy(request, auth, runtime, body)
+    else:
+        ready = _live(request, auth, runtime, body)
+    _stamp_conversation(response, ready.conversation_id)
+    return ready
+
+
+def _stamp_conversation(response: Response, conversation_id: str) -> None:
+    """正文流出前让页面拿到这轮对话号，暂停才发得出去。"""
+    if conversation_id:
+        response.headers[CONVERSATION_HEADER] = conversation_id
 
 
 def open_continue(request: Request) -> AskReady:
@@ -97,6 +111,9 @@ def attach_pause(request: Request, response: Response) -> Response:
     if conversation_id is None:
         return response
     runtime: AskRuntime = request.app.state.runtime
+    # 继续后工具还在跑时，旧检查点不能把未提交正文又画回来。
+    if runtime.gate.pause_event(conversation_id) is not None:
+        return response
     loaded = runtime.store.load(thread_of(conversation_id))
     if loaded is None or loaded.answer_committed:
         return response
@@ -158,6 +175,15 @@ def _live(
     conversation_id = supplied or new_conversation_id()
     if supplied is not None:
         _owner(auth, visitor, supplied)
+    else:
+        # 暂停和继续只认已经属于本人的编号，所以公布前先建空对话。
+        ensure_conversation(
+            auth.db,
+            visitor.user_id,
+            conversation_id,
+            question,
+            now_seconds(),
+        )
     held = _hold(runtime, conversation_id)
     runtime.store.delete(thread_of(conversation_id))
     return _fresh(auth, runtime, visitor, held, conversation_id, question)
@@ -175,6 +201,8 @@ def _resumed(
     if loaded is None or loaded.answer_committed:
         raise AskDenied(HTTP_UNPROCESSABLE, MISSING_CHECKPOINT)
     held = _hold(runtime, conversation_id)
+    # 继续已经把检查点读进内存。留下它的话，刷新会把未提交正文又画出来。
+    runtime.store.delete(thread_of(conversation_id))
     return AskReady(
         held_id=held,
         conversation_id=conversation_id,

@@ -181,6 +181,24 @@ def commit_turn(
         return stored_id
 
 
+def ensure_conversation(
+    db: AuthDb,
+    user_id: str,
+    conversation_id: str,
+    title: str,
+    now: int,
+) -> str:
+    """用已经公布的编号建这场。已属于该用户则原样返回。"""
+    with db.immediate() as conn:
+        _ensure(conn)
+        if _belongs(conn, user_id, conversation_id):
+            return conversation_id
+        if _owner_row(conn, conversation_id) is not None:
+            return conversation_id
+        _insert_conversation(conn, user_id, conversation_id, title, now)
+        return conversation_id
+
+
 def _ensure(conn: sqlite3.Connection) -> None:
     # executescript 会提交当前事务，所以建表逐条执行。
     conn.execute(_CREATE_CONVERSATIONS)
@@ -214,16 +232,26 @@ def _open_conversation(
     if conversation_id is not None:
         return conversation_id
     stored_id = new_conversation_id()
+    _insert_conversation(conn, user_id, stored_id, question, now)
+    return stored_id
+
+
+def _insert_conversation(
+    conn: sqlite3.Connection,
+    user_id: str,
+    conversation_id: str,
+    title: str,
+    now: int,
+) -> None:
     conn.execute(
         """
         INSERT INTO conversations (
             conversation_id, user_id, title, created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?)
         """,
-        (stored_id, user_id, question, now, now),
+        (conversation_id, user_id, title, now, now),
     )
-    _insert_empty_card(conn, stored_id)
-    return stored_id
+    _insert_empty_card(conn, conversation_id)
 
 
 def _append_exchange(

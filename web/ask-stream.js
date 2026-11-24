@@ -1,3 +1,4 @@
+const CONVERSATION_HEADER = "x-conversation-id";
 function onPrimaryClick() {
   const buttons = AskView.buttonState(view, messageInput.value);
   if (buttons.sendName === AskView.PAUSE_NAME) {
@@ -59,10 +60,19 @@ function postSse(path, payload, token) {
         failTurn(token, httpError(body));
       });
     }
+    // 新对话还没有 currentId 时，暂停请求发不出去。
+    rememberConversation(response, token);
     return readSse(response, token);
   }).catch(function () {
     failTurn(token, OFFLINE_NOTICE);
   });
+}
+function rememberConversation(response, token) {
+  const id = response.headers.get(CONVERSATION_HEADER);
+  if (!id || token !== viewToken) {
+    return;
+  }
+  currentId = id;
 }
 function httpError(body) {
   if (body && typeof body.error === "string" && body.error) {
